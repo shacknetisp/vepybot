@@ -17,6 +17,7 @@ class Server(bot.Server):
         "irc/rights",
         "irc/alias",
         "irc/users",
+        "irc/config",
     ]
 
     options = {
@@ -53,8 +54,10 @@ class Server(bot.Server):
 
         self.settings.add("server.autoload", ['utils'])
         self.settings.add("server.channels", [])
-        for n in ['nick', 'mode', 'name']:
+        for n in ['nick', 'name', 'mode']:
             self.settings.add("server.user.%s" % n, self.opt(n))
+        self.settings.add("server.user.ident", self.settings.get(
+            'server.user.nick'))
 
     def ready(self):
         self.info = {}
@@ -63,8 +66,8 @@ class Server(bot.Server):
         self.socket = socket.socket()
         self.socket.connect((self.opt('host'), self.opt('port')))
         self.send("NICK %s" % (self.settings.get('server.user.nick')))
-        self.send("USER %s %s * %s" % (
-            self.settings.get('server.user.nick'),
+        self.send("USER %s %s * :%s" % (
+            self.settings.get('server.user.ident'),
             self.settings.get('server.user.mode'),
             self.settings.get('server.user.name')))
 

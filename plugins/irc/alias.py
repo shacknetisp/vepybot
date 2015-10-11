@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 import lib.alias
+bot.reload(lib.alias)
 
 
 class M_Alias(lib.alias.Module):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 import lib.rights
+bot.reload(lib.rights)
 import fnmatch
 
 
@@ -49,7 +50,8 @@ class M_Rights(lib.rights.Module):
             rightlist = self.server.settings.getchannel("rights", context)
             for r in rightlist:
                 if fnmatch.fnmatch(idstring, r):
-                    matches.append(r)
+                    if rightlist[r]:
+                        matches.append(r)
                     rights += [context.channel + "," + r for r in rightlist[r]]
         for c in context.whois.channels:
             modes = context.whois.channels[c]

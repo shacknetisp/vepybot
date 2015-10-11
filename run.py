@@ -3,7 +3,7 @@
 import bot
 from lib import db
 if __name__ == "__main__":
-    bot.importmodule("%s/config" % bot.userdata)
+    bot.importmodule("%s/config.py" % bot.userdata)
     while True:
         for server in bot.runningservers:
             server.dotimers()

@@ -5,6 +5,12 @@ import importlib
 import time
 from lib import db, utils, parser
 import fnmatch
+import imp
+import copy
+
+
+def reload(m):
+    imp.reload(m)
 
 userdata = 'userdata'
 for d in [
@@ -14,12 +20,13 @@ for d in [
         os.makedirs(userdata + '/' + d, exist_ok=True)
 
 
-def importmodule(path):
-    osp = sys.path
-    sys.path.append(os.path.dirname(path))
+def importmodule(path, r=False):
+    sys.path = [(os.path.dirname(path))] + sys.path
     module = importlib.import_module(
         os.path.splitext(os.path.basename(path))[0])
-    sys.path = osp
+    if r:
+        reload(module)
+    del sys.path[sys.path.index(os.path.dirname(path))]
     return module
 
 
@@ -60,8 +67,7 @@ def loadnamedmodule(n, p=""):
         if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
             os.path.exists("%s/%s.py" % (directory, n))):
                 currentplugin = p or n
-                m = importmodule("%s/%s" % (directory, n))
-                importlib.reload(m)
+                importmodule("%s/%s" % (directory, n), r=True)
                 currentplugin = ""
                 return True
     return False
@@ -126,6 +132,13 @@ class NoPerms(Exception):
         self.msg = m
 
 
+class ModuleError(Exception):
+
+    def __init__(self, m):
+        Exception.__init__(self, m)
+        self.msg = m
+
+
 class Server:
 
     class Settings:
@@ -140,12 +153,16 @@ class Server:
             self.db = db.DB("servers/%s/settings.json" % server.name)
             self.d = self.db.d
             self.defaults = {}
+            self.user = []
             self.tree = {}
 
         def get(self, n):
-            import copy
             if n not in self.d:
                 self.d[n] = copy.deepcopy(self.defaults[n])
+                ret = self.d[n]
+                if type(ret) not in [list, dict]:
+                    self.d.pop(n)
+                return ret
             return self.d[n]
 
         def addbranch(self, ss, n):
@@ -174,7 +191,7 @@ class Server:
                     if self.d[k] == self.defaults[k]:
                         tod.append(k)
             for t in tod:
-                del self.d[t]
+                self.d.pop(t)
             self.db.save()
 
         def add(self, n, v):
@@ -182,9 +199,9 @@ class Server:
             sections = split[:-1]
             basen = split[-1]
             truename = '.'.join(sections + [basen.strip(self.idents)])
-            self.defaults[truename] = v
-            if truename not in self.d:
-                self.d[truename] = v
+            self.defaults[truename] = copy.deepcopy(v)
+            if '=' not in basen:
+                self.user.append(truename)
             self.addbranch(sections, basen)
             self.save()
 
@@ -215,6 +232,11 @@ class Server:
             if index not in newmodules:
                 continue
             v = modules[index]
+            if index in self.modules:
+                raise ModuleError("Module %s already is registered from %s" % (
+                    index,
+                    self.modules[index].plugin
+                    ))
             self.modules[index] = v(self)
             self.modules[index].plugin = plugin
             self.log('LOAD', "%s/%s" % (plugin, index))
@@ -410,7 +432,9 @@ class Server:
     def runcommand(self, context, text):
         split = text.split()
         for k, v in self.commands:
-            for splitc in [[v[0].index] + v[1]['name'].split(),
+            for splitc in [
+                    [v[0].plugin] + [v[0].index] + v[1]['name'].split(),
+                    [v[0].index] + v[1]['name'].split(),
                     v[1]['name'].split()]:
                     if splitc == split[:len(splitc)]:
                         argtext = ' '.join(split[len(splitc):])
