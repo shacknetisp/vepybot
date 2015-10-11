@@ -4,6 +4,7 @@ import sys
 import importlib
 import time
 from lib import db, utils, parser
+import fnmatch
 
 userdata = 'userdata'
 for d in [
@@ -129,6 +130,8 @@ class Server:
 
     class Settings:
 
+        idents = '.='
+
         def __init__(self, server):
             os.makedirs("%s/servers/%s" % (userdata, server.name),
                 exist_ok=True)
@@ -136,24 +139,54 @@ class Server:
                 exist_ok=True)
             self.db = db.DB("servers/%s/settings.json" % server.name)
             self.d = self.db.d
+            self.defaults = {}
+            self.tree = {}
 
-        def get(self, n, d=None):
-            if n not in self.d and d is not None:
-                return d
+        def get(self, n):
+            import copy
+            if n not in self.d:
+                self.d[n] = copy.deepcopy(self.defaults[n])
             return self.d[n]
 
+        def addbranch(self, ss, n):
+            s = None
+            d = self.tree
+            while ss:
+                s = ss.pop(0)
+                if s not in d:
+                    d[s] = {}
+                d = d[s]
+            d[n] = True
+
         def set(self, n, v):
-            self.d[n] = v
+            split = n.split('.')
+            sections = split[:-1]
+            basen = split[-1]
+            truename = '.'.join(sections + [basen.strip(self.idents)])
+            self.d[truename] = v
+            self.addbranch(sections, basen)
+            self.save()
+
+        def save(self):
+            tod = []
+            for k in self.d:
+                if k in self.defaults:
+                    if self.d[k] == self.defaults[k]:
+                        tod.append(k)
+            for t in tod:
+                del self.d[t]
             self.db.save()
 
-        def setifne(self, n, v):
-            if n not in self.d:
-                self.set(n, v)
-
-        def default(self, d):
-            tmp = dict(list(d.items()) + list(self.d.items()))
-            self.d.update(tmp)
-            self.db.save()
+        def add(self, n, v):
+            split = n.split('.')
+            sections = split[:-1]
+            basen = split[-1]
+            truename = '.'.join(sections + [basen.strip(self.idents)])
+            self.defaults[truename] = v
+            if truename not in self.d:
+                self.d[truename] = v
+            self.addbranch(sections, basen)
+            self.save()
 
     def __init__(self, name, shared, options):
         self.name = name
@@ -169,7 +202,7 @@ class Server:
         self.pluginpaths = []
         for k in ["core",
             self.index] + self.requiredplugins + self.settings.get(
-            "plugins"):
+            "server.autoload"):
                 self.loadplugin(k)
         self.addhook("server_ready", "sinit", self.ready)
         self.dohook("server_ready")
@@ -343,7 +376,7 @@ class Server:
                                 parsedargs[name] = param.split('=')[1]
                             except IndexError:
                                 parsedargs[name] = ""
-                        done = True
+                            done = True
                         break
             if not done:
                 if argi in range(len(args)):
@@ -382,6 +415,7 @@ class Server:
                     if splitc == split[:len(splitc)]:
                         argtext = ' '.join(split[len(splitc):])
                         try:
+                            context.exceptcancommand(v[0], v[1])
                             return self.parsecommand(context,
                                 text, v, argtext), None
                         except ParserBadCommand as e:
@@ -402,7 +436,7 @@ class Server:
             elif r[1] is not None:
                 return None, r[1]
 
-        return None, self.settings.get('notfoundmsg').format(
+        return None, self.settings.get('messages.notfound').format(
             command=split[0])
 
 
@@ -453,7 +487,7 @@ class Context:
     def checkright(self, r):
         return r in self.server.getrights(self.idstring(), self)
 
-    def needrights(self, rlist, m=None):
+    def exceptrights(self, rlist, m=None):
         if type(rlist) is str:
             rlist = [rlist]
         rlist = rlist + ['owner']
@@ -463,3 +497,10 @@ class Context:
         raise NoPerms(m or "You must have %s: %s" % (
             "this right" if len(rlist) == 1 else "one of these rights",
             ', '.join(rlist)))
+
+    def _exceptcancommand(self, module, command):
+        for r in self.server.getrights(self.idstring(), self):
+            if fnmatch.fnmatchcase("-%s.%s.%s" % (
+                module.plugin, module.index, command['name']), r):
+                    raise NoPerms("You may not use %s" % "%s.%s.%s" % (
+                        module.plugin, module.index, command['name']))

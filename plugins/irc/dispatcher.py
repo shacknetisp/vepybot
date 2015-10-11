@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 import time
+import fnmatch
 
 
 class Context(bot.Context):
@@ -44,6 +45,37 @@ class Context(bot.Context):
             return
         self.server.send('NOTICE %s :%s' % (sender, m))
 
+    def setting(self, s):
+        return "channels.%s.%s" % (self.channel, s)
+
+    def channelidstring(self):
+        return "irc#:%s" % self.channel
+
+    def exceptchannelrights(self, rlist, m=None):
+        if type(rlist) is str:
+            rlist = [rlist]
+        rlist = rlist + ['op']
+        return self.exceptrights([("%s,%s" % (self.channel, r)) for r in rlist])
+
+    def exceptcancommand(self, module, command):
+        if self.channel:
+            for r in self.server.getrights(self.channelidstring(), self):
+                if fnmatch.fnmatchcase("-%s.%s.%s" % (
+                    module.plugin, module.index, command['name']), r):
+                        raise bot.NoPerms(
+                            "The channel may not use %s" % "%s.%s.%s" % (
+                            module.plugin, module.index, command['name']))
+
+        self._exceptcancommand(module, command)
+
+        if self.channel:
+            for r in self.server.getrights(self.idstring(), self):
+                if fnmatch.fnmatchcase("%s,-%s.%s.%s" % (self.channel,
+                    module.plugin, module.index, command['name']), r):
+                        raise bot.NoPerms(
+                        "You may not use %s on this channel." % "%s.%s.%s" % (
+                        module.plugin, module.index, command['name']))
+
 
 class M_Dispatcher(bot.Module):
 
@@ -71,7 +103,9 @@ class M_Dispatcher(bot.Module):
     def recv(self, context):
         if context.code("privmsg"):
             #Find if prefixed
-            for prefix in self.server.settings.prefixes(context):
+            for prefix in self.server.settings.getchannel(
+                "parser.prefixes", context) + (
+                    [""] if not context.channel else []):
                 if context.text.startswith(prefix):
                     command = context.text[len(prefix):]
                     #Schedule WHOIS if neccessary

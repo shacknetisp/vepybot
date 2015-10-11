@@ -29,19 +29,29 @@ class M_Alias(lib.alias.Module):
             ["[channel]", "alias"],
             recognizers={'channel': self.server.ischannel})
 
+        self.server.settings.add("server.#aliases", {})
+
     def get(self, context, args):
         args.default("channel", "")
         alias = args.getstr('alias')
         if args.getstr("channel"):
-            pass
+            return "[%s] %s" % (args.getstr("channel"),
+                self._get(self.server.settings.getchannel(
+                "aliases", args.getstr("channel")),
+                alias))
         else:
-            return "%s" % (self._get(alias))
+            return "%s" % (self._get(self.server.settings.get("server.aliases"),
+                alias))
 
     def command(self, context, text, responses):
         if context.channel:
-            pass
+            r = self._command(context, text,
+                self.server.settings.getchannel("aliases", context))
+            if r[0] is not None or r[1] is not None:
+                responses.append(r)
+                return
         responses.append(self._command(context, text,
-            self.server.settings.get("aliases")))
+            self.server.settings.get("server.aliases")))
 
     def add(self, context, args):
         args.default("channel", "")
@@ -49,20 +59,38 @@ class M_Alias(lib.alias.Module):
         alias = args.getstr('alias')
         content = args.getstr('content')
         if args.getstr("channel"):
-            context.needchannelrights(['op', 'alias'])
-            pass
+            context.exceptchannelrights(['alias'])
+            ret = "[%s] %s" % (args.getstr("channel"),
+                self._add(
+                self.server.settings.getchannel('aliases',
+                    args.getstr("channel")),
+                alias, content))
+            return ret
         else:
-            context.needrights(["admin", "alias"])
-            return "%s" % (self._add(alias, content))
+            context.exceptrights(["admin", "alias"])
+            ret = "%s" % (self._add(self.server.settings.get("server.aliases"),
+                alias, content))
+            self.server.settings.save()
+            return ret
 
     def remove(self, context, args):
         args.default("channel", "")
         alias = args.getstr('alias')
         if args.getstr("channel"):
-            context.needchannelrights(['op', 'alias'])
-            pass
+            context.exceptchannelrights(['op', 'alias'])
+            ret = "[%s] %s" % (args.getstr("channel"),
+                self._remove(
+                self.server.settings.getchannel("aliases",
+                    args.getstr("channel")),
+                alias))
+            self.server.settings.save()
+            return ret
         else:
-            context.needrights(["admin", "alias"])
-            return "%s" % (self._remove(alias))
+            context.exceptrights(["admin", "alias"])
+            ret = "%s" % (self._remove(
+                self.server.settings.get("server.aliases"),
+                alias))
+            self.server.settings.save()
+            return ret
 
 bot.register.module(M_Alias)

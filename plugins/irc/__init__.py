@@ -3,6 +3,7 @@ import bot
 import socket
 import select
 import re
+import copy
 
 
 class Server(bot.Server):
@@ -21,27 +22,39 @@ class Server(bot.Server):
     options = {
         'mode': '*',
         'recv': 16384,
-        'plugins': [
-            'echo',
-            ],
         }
 
     class Settings(bot.Server.Settings):
 
-        def prefixes(self, context):
-            if context.channel:
-                return self.get("%s:prefixes" % context.channel,
-                    self.get("prefixes"))
-            return self.get("prefixes") + [""]
+        idents = '.=#'
+
+        channeldefault = {}
+
+        def getchannel(self, v, context):
+            channel = context if type(context) is str else context.channel
+            setting = "channels.%s.%s" % (channel, v)
+            if channel:
+                try:
+                    return self.get(setting)
+                except KeyError:
+                    pass
+                if v in self.channeldefault:
+                    self.d[setting] = copy.deepcopy(
+                        self.channeldefault[v])
+                    return self.get(setting)
+            return self.get(v)
+
+        def addchannel(self, n, v):
+            self.channeldefault[n] = v
 
     def settings_ready(self):
-        d = {
-            'notfoundmsg': '?',
-            'prefixes': ['.'],
-            'plugins': self.opt('plugins'),
-            'channels': [],
-        }
-        self.settings.default(d)
+        self.settings.add("messages.notfound", "?")
+        self.settings.add("parser.#prefixes", ['.'])
+
+        self.settings.add("server.autoload", ['utils'])
+        self.settings.add("server.channels", [])
+        for n in ['nick', 'mode', 'name']:
+            self.settings.add("server.user.%s" % n, self.opt(n))
 
     def ready(self):
         self.info = {}
@@ -49,11 +62,11 @@ class Server(bot.Server):
         self.addtimer("output", self.output, 100)
         self.socket = socket.socket()
         self.socket.connect((self.opt('host'), self.opt('port')))
-        self.send("NICK %s" % (self.opt('nick')))
+        self.send("NICK %s" % (self.settings.get('server.user.nick')))
         self.send("USER %s %s * %s" % (
-            self.opt('nick'),
-            self.opt('mode'),
-            self.opt('name')))
+            self.settings.get('server.user.nick'),
+            self.settings.get('server.user.mode'),
+            self.settings.get('server.user.name')))
 
     def send(self, msg):
         self.outbuf.append(msg)

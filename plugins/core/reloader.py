@@ -29,7 +29,7 @@ class M_Reloader(bot.Module):
             ["plugin"])
 
     def unload(self, context, args):
-        context.needrights('admin')
+        context.exceptrights('admin')
         plugin = args.getstr("plugin")
         if plugin in self.protected:
             return "You can only reload the server plugin."
@@ -39,7 +39,7 @@ class M_Reloader(bot.Module):
         return "Unloaded plugin: %s" % (plugin)
 
     def load(self, context, args):
-        context.needrights('admin')
+        context.exceptrights('admin')
         plugin = args.getstr("plugin")
         if plugin in self.server.plugins:
             return "That plugin is already loaded."
@@ -48,7 +48,7 @@ class M_Reloader(bot.Module):
         return "Loaded plugin: %s" % (plugin)
 
     def reload(self, context, args):
-        context.needrights('admin')
+        context.exceptrights('admin')
         plugin = args.getstr("plugin")
         if plugin not in self.server.plugins:
             return "That plugin is not loaded."
