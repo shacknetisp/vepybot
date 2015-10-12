@@ -11,13 +11,13 @@ class Server(bot.Server):
     index = "irc"
 
     requiredplugins = [
+        "irc/rights",
+        "irc/alias",
+        "irc/config",
         "irc/pinger",
         "irc/dispatcher",
         "irc/channels",
-        "irc/rights",
-        "irc/alias",
         "irc/users",
-        "irc/config",
     ]
 
     options = {
@@ -30,6 +30,7 @@ class Server(bot.Server):
         idents = '.=#'
 
         channeldefault = {}
+        channeltree = {}
 
         def getchannel(self, v, context):
             channel = context if type(context) is str else context.channel
@@ -44,6 +45,18 @@ class Server(bot.Server):
                         self.channeldefault[v])
                     return self.get(setting)
             return self.get(v)
+
+        def addbranch(self, ss, n):
+            bot.Server.Settings.addbranch(self, copy.deepcopy(ss), n)
+            if '#' in n:
+                s = None
+                d = self.channeltree
+                while ss:
+                    s = ss.pop(0)
+                    if s not in d:
+                        d[s] = {}
+                    d = d[s]
+                d[n] = True
 
         def addchannel(self, n, v):
             self.channeldefault[n] = v
@@ -65,7 +78,8 @@ class Server(bot.Server):
         self.addtimer("output", self.output, 100)
         self.socket = socket.socket()
         self.socket.connect((self.opt('host'), self.opt('port')))
-        self.send("NICK %s" % (self.settings.get('server.user.nick')))
+        self.nick = self.settings.get('server.user.nick')
+        self.send("NICK %s" % (self.nick))
         self.send("USER %s %s * :%s" % (
             self.settings.get('server.user.ident'),
             self.settings.get('server.user.mode'),

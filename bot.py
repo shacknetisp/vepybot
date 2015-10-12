@@ -52,8 +52,6 @@ class register:
         servers[c.index] = c
 
     def module(c):
-        if currentplugin not in plugins:
-            plugins[currentplugin] = {}
         plugins[currentplugin][c.index] = c
         if c.index not in newmodules:
             newmodules.append(c.index)
@@ -67,6 +65,8 @@ def loadnamedmodule(n, p=""):
         if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
             os.path.exists("%s/%s.py" % (directory, n))):
                 currentplugin = p or n
+                if currentplugin not in plugins:
+                    plugins[currentplugin] = {}
                 importmodule("%s/%s" % (directory, n), r=True)
                 currentplugin = ""
                 return True
@@ -155,6 +155,11 @@ class Server:
             self.defaults = {}
             self.user = []
             self.tree = {}
+
+        def pop(self, n):
+            r = self.d.pop(n)
+            self.save()
+            return r
 
         def get(self, n):
             if n not in self.d:

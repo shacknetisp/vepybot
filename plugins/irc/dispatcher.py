@@ -105,9 +105,12 @@ class M_Dispatcher(bot.Module):
             #Find if prefixed
             for prefix in self.server.settings.getchannel(
                 "parser.prefixes", context) + (
-                    [""] if not context.channel else []):
+                    [""] if not context.channel else []) + [
+                        self.server.nick + ',',
+                        self.server.nick + ':',
+                        ]:
                 if context.text.startswith(prefix):
-                    command = context.text[len(prefix):]
+                    command = context.text[len(prefix):].strip()
                     #Schedule WHOIS if neccessary
                     if context.user[0] not in self.buf:
                         self.buf[context.user[0]] = []

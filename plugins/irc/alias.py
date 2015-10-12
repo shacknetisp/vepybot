@@ -30,7 +30,7 @@ class M_Alias(lib.alias.Module):
             ["[channel]", "alias"],
             recognizers={'channel': self.server.ischannel})
 
-        self.server.settings.add("server.#aliases", {})
+        self.server.settings.add("server.=#aliases", {})
 
     def get(self, context, args):
         args.default("channel", "")
