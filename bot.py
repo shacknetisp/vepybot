@@ -232,6 +232,8 @@ class Server:
             self.index] + self.requiredplugins + self.settings.get(
             "server.autoload"):
                 self.loadplugin(k)
+        self.dohook("prepare_settings")
+        self.build_lists()
         self.addhook("server_ready", "sinit", self.ready)
         self.dohook("server_ready")
 
@@ -266,6 +268,7 @@ class Server:
         if module:
             self.log('UNLOAD', "%s/%s" % (plugin, module))
             del self.modules[module]
+            self.build_lists()
             return
         for m in self.plugins[plugin]:
             self.log('UNLOAD', "%s/%s" % (plugin, m))
@@ -273,10 +276,6 @@ class Server:
         self.pluginpaths = [x for x in self.pluginpaths
             if x.split('/')[0] != plugin]
         del self.plugins[plugin]
-        try:
-            self.settings.defaults['modules'].pop(module)
-        except KeyError:
-            pass
         self.build_lists()
 
     def reloadplugin(self, plugin):
@@ -287,6 +286,7 @@ class Server:
             self.unloadplugin(plugin)
             if not self.loadplugin(plugin):
                 return False
+            self.build_lists()
             return True
         oldpaths = self.pluginpaths
         self.unloadplugin(plugin)
@@ -320,6 +320,12 @@ class Server:
                 self.numcommands[k] += 1
         self.commands = sorted(list(self.commands.items()),
             key=lambda x: -len(x[0][2].split()))
+        self.settings.user = []
+        self.settings.defaults = {}
+        self.settings.tree = {}
+        for m in list(self.modules.values()):
+            for k, v in list(m.serversettings.items()):
+                self.settings.add(k, v)
 
     def addhook(self, name, uname, function):
         if name not in self.hooks:
@@ -514,7 +520,11 @@ class Module:
     def __init__(self, server):
         self.server = server
         self.commands = {}
+        self.serversettings = {}
         self.register()
+
+    def addserversetting(self, n, v):
+        self.serversettings[n] = v
 
     def addcommand(self, function, name, helptext, arguments,
             recognizers=None):
@@ -543,7 +553,7 @@ class Module:
         self.server.addhook(name, "%s:%s" % (self.index, uname), function)
 
     def addsetting(self, setting, value):
-        self.server.settings.add("modules.%s.%s" % (self.index, setting), value)
+        self.addserversetting("modules.%s.%s" % (self.index, setting), value)
 
     def getsetting(self, setting):
         return self.server.settings.get("modules.%s.%s" % (self.index, setting))
@@ -572,10 +582,11 @@ class Context:
             ', '.join(rlist)))
 
     def _exceptcancommand(self, module, command):
-        for r in self.server.getrights(self.idstring(), self):
-            if fnmatch.fnmatchcase("-%s.%s.%s" % (
-                module.plugin, module.index, command['name']), r):
-                    raise NoPerms("You may not use %s" % "%s.%s.%s" % (
-                        module.plugin, module.index, command['name']))
-            if r == "ignore" and not self.checkright("admin"):
-                raise NoPerms("")
+        if not self.checkright("admin"):
+            for r in self.server.getrights(self.idstring(), self):
+                if fnmatch.fnmatchcase("-%s.%s.%s" % (
+                    module.plugin, module.index, command['name']), r):
+                        raise NoPerms("You may not use %s" % "%s.%s.%s" % (
+                            module.plugin, module.index, command['name']))
+                if r == "ignore":
+                    raise NoPerms("")

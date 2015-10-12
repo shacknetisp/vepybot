@@ -61,10 +61,9 @@ class M_Loader(bot.Module):
             if len(p.split('/')) > 1:
                 bmodule = p.split('/')[-1]
             if plugin == bplugin and module == bmodule:
-                if args.getbool('temp'):
-                    return
                 aname = p
-                plist.pop(plist.index(p))
+                if not args.getbool('temp'):
+                    plist.pop(plist.index(p))
                 break
         self.server.settings.set("server.autoload", plist)
         return "Unloaded plugin: %s (%s autoload)" % (aname,
@@ -82,12 +81,11 @@ class M_Loader(bot.Module):
                 return "Cannot load plugin: %s" % plugin
         except bot.ModuleError as e:
             return str(e)
-        if args.getbool('temp'):
-            return
-        plist = self.server.settings.get("server.autoload")
-        if plugin not in plist:
-            plist.append(plugin)
-        self.server.settings.set("server.autoload", plist)
+        if not args.getbool('temp'):
+            plist = self.server.settings.get("server.autoload")
+            if plugin not in plist:
+                plist.append(plugin)
+            self.server.settings.set("server.autoload", plist)
         return "Loaded plugin: %s (%s autoload)" % (plugin,
             utils.ynstr(plugin
             in self.server.settings.get("server.autoload"), "will", "won't"))

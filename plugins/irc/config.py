@@ -32,13 +32,6 @@ class M_Config(lib.config.Module):
 
         context.exceptrights([args.getstr('channel') + ",op"])
 
-        d = {}
-        try:
-            d = self.server.settings.tree['channels']
-            [args.getstr('channel')]
-        except KeyError:
-            pass
-
         ct = {
             'channels': {
                     args.getstr('channel'): self.server.settings.channeltree
@@ -52,7 +45,6 @@ class M_Config(lib.config.Module):
             lambda x: self.server.settings.getchannel(x,
                 args.getstr('channel')),
             [],
-            dict(list(d.items()) + list(
-            ct.items())))
+            ct)
 
 bot.register.module(M_Config)

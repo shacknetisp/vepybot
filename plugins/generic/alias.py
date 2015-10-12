@@ -27,8 +27,6 @@ class M_Alias(lib.alias.Module):
             "Remove an alias.",
             ["alias"],)
 
-        self.server.settings.add("server.#=aliases", {})
-
     def get(self, context, args):
         alias = args.getstr('alias')
         return "%s" % (self._get(self.server.settings.get("server.aliases"),

@@ -15,6 +15,7 @@ class M_Channel(bot.Module):
     index = "channel"
 
     def register(self):
+        self.addhook("loggedin", "loggedin", self.loggedin)
         self.addhook("recv", "recv", self.recv)
         self.channels = {}
 
@@ -79,12 +80,12 @@ class M_Channel(bot.Module):
         self.part(args.getstr('channel'), True)
         self.join(args.getstr('channel'), True)
 
+    def loggedin(self):
+        for channel in self.server.settings.get("server.channels"):
+            self.join(channel)
+
     def recv(self, context):
-        if context.code(376):
-            self.server.dohook('login')
-            for channel in self.server.settings.get("server.channels"):
-                self.join(channel)
-        elif context.code("kick"):
+        if context.code("kick"):
             if self.getchannelsetting("kickrejoin", context.reciever):
                 self.join(context.reciever)
 

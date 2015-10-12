@@ -10,7 +10,7 @@ class M_Rights(lib.rights.Module):
     def register(self):
         lib.rights.Module.register(self)
 
-        self.server.settings.addchannel("=crights", {})
+        self.addserverchannelsetting("=crights", {})
 
         self.addcommand(
             self.setcright,

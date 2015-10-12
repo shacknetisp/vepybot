@@ -11,6 +11,7 @@ class Server(bot.Server):
     index = "irc"
 
     requiredplugins = [
+        "irc/settings",
         "irc/rights",
         "irc/alias",
         "irc/config",
@@ -74,15 +75,6 @@ class Server(bot.Server):
 
     def settings_ready(self):
         self.globalaliases = {}
-        self.settings.add("messages.notfound", "?")
-        self.settings.add("parser.#prefixes", ['.'])
-
-        self.settings.add("server.autoload", ['utils'])
-        self.settings.add("server.channels", [])
-        for n in ['nick', 'name', 'mode']:
-            self.settings.add("server.user.%s" % n, self.opt(n))
-        self.settings.add("server.user.ident", self.settings.get(
-            'server.user.nick'))
 
     def modulesetup(self, m):
 
@@ -90,7 +82,12 @@ class Server(bot.Server):
             return self.server.settings.getchannel(
                 "modules.%s.%s" % (self.index, setting), c)
 
+        def addserverchannelsetting(self, n, v):
+            self.serverchannelsettings[n] = v
+
         m.getchannelsetting = getchannelsetting
+        m.addserverchannelsetting = addserverchannelsetting
+        m.serverchannelsettings = {}
         return m
 
     def ready(self):
@@ -137,6 +134,13 @@ class Server(bot.Server):
 
     def ischannel(self, x):
         return x and x[0] in self.info['CHANTYPES']
+
+    def build_lists(self):
+        bot.Server.build_lists(self)
+        self.settings.channeldefaults = {}
+        for m in list(self.modules.values()):
+            for k, v in list(m.serverchannelsettings.items()):
+                self.settings.addchannel(k, v)
 
 
 bot.register.server(Server)

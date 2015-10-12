@@ -58,28 +58,28 @@ class Context(bot.Context):
         return self.exceptrights([("%s,%s" % (self.channel, r)) for r in rlist])
 
     def exceptcancommand(self, module, command):
-        if self.channel:
+        if self.channel and not self.checkright(
+            "%s,op" % self.channel):
             for r in self.server.getrights(self.channelidstring(), self):
                 if fnmatch.fnmatchcase("-%s.%s.%s" % (
                     module.plugin, module.index, command['name']), r):
                         raise bot.NoPerms(
                             "The channel may not use %s" % "%s.%s.%s" % (
                             module.plugin, module.index, command['name']))
-                if r == "ignore" and not self.checkright(
-                    "%s,op" % self.channel):
+                if r == "ignore":
                     raise bot.NoPerms("")
 
         self._exceptcancommand(module, command)
 
-        if self.channel:
+        if self.channel and not self.checkright(
+            "%s,op" % self.channel):
             for r in self.server.getrights(self.idstring(), self):
                 if fnmatch.fnmatchcase("%s,-%s.%s.%s" % (self.channel,
                     module.plugin, module.index, command['name']), r):
                         raise bot.NoPerms(
                         "You may not use %s on this channel." % "%s.%s.%s" % (
                         module.plugin, module.index, command['name']))
-                if r == "%s,ignore" % self.channel and not self.checkright(
-                        "%s,op" % self.channel):
+                if r == "%s,ignore" % self.channel:
                     raise bot.NoPerms("")
 
 
@@ -132,6 +132,9 @@ class M_Dispatcher(bot.Module):
                         context.whois = self.server.whois[context.user[0]]
                         self.doinput(context, command)
                     return
+        elif context.code(376):
+            self.server.dohook('login')
+            self.server.dohook('loggedin')
 
     def whoised(self, user):
         if user in self.buf:
