@@ -17,7 +17,7 @@ class Server(bot.Server):
         "irc/config",
         "irc/pinger",
         "irc/dispatcher",
-        "irc/channels",
+        "irc/channel",
         "irc/users",
     ]
 
@@ -29,6 +29,7 @@ class Server(bot.Server):
     class Settings(bot.Server.Settings):
 
         idents = '.=#'
+        mglob = bot.Server.Settings.mglob + ['channels.*.modules.{m}.*']
 
         channeldefaults = {}
         channeltree = {}

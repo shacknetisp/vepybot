@@ -144,6 +144,7 @@ class Server:
     class Settings:
 
         idents = '.='
+        mglob = ['modules.{m}.*']
 
         def __init__(self, server):
             os.makedirs("%s/servers/%s" % (userdata, server.name),
@@ -158,6 +159,20 @@ class Server:
 
         def isdefault(self, n, v):
             pass
+
+        def purge(self, m):
+            c = 0
+            tod = []
+            for v in self.d:
+                for g in self.mglob:
+                    if fnmatch.fnmatch(v, g.format(m=m)):
+                        c += 1
+                        tod.append(v)
+                        break
+            for d in tod:
+                self.d.pop(d)
+            self.save()
+            return c
 
         def pop(self, n):
             r = self.d.pop(n)
