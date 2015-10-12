@@ -10,7 +10,7 @@ class M_Rights(lib.rights.Module):
     def register(self):
         lib.rights.Module.register(self)
 
-        self.server.settings.addchannel("rights", {})
+        self.server.settings.addchannel("=crights", {})
 
         self.addcommand(
             self.setcright,
@@ -47,7 +47,7 @@ class M_Rights(lib.rights.Module):
         rights = []
         matches = []
         if context.channel:
-            rightlist = self.server.settings.getchannel("rights", context)
+            rightlist = self.server.settings.getchannel("crights", context)
             for r in rightlist:
                 if fnmatch.fnmatch(idstring, r):
                     if rightlist[r]:
@@ -68,7 +68,7 @@ class M_Rights(lib.rights.Module):
             return "That channel does not exist."
         ids = args.getstr("idstring")
         r = args.getstr("right")
-        rightlist = self.server.settings.getchannel("rights", channel)
+        rightlist = self.server.settings.getchannel("crights", channel)
         if ids not in rightlist:
             rightlist[ids] = []
         if r in rightlist[ids]:
@@ -94,7 +94,7 @@ class M_Rights(lib.rights.Module):
             return "That channel does not exist."
         ids = args.getstr("idstring")
         r = args.getstr("right")
-        rightlist = self.server.settings.getchannel("rights", channel)
+        rightlist = self.server.settings.getchannel("crights", channel)
         if ids not in rightlist:
             rightlist[ids] = []
         if r not in rightlist[ids]:

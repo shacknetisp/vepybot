@@ -5,6 +5,7 @@ import bot
 class M_Pinger(bot.Module):
 
     index = "pinger"
+    hidden = True
 
     def register(self):
         self.addhook("recv", "recv", self.recv)

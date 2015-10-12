@@ -156,6 +156,9 @@ class Server:
             self.user = []
             self.tree = {}
 
+        def isdefault(self, n, v):
+            pass
+
         def pop(self, n):
             r = self.d.pop(n)
             self.save()
@@ -194,6 +197,9 @@ class Server:
             for k in self.d:
                 if k in self.defaults:
                     if self.d[k] == self.defaults[k]:
+                        tod.append(k)
+                else:
+                    if self.isdefault(k, self.d[k]):
                         tod.append(k)
             for t in tod:
                 self.d.pop(t)
@@ -284,9 +290,13 @@ class Server:
 
     def build_lists(self):
         self.commands = {}
+        self.numcommands = {}
         for m in list(self.modules.values()):
             for k, v in list(m.commands.items()):
                 self.commands[(m.plugin, m.index, k)] = (m, v)
+                if k not in self.numcommands:
+                    self.numcommands[k] = 0
+                self.numcommands[k] += 1
         self.commands = sorted(list(self.commands.items()),
             key=lambda x: -len(x[0][2].split()))
 

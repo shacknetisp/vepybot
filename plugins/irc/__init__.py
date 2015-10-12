@@ -58,8 +58,16 @@ class Server(bot.Server):
                     d = d[s]
                 d[n] = True
 
+        def isdefault(self, n, v):
+            if n.split('.')[:1] == ['channels']:
+                nn = '.'.join(n.split('.')[2:])
+                if nn in self.defaults and n in self.d:
+                    if self.d[n] == self.defaults[nn]:
+                        return True
+            return False
+
         def addchannel(self, n, v):
-            self.channeldefault[n] = v
+            self.channeldefault[n.strip(self.idents)] = v
 
     def settings_ready(self):
         self.settings.add("messages.notfound", "?")
