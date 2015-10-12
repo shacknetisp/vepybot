@@ -10,9 +10,9 @@ class Channel:
         self.name = name
 
 
-class M_Channel(bot.Module):
+class M_Channels(bot.Module):
 
-    index = "channel"
+    index = "channels"
 
     def register(self):
         self.addhook("loggedin", "loggedin", self.loggedin)
@@ -90,4 +90,4 @@ class M_Channel(bot.Module):
                 self.join(context.reciever)
 
 
-bot.register.module(M_Channel)
+bot.register.module(M_Channels)

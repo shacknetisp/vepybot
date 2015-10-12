@@ -17,7 +17,7 @@ class Server(bot.Server):
         "irc/config",
         "irc/pinger",
         "irc/dispatcher",
-        "irc/channel",
+        "irc/channels",
         "irc/users",
     ]
 
