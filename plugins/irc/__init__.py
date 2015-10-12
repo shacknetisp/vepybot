@@ -73,6 +73,7 @@ class Server(bot.Server):
             self.channeldefaults[n.strip(self.idents)] = v
 
     def settings_ready(self):
+        self.globalaliases = {}
         self.settings.add("messages.notfound", "?")
         self.settings.add("parser.#prefixes", ['.'])
 

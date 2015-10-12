@@ -81,6 +81,7 @@ class M_Channel(bot.Module):
 
     def recv(self, context):
         if context.code(376):
+            self.server.dohook('login')
             for channel in self.server.settings.get("server.channels"):
                 self.join(channel)
         elif context.code("kick"):

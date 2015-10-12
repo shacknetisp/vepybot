@@ -244,7 +244,8 @@ class Server:
                 continue
             v = modules[index]
             if index in self.modules:
-                raise ModuleError("Module %s already is registered from %s" % (
+                raise ModuleError(
+                    "Module %s already registered from plugin: %s" % (
                     index,
                     self.modules[index].plugin
                     ))
@@ -258,16 +259,35 @@ class Server:
         return True
 
     def unloadplugin(self, plugin):
-        for module in self.plugins[plugin]:
+        module = ""
+        if len(plugin.split('/')) > 1:
+            module = plugin.split('/')[-1]
+        plugin = plugin.split('/')[0]
+        if module:
             self.log('UNLOAD', "%s/%s" % (plugin, module))
             del self.modules[module]
+            return
+        for m in self.plugins[plugin]:
+            self.log('UNLOAD', "%s/%s" % (plugin, m))
+            del self.modules[m]
         self.pluginpaths = [x for x in self.pluginpaths
             if x.split('/')[0] != plugin]
         del self.plugins[plugin]
+        try:
+            self.settings.defaults['modules'].pop(module)
+        except KeyError:
+            pass
         self.build_lists()
 
     def reloadplugin(self, plugin):
-        plugin = plugin.split('/')[0]
+        module = ""
+        if len(plugin.split('/')) > 1:
+            module = plugin.split('/')[-1]
+        if module:
+            self.unloadplugin(plugin)
+            if not self.loadplugin(plugin):
+                return False
+            return True
         oldpaths = self.pluginpaths
         self.unloadplugin(plugin)
         for pp in oldpaths:
