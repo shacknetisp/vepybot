@@ -30,6 +30,7 @@ class M_Rights(lib.rights.Module):
             'op': ['op'],
             'v': ['op'],
             '-': ['op'],
+            'ignore': ['op'],
         }
 
     def idstring(self, context):

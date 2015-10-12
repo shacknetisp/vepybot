@@ -464,6 +464,8 @@ class Server:
                         except ParserBadCommand as e:
                             return None, e
                         except NoPerms as e:
+                            if not str(e):
+                                return None, None
                             return None, e
                         except NoArg as e:
                             return None, "%s, Usage: %s %s" % (e,
@@ -555,3 +557,5 @@ class Context:
                 module.plugin, module.index, command['name']), r):
                     raise NoPerms("You may not use %s" % "%s.%s.%s" % (
                         module.plugin, module.index, command['name']))
+            if r == "ignore" and not self.checkright("admin"):
+                raise NoPerms("")

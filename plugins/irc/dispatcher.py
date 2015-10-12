@@ -65,6 +65,9 @@ class Context(bot.Context):
                         raise bot.NoPerms(
                             "The channel may not use %s" % "%s.%s.%s" % (
                             module.plugin, module.index, command['name']))
+                if r == "ignore" and not self.checkright(
+                    "%s,op" % self.channel):
+                    raise bot.NoPerms("")
 
         self._exceptcancommand(module, command)
 
@@ -75,6 +78,9 @@ class Context(bot.Context):
                         raise bot.NoPerms(
                         "You may not use %s on this channel." % "%s.%s.%s" % (
                         module.plugin, module.index, command['name']))
+                if r == "%s,ignore" % self.channel and not self.checkright(
+                        "%s,op" % self.channel):
+                    raise bot.NoPerms("")
 
 
 class M_Dispatcher(bot.Module):
