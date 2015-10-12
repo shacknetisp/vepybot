@@ -107,6 +107,8 @@ class M_Rights(lib.rights.Module):
             required = channel + ',' + required
             if context.checkright(required) or context.checkright("owner"):
                 rightlist[ids] = [x for x in rightlist[ids] if x != r]
+                if not rightlist[ids]:
+                    rightlist.pop(ids)
                 self.server.settings.save()
                 return "Unset %s from %s" % (r, ids)
         return "You do not have the rights to do that."

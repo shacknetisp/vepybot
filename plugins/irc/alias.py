@@ -52,7 +52,7 @@ class M_Alias(lib.alias.Module):
     def command(self, context, text, responses):
         if context.channel:
             r = self._command(context, text,
-                self.server.settings.getchannel("aliases", context))
+                self.server.settings.getchannel("server.aliases", context))
             if r[0] is not None or r[1] is not None:
                 responses.append(r)
                 return
@@ -70,7 +70,7 @@ class M_Alias(lib.alias.Module):
             context.exceptchannelrights(['alias'])
             ret = "[%s] %s" % (args.getstr("channel"),
                 self._add(
-                self.server.settings.getchannel('aliases',
+                self.server.settings.getchannel('server.aliases',
                     args.getstr("channel")),
                 alias, content))
             return ret
@@ -88,7 +88,7 @@ class M_Alias(lib.alias.Module):
             context.exceptchannelrights(['op', 'alias'])
             ret = "[%s] %s" % (args.getstr("channel"),
                 self._remove(
-                self.server.settings.getchannel("aliases",
+                self.server.settings.getchannel("server.aliases",
                     args.getstr("channel")),
                 alias))
             self.server.settings.save()

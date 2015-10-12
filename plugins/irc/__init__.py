@@ -29,7 +29,7 @@ class Server(bot.Server):
 
         idents = '.=#'
 
-        channeldefault = {}
+        channeldefaults = {}
         channeltree = {}
 
         def getchannel(self, v, context):
@@ -40,9 +40,9 @@ class Server(bot.Server):
                     return self.get(setting)
                 except KeyError:
                     pass
-                if v in self.channeldefault:
+                if v in self.channeldefaults:
                     self.d[setting] = copy.deepcopy(
-                        self.channeldefault[v])
+                        self.channeldefaults[v])
                     return self.get(setting)
             return self.get(v)
 
@@ -64,10 +64,13 @@ class Server(bot.Server):
                 if nn in self.defaults and n in self.d:
                     if self.d[n] == self.defaults[nn]:
                         return True
+                elif nn in self.channeldefaults and n in self.d:
+                    if self.d[n] == self.channeldefaults[nn]:
+                        return True
             return False
 
         def addchannel(self, n, v):
-            self.channeldefault[n.strip(self.idents)] = v
+            self.channeldefaults[n.strip(self.idents)] = v
 
     def settings_ready(self):
         self.settings.add("messages.notfound", "?")
