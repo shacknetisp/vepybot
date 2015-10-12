@@ -36,6 +36,8 @@ class M_Channel(bot.Module):
             "Hop a channel.",
             ["channel"])
 
+        self.addsetting("#kickrejoin", True)
+
     def join(self, c, temp=False):
         self.server.send("JOIN %s" % c)
         if temp:
@@ -81,5 +83,9 @@ class M_Channel(bot.Module):
         if context.code(376):
             for channel in self.server.settings.get("server.channels"):
                 self.join(channel)
+        elif context.code("kick"):
+            if self.getchannelsetting("kickrejoin", context.reciever):
+                self.join(context.reciever)
+
 
 bot.register.module(M_Channel)

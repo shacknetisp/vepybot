@@ -248,6 +248,7 @@ class Server:
                     index,
                     self.modules[index].plugin
                     ))
+            v = self.modulesetup(v)
             self.modules[index] = v(self)
             self.modules[index].plugin = plugin
             self.log('LOAD', "%s/%s" % (plugin, index))
@@ -444,6 +445,9 @@ class Server:
     def getrights(self, *args):
         pass
 
+    def modulesetup(self, *args):
+        pass
+
     def runcommand(self, context, text):
         split = text.split()
         for k, v in self.commands:
@@ -462,7 +466,9 @@ class Server:
                         except NoPerms as e:
                             return None, e
                         except NoArg as e:
-                            return None, e
+                            return None, "%s, Usage: %s %s" % (e,
+                                ' '.join(splitc),
+                                self.gethelp(v[1])[0])
                         except Exception as e:
                             import traceback
                             traceback.print_exc()
@@ -513,6 +519,12 @@ class Module:
 
     def addhook(self, name, uname, function):
         self.server.addhook(name, "%s:%s" % (self.index, uname), function)
+
+    def addsetting(self, setting, value):
+        self.server.settings.add("modules.%s.%s" % (self.index, setting), value)
+
+    def getsetting(self, setting):
+        return self.server.settings.get("modules.%s.%s" % (self.index, setting))
 
 
 class Context:

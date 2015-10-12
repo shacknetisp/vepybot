@@ -27,7 +27,7 @@ class M_Help(bot.Module):
             else:
                 r = "<%s>" % r
             if a['optional']:
-                r = "[" + r + "]"
+                r = "[%s]" % r
             args.append(r)
         return (' '.join(args), command['help'])
 

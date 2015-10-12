@@ -80,6 +80,15 @@ class Server(bot.Server):
         self.settings.add("server.user.ident", self.settings.get(
             'server.user.nick'))
 
+    def modulesetup(self, m):
+
+        def getchannelsetting(self, setting, c):
+            return self.server.settings.getchannel(
+                "modules.%s.%s" % (self.index, setting), c)
+
+        m.getchannelsetting = getchannelsetting
+        return m
+
     def ready(self):
         self.info = {}
         self.outbuf = []

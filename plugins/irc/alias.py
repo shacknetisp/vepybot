@@ -31,6 +31,11 @@ class M_Alias(lib.alias.Module):
             recognizers={'channel': self.server.ischannel})
 
         self.server.settings.add("server.=#aliases", {})
+        self.server.globalaliases = {}
+        self.server.globalaliases.update({
+            'idhost': 'echo irc:*@$*!*',
+            'idauth': 'echo irc:*!$*',
+            })
 
     def get(self, context, args):
         args.default("channel", "")
@@ -53,6 +58,8 @@ class M_Alias(lib.alias.Module):
                 return
         responses.append(self._command(context, text,
             self.server.settings.get("server.aliases")))
+        responses.append(self._command(context, text,
+            self.server.globalaliases))
 
     def add(self, context, args):
         args.default("channel", "")
