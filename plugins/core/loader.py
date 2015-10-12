@@ -2,9 +2,9 @@
 import bot
 
 
-class M_Reloader(bot.Module):
+class M_Loader(bot.Module):
 
-    index = "reloader"
+    index = "loader"
 
     def register(self):
 
@@ -32,7 +32,7 @@ class M_Reloader(bot.Module):
         context.exceptrights('admin')
         plugin = args.getstr("plugin")
         if plugin in self.protected:
-            return "You can only reload the server plugin."
+            return "You cannot unload the core plugins."
         if plugin not in self.server.plugins:
             return "That plugin is not loaded."
         self.server.unloadplugin(plugin)
@@ -56,4 +56,4 @@ class M_Reloader(bot.Module):
             return "Cannot load plugin: %s" % plugin
         return "Reloaded plugin: %s" % (plugin)
 
-bot.register.module(M_Reloader)
+bot.register.module(M_Loader)

@@ -14,7 +14,7 @@ class M_Config(lib.config.Module):
         self.addcommand(
             self.channelconfig,
             "channel config",
-            ("Act on a channel config entry." +
+            ("Act on a channel config entry, requires channel op." +
             " (list, get, reset, set, add, remove)"),
             ["[channel]", "action", "name", "value..."],
             recognizers={'channel': self.server.ischannel})
