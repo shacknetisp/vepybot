@@ -33,17 +33,6 @@ class M_Rights(lib.rights.Module):
             'ignore': ['op'],
         }
 
-    def idstring(self, context):
-        ret = ""
-        if context.sender[0]:
-            ret = "%s!%s@%s!%s" % (
-                context.user[0],
-                context.user[1],
-                context.user[2],
-                context.whois.auth
-                )
-        return "irc:" + ret
-
     def _contextrights(self, idstring, context):
         rights = []
         matches = []

@@ -9,10 +9,8 @@ class M_Rights(lib.rights.Module):
     def register(self):
         lib.rights.Module.register(self)
 
-    def idstring(self, context):
-        return self.server.index + ":" + context.sender
-
     def _contextrights(self, idstring, context):
+        """Rights from a context."""
         rights = []
         matches = []
         return rights, matches

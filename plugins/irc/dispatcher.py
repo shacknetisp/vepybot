@@ -36,6 +36,17 @@ class Context(bot.Context):
         except IndexError:
             self.channel = ""
 
+    def idstring(self):
+        ret = ""
+        if self.sender[0]:
+            ret = "%s!%s@%s!%s" % (
+                self.user[0],
+                self.user[1],
+                self.user[2],
+                self.whois.auth
+                )
+        return "irc:" + ret
+
     def code(self, c):
         return self.rawcode.lower() == str(c).lower()
 

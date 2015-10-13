@@ -148,6 +148,7 @@ class ModuleError(Exception):
 
 
 class Server:
+    """The Server Plugin."""
 
     class Settings:
 
@@ -528,7 +529,8 @@ class Server:
         pass
 
     def idstring(self, context):
-        """Return the rights idstring from <context>."""
+        """Return the rights idstring from <context>.
+        Implemented by modules."""
         pass
 
     def runcommand(self, context, text):
@@ -572,6 +574,7 @@ class Server:
 
 
 class Module:
+    """A Module Object."""
 
     """Display the module in lists?"""
     hidden = False
@@ -624,11 +627,13 @@ class Module:
 
 
 class Context:
+    """Server Specific Context, implement the core functions at least."""
 
     def __init__(self, server):
         self.server = server
 
     def idstring(self):
+        """Return the idstring of the context."""
         return self.server.idstring(self)
 
     def checkright(self, r):
