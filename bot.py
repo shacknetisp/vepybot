@@ -468,11 +468,11 @@ class Server:
                     running = False
                 else:
                     section += cchar
-            elif not quoted and cchar in parser.quotes:
+            elif not quoted and cchar in parser.quotes and not running:
                 quoted = cchar
                 if not section:
                     sectiond[len(sections)] = "cooked"
-            elif quoted:
+            elif quoted and not running:
                 if cchar == quoted:
                     quoted = None
                 else:
