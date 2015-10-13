@@ -9,7 +9,7 @@ class M_Settings(bot.Module):
 
     def register(self):
 
-        self.server.addhook('prepare_settings', 'sr', self.ready)
+        self.addhook('prepare_settings', 'sr', self.ready)
 
     def ready(self):
         self.addserversetting("messages.notfound", "?")
@@ -17,8 +17,9 @@ class M_Settings(bot.Module):
 
         self.addserversetting("server.autoload", ['utils'])
         self.addserversetting("server.channels", [])
-        for n in ['nick', 'name', 'mode']:
+        for n in ['nick', 'mode']:
             self.addserversetting("server.user.%s" % n, self.server.opt(n))
+        self.addserversetting("server.user.name", bot.versionstring)
         self.addserversetting("server.user.ident", self.server.opt('nick'))
 
 bot.register.module(M_Settings)

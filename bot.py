@@ -8,16 +8,21 @@ import fnmatch
 import imp
 import copy
 
+versionstring = "Vepybot 0.1.0"
+
+userdata = 'userdata'
+
+
+def createuserdata():
+    for d in [
+            'servers',
+            'shared',
+        ]:
+            os.makedirs(userdata + '/' + d, exist_ok=True)
+
 
 def reload(m):
     imp.reload(m)
-
-userdata = 'userdata'
-for d in [
-        'servers',
-        'shared',
-    ]:
-        os.makedirs(userdata + '/' + d, exist_ok=True)
 
 
 def importmodule(path, r=False):
@@ -101,16 +106,19 @@ class Args:
         self.d = d
 
     def default(self, n, d):
+        """Set the default value of arg <n> to <d>"""
         if n not in self.d:
             self.d[n] = d
 
     def getstr(self, n):
+        """Get the arg <n> as a str."""
         try:
-            return self.d[n]
+            return str(self.d[n])
         except KeyError:
             raise NoArg("Argument not found: %s" % n)
 
     def getbool(self, n):
+        """Get the arg <n> as a bool. For -kv args."""
         if n not in self.d:
             return False
         elif self.d[n] == "":
@@ -143,7 +151,9 @@ class Server:
 
     class Settings:
 
+        """Indicator Characters."""
         idents = '.='
+        """Module search glob, {m} is replaced with the module name."""
         mglob = ['modules.{m}.*']
 
         def __init__(self, server):
@@ -158,9 +168,12 @@ class Server:
             self.tree = {}
 
         def isdefault(self, n, v):
+            """Determine if a setting <n> with value <v>
+            is set to it's default."""
             pass
 
         def purge(self, m):
+            """Purge module <m> from the settings DB."""
             c = 0
             tod = []
             for v in self.d:
@@ -175,11 +188,13 @@ class Server:
             return c
 
         def pop(self, n):
+            """Pop <n> from the DB."""
             r = self.d.pop(n)
             self.save()
             return r
 
         def get(self, n):
+            """Return the setting <n> or it's default."""
             if n not in self.d:
                 self.d[n] = copy.deepcopy(self.defaults[n])
                 ret = self.d[n]
@@ -189,6 +204,7 @@ class Server:
             return self.d[n]
 
         def addbranch(self, ss, n):
+            """Add <ss> to the tree with name <n>."""
             s = None
             d = self.tree
             while ss:
@@ -199,6 +215,7 @@ class Server:
             d[n] = True
 
         def set(self, n, v):
+            """Set <n> to <v>, adding it to the tree if neccessary."""
             split = n.split('.')
             sections = split[:-1]
             basen = split[-1]
@@ -208,6 +225,7 @@ class Server:
             self.save()
 
         def save(self):
+            """Save the database, removing values set to their defaults."""
             tod = []
             for k in self.d:
                 if k in self.defaults:
@@ -221,6 +239,7 @@ class Server:
             self.db.save()
 
         def add(self, n, v):
+            """Add a default setting <n> with a value of <v>."""
             split = n.split('.')
             sections = split[:-1]
             basen = split[-1]
@@ -253,6 +272,7 @@ class Server:
         self.dohook("server_ready")
 
     def loadplugin(self, k):
+        """Load the plugin/module <k>."""
         plugin = k.split('/')[0]
         loadnamedmodule(k, plugin)
         modules = plugins[plugin]
@@ -276,6 +296,7 @@ class Server:
         return True
 
     def unloadplugin(self, plugin):
+        """Unload the plugin/module <plugin>."""
         module = ""
         if len(plugin.split('/')) > 1:
             module = plugin.split('/')[-1]
@@ -294,6 +315,7 @@ class Server:
         self.build_lists()
 
     def reloadplugin(self, plugin):
+        """Reload the plugin/module <plugin>."""
         module = ""
         if len(plugin.split('/')) > 1:
             module = plugin.split('/')[-1]
@@ -313,18 +335,22 @@ class Server:
         return True
 
     def addrights(self, d):
+        """Add <d> to the rights hierarchy."""
         self.righttypes.update(d)
 
     def opt(self, n):
+        """Get config.py value <n>."""
         return self.options[n]
 
     def log(self, category, text):
+        """Log <text> under <category>."""
         print(("%s %s: %s" % (self.name, category, text.strip())))
 
     def build_settings(self):
         self.settings_ready()
 
     def build_lists(self):
+        """Recreate the command and settings lists."""
         self.commands = {}
         self.numcommands = {}
         for m in list(self.modules.values()):
@@ -343,16 +369,20 @@ class Server:
                 self.settings.add(k, v)
 
     def addhook(self, name, uname, function):
+        """Add a hook to <name> with the unique id <uname>
+        and the function <function>."""
         if name not in self.hooks:
             self.hooks[name] = {}
         self.hooks[name][uname] = function
 
     def dohook(self, name, *args):
+        """Call all functions registered to <name> with <*args>."""
         if name in self.hooks:
             for f in list(self.hooks[name].values()):
                 f(*args)
 
     def addtimer(self, n, f, t):
+        """Add a timer with unique name <n>, function <f> and timeout <t>."""
         self.timers.append({
             'name': n,
             'function': f,
@@ -484,12 +514,19 @@ class Server:
         return v[1]['function'](context, args)
 
     def getrights(self, *args):
+        """Set by modules to get rights."""
         pass
 
-    def modulesetup(self, *args):
+    def modulesetup(self, m):
+        """Modify and return <m>, to add attributes to the module class."""
+        pass
+
+    def idstring(self, context):
+        """Return the rights idstring from <context>."""
         pass
 
     def runcommand(self, context, text):
+        """Run <text> as <context>."""
         split = text.split()
         for k, v in self.commands:
             for splitc in [
@@ -530,6 +567,7 @@ class Server:
 
 class Module:
 
+    """Display the module in lists?"""
     hidden = False
 
     def __init__(self, server):
@@ -539,10 +577,12 @@ class Module:
         self.register()
 
     def addserversetting(self, n, v):
+        """Add setting <n> with default value <v>."""
         self.serversettings[n] = v
 
     def addcommand(self, function, name, helptext, arguments,
             recognizers=None):
+        """Add a command to the module."""
         if recognizers is None:
             recognizers = {}
         c = {
@@ -565,12 +605,15 @@ class Module:
         self.commands[c['name']] = c
 
     def addhook(self, name, uname, function):
+        """Add a server hook, prefixing the name with the module index."""
         self.server.addhook(name, "%s:%s" % (self.index, uname), function)
 
     def addsetting(self, setting, value):
+        """Add a module-specific <setting> with a default value of <value>."""
         self.addserversetting("modules.%s.%s" % (self.index, setting), value)
 
     def getsetting(self, setting):
+        """Get a module-specific <setting>."""
         return self.server.settings.get("modules.%s.%s" % (self.index, setting))
 
 
@@ -583,9 +626,12 @@ class Context:
         return self.server.idstring(self)
 
     def checkright(self, r):
+        """Check if the context has the right <r>."""
         return r in self.server.getrights(self.idstring(), self)
 
     def exceptrights(self, rlist, m=None):
+        """Raise NoPerms exception if this context has none of the
+        rights in <r>, <m> is an optional exception message."""
         if type(rlist) is str:
             rlist = [rlist]
         rlist = rlist + ['owner']
