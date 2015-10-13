@@ -74,9 +74,6 @@ class Server(bot.Server):
         def addchannel(self, n, v):
             self.channeldefaults[n.strip(self.idents)] = v
 
-    def settings_ready(self):
-        self.globalaliases = {}
-
     def modulesetup(self, m):
 
         def getchannelsetting(self, setting, c):

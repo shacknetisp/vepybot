@@ -254,6 +254,7 @@ class Server:
         self.name = name
         self.shared = shared
         self.hooks = {}
+        self.globalaliases = {}
         self.timers = []
         self.options.update(options)
         self.settings = self.Settings(self)
@@ -351,7 +352,8 @@ class Server:
         print(("%s %s: %s" % (self.name, category, text.strip())))
 
     def build_settings(self):
-        self.settings_ready()
+        """Ready to build settings."""
+        pass
 
     def build_lists(self):
         """Recreate the command and settings lists."""
