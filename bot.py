@@ -15,6 +15,7 @@ versiontuple = (versionname, version, "Python %s on %s" % (
     platform.python_version(),
     platform.system()
     ))
+source = "https://github.com/shacknetisp/vepybot"
 
 userdata = 'userdata'
 

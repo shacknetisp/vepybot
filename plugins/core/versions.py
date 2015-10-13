@@ -14,7 +14,16 @@ class M_Versions(bot.Module):
             "Get the bot version.",
             [])
 
+        self.addcommand(
+            self.source,
+            "source",
+            "Get the bot source.",
+            [])
+
     def version(self, context, args):
         return "%s" % (bot.versionstring)
+
+    def source(self, context, args):
+        return "%s" % (bot.source)
 
 bot.register.module(M_Versions)
