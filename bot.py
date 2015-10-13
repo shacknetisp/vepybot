@@ -263,10 +263,14 @@ class Server:
         self.righttypes = {}
         self.pluginpaths = []
         for k in ["core",
-            self.index] + self.requiredplugins + self.settings.get(
+            self.index] + self.requiredplugins:
+                self.loadplugin(k)
+        self.dohook("core_prepare_settings")
+        self.dohook("prepare_settings")
+        self.build_lists()
+        for k in self.settings.get(
             "server.autoload"):
                 self.loadplugin(k)
-        self.dohook("prepare_settings")
         self.build_lists()
         self.addhook("server_ready", "sinit", self.ready)
         self.dohook("server_ready")

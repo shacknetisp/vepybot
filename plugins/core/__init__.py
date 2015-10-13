@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from . import loader, help, list, echo, versions
+from . import loader, help, list, echo, versions, settings
