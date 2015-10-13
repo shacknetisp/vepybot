@@ -210,7 +210,7 @@ class Server:
                 return ret
             return self.d[n]
 
-        def addbranch(self, ss, n):
+        def addbranch(self, ss, n, rm=False):
             """Add <ss> to the tree with name <n>."""
             ss = copy.deepcopy(ss)
             s = None
@@ -220,6 +220,8 @@ class Server:
                 if s not in d:
                     d[s] = {}
                 d = d[s]
+            if n.strip(self.idents) in d and rm:
+                d.pop(n.strip(self.idents))
             d[n] = True
 
         def set(self, n, v):
@@ -274,8 +276,6 @@ class Server:
         for k in ["core",
             self.index] + self.requiredplugins:
                 self.loadplugin(k)
-        self.dohook("core_prepare_settings")
-        self.dohook("prepare_settings")
         self.build_lists()
         for k in self.settings.get(
             "server.autoload"):
@@ -378,8 +378,10 @@ class Server:
         self.settings.user = []
         self.settings.defaults = {}
         self.settings.tree = {}
+        self.dohook("core_prepare_settings")
+        self.dohook("prepare_settings")
         for m in list(self.modules.values()):
-            for k, v in list(m.serversettings.items()):
+            for k, v in m.serversettings:
                 self.settings.add(k, v)
 
     def addhook(self, name, uname, function):
@@ -588,12 +590,12 @@ class Module:
     def __init__(self, server):
         self.server = server
         self.commands = {}
-        self.serversettings = {}
+        self.serversettings = []
         self.register()
 
     def addserversetting(self, n, v):
         """Add setting <n> with default value <v>."""
-        self.serversettings[n] = v
+        self.serversettings.append((n, v))
 
     def addcommand(self, function, name, helptext, arguments,
             recognizers=None):

@@ -63,7 +63,7 @@ class Server(bot.Server):
             return self.get(v)
 
         def addbranch(self, ss, n):
-            bot.Server.Settings.addbranch(self, copy.deepcopy(ss), n)
+            bot.Server.Settings.addbranch(self, copy.deepcopy(ss), n, rm=True)
             if '#' in n:
                 s = None
                 d = self.channeltree
@@ -200,12 +200,12 @@ class M_Settings(bot.Module):
         self.addhook('prepare_settings', 'sr', self.ready)
 
     def ready(self):
-        self.addserversetting("parser.#prefixes", ['.'])
+        self.server.settings.add("parser.#prefixes", ['.'])
 
-        self.addserversetting("server.channels", [])
+        self.server.settings.add("server.channels", [])
         for n in ['nick', 'mode']:
-            self.addserversetting("server.user.%s" % n, self.server.opt(n))
-        self.addserversetting("server.user.name", bot.versionstring)
-        self.addserversetting("server.user.ident", self.server.opt('nick'))
+            self.server.settings.add("server.user.%s" % n, self.server.opt(n))
+        self.server.settings.add("server.user.name", bot.versionstring)
+        self.server.settings.add("server.user.ident", self.server.opt('nick'))
 
 bot.register.module(M_Settings)
