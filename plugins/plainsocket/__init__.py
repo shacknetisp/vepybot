@@ -2,8 +2,6 @@
 import bot
 import socket
 import select
-import re
-import copy
 
 """
 Plain Socket Server
