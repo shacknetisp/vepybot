@@ -21,8 +21,7 @@ class Context(bot.Context):
 class M_Dispatcher(bot.Module):
 
     index = "dispatcher"
-    hidden = False
-    whoist = 60
+    hidden = True
 
     def register(self):
         self.addhook("server_recv", "s_recv", self.s_recv)

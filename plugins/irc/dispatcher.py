@@ -97,7 +97,7 @@ class Context(bot.Context):
 class M_Dispatcher(bot.Module):
 
     index = "dispatcher"
-    hidden = False
+    hidden = True
     whoist = 60
 
     def register(self):
