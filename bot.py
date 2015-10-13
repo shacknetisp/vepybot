@@ -6,8 +6,15 @@ import time
 import fnmatch
 import imp
 import copy
+import platform
 
-versionstring = "Vepybot 0.1.0"
+version = "0.1.0"
+versionname = "Vepybot"
+versionstring = "%s %s" % (versionname, version)
+versiontuple = (versionname, version, "Python %s on %s" % (
+    platform.python_version(),
+    platform.system()
+    ))
 
 userdata = 'userdata'
 

@@ -14,6 +14,8 @@ bot.load_server(
         'port': 5000,
         'owner': 'host:*',
     })
+
+$ telnet localhost 5000
 """
 
 

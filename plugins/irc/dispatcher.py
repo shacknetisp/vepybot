@@ -35,6 +35,9 @@ class Context(bot.Context):
                 ) if 'CHANTYPES' in server.info else None
         except IndexError:
             self.channel = ""
+        self.ctcp = ""
+        if self.text.startswith('\1'):
+            self.ctcp = self.text.strip('\1')
 
     def idstring(self):
         ret = ""
@@ -55,6 +58,9 @@ class Context(bot.Context):
         if not sender:
             return
         self.server.send('NOTICE %s :%s' % (sender, m))
+
+    def replyctcp(self, m):
+        self.reply("\1%s\1" % m)
 
     def setting(self, s):
         return "channels.%s.%s" % (self.channel, s)
@@ -119,32 +125,40 @@ class M_Dispatcher(bot.Module):
 
     def recv(self, context):
         if context.code("privmsg"):
-            #Find if prefixed
-            for prefix in self.server.settings.getchannel(
-                "parser.prefixes", context) + (
-                    [""] if not context.channel else []) + [
-                        self.server.nick + ',',
-                        self.server.nick + ':',
-                        ]:
-                if context.text.startswith(prefix):
-                    command = context.text[len(prefix):].strip()
-                    #Schedule WHOIS if neccessary
-                    if context.user[0] not in self.buf:
-                        self.buf[context.user[0]] = []
-                    if context.user[0] not in self.whoistime:
-                        self.whoistime[context.user[0]] = 0
-                    if time.time() - self.whoistime[
-                        context.user[0]] > self.whoist or (
-                            context.user[0] not in self.server.whois):
-                            self.buf[context.user[0]].append((context, command))
-                            self.whoistime[context.user[0]] = time.time()
-                            self.server.send("WHOIS %s" % context.user[0])
-                    else:
-                        context.whois = self.server.whois[context.user[0]]
-                        self.doinput(context, command)
-                    return
+            if context.ctcp:
+                split = context.ctcp.split()
+                if split[0]:
+                    self.server.dohook('ctcp.%s' % split[0].lower(),
+                        context, split[1:])
+            else:
+                #Find if prefixed
+                for prefix in self.server.settings.getchannel(
+                    "parser.prefixes", context) + (
+                        [""] if not context.channel else []) + [
+                            self.server.nick + ',',
+                            self.server.nick + ':',
+                            ]:
+                    if context.text.startswith(prefix):
+                        command = context.text[len(prefix):].strip()
+                        #Schedule WHOIS if neccessary
+                        if context.user[0] not in self.buf:
+                            self.buf[context.user[0]] = []
+                        if context.user[0] not in self.whoistime:
+                            self.whoistime[context.user[0]] = 0
+                        if time.time() - self.whoistime[
+                            context.user[0]] > self.whoist or (
+                                context.user[0] not in self.server.whois):
+                                self.buf[context.user[0]].append(
+                                    (context, command))
+                                self.whoistime[context.user[0]] = time.time()
+                                self.server.send("WHOIS %s" % context.user[0])
+                        else:
+                            context.whois = self.server.whois[context.user[0]]
+                            self.doinput(context, command)
+                        return
         elif context.code(376):
             self.server.dohook('login')
+            self.server.loggedin = True
             self.server.dohook('loggedin')
 
     def whoised(self, user):

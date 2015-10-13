@@ -32,6 +32,10 @@ class M_Rights(lib.rights.Module):
             '-': ['op'],
             'ignore': ['op'],
         }
+        self.server.globalaliases.update({
+            'idhost': 'echo irc:*@$*!*',
+            'idauth': 'echo irc:*!$*',
+            })
 
     def _contextrights(self, idstring, context):
         rights = []

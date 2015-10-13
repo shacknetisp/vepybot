@@ -33,6 +33,7 @@ class Server(bot.Server):
         "irc/dispatcher",
         "irc/channels",
         "irc/users",
+        "irc/ctcp",
     ]
 
     options = {
@@ -102,14 +103,18 @@ class Server(bot.Server):
         m.serverchannelsettings = {}
         return m
 
+    def setnick(self, nick):
+        self.nick = nick
+        self.send("NICK %s" % (nick))
+
     def ready(self):
+        self.loggedin = False
         self.info = {}
         self.outbuf = []
         self.addtimer("output", self.output, 100)
         self.socket = socket.socket()
         self.socket.connect((self.opt('host'), self.opt('port')))
-        self.nick = self.settings.get('server.user.nick')
-        self.send("NICK %s" % (self.nick))
+        self.setnick(self.settings.get('server.user.nick'))
         self.send("USER %s %s * :%s" % (
             self.settings.get('server.user.ident'),
             self.settings.get('server.user.mode'),
@@ -209,3 +214,22 @@ class M_Settings(bot.Module):
         self.server.settings.add("server.user.ident", self.server.opt('nick'))
 
 bot.register.module(M_Settings)
+
+
+class M_433(bot.Module):
+
+    index = "433"
+    hidden = True
+
+    def register(self):
+
+        self.addhook('recv', 'recv', self.recv)
+
+    def recv(self, context):
+        if context.code(433):
+            responses = []
+            self.server.dohook('nickinuse', responses)
+            if not responses and not self.server.loggedin:
+                self.server.setnick(self.server.nick + "_")
+
+bot.register.module(M_433)

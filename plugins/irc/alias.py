@@ -32,10 +32,6 @@ class M_Alias(lib.alias.Module):
 
         self.addserversetting("server.=#aliases", {})
         self.addserverchannelsetting("aliases", {})
-        self.server.globalaliases.update({
-            'idhost': 'echo irc:*@$*!*',
-            'idauth': 'echo irc:*!$*',
-            })
 
     def get(self, context, args):
         args.default("channel", "")
