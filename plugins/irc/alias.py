@@ -31,6 +31,7 @@ class M_Alias(lib.alias.Module):
             recognizers={'channel': self.server.ischannel})
 
         self.addserversetting("server.=#aliases", {})
+        self.addserverchannelsetting("aliases", {})
         self.server.globalaliases.update({
             'idhost': 'echo irc:*@$*!*',
             'idauth': 'echo irc:*!$*',

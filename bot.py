@@ -150,6 +150,12 @@ class ModuleError(Exception):
 class Server:
     """The Server Plugin."""
 
+    """Override with plugins that are required to run the server."""
+    requiredplugins = []
+
+    """Default Options."""
+    options = {}
+
     class Settings:
 
         """Indicator Characters."""
@@ -206,6 +212,7 @@ class Server:
 
         def addbranch(self, ss, n):
             """Add <ss> to the tree with name <n>."""
+            ss = copy.deepcopy(ss)
             s = None
             d = self.tree
             while ss:
@@ -526,7 +533,7 @@ class Server:
 
     def modulesetup(self, m):
         """Modify and return <m>, to add attributes to the module class."""
-        pass
+        return m
 
     def idstring(self, context):
         """Return the rights idstring from <context>.
@@ -569,8 +576,7 @@ class Server:
             elif r[1] is not None:
                 return None, r[1]
 
-        return None, self.settings.get('messages.notfound').format(
-            command=split[0])
+        return None, self.settings.get('messages.notfound')
 
 
 class Module:
@@ -652,6 +658,10 @@ class Context:
         raise NoPerms(m or "You must have %s: %s" % (
             "this right" if len(rlist) == 1 else "one of these rights",
             ', '.join(rlist)))
+
+    def exceptcancommand(self, module, command):
+        """Call _exceptcancommand, raise NoPerms if cannot execute <command>."""
+        self._exceptcancommand(module, command)
 
     def _exceptcancommand(self, module, command):
         if not self.checkright("admin"):

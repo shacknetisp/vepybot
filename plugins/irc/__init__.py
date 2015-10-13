@@ -5,13 +5,27 @@ import select
 import re
 import copy
 
+"""
+IRC Client
+bot.load_server(
+    "irc",
+    "irc",
+    "freenode1",
+    "shared1",
+    {
+        'host': 'irc.freenode.net',
+        'port': 6667,
+        'nick': 'vepybot',
+        'owner': 'irc:*',
+    })
+"""
+
 
 class Server(bot.Server):
 
     index = "irc"
 
     requiredplugins = [
-        "irc/settings",
         "irc/rights",
         "irc/alias",
         "irc/config",
@@ -174,3 +188,24 @@ class M_ServerInfo(bot.Module):
 
 
 bot.register.module(M_ServerInfo)
+
+
+class M_Settings(bot.Module):
+
+    index = "settings"
+    hidden = True
+
+    def register(self):
+
+        self.addhook('prepare_settings', 'sr', self.ready)
+
+    def ready(self):
+        self.addserversetting("parser.#prefixes", ['.'])
+
+        self.addserversetting("server.channels", [])
+        for n in ['nick', 'mode']:
+            self.addserversetting("server.user.%s" % n, self.server.opt(n))
+        self.addserversetting("server.user.name", bot.versionstring)
+        self.addserversetting("server.user.ident", self.server.opt('nick'))
+
+bot.register.module(M_Settings)
