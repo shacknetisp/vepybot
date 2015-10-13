@@ -17,4 +17,6 @@ class M_Settings(bot.Module):
 
         self.server.settings.add("server.autoload", [])
 
+        self.server.dohook("prepare_settings")
+
 bot.register.module(M_Settings)

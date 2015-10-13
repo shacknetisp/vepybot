@@ -49,5 +49,9 @@ class M_Whois(bot.Module):
         elif context.code("318"):
             self.whois[context.rawsplit[3]] = self.tmp[context.rawsplit[3]]
             self.server.dohook("whois", context.rawsplit[3])
+        elif context.code("330"):
+            #Freenode
+            w = self.tmp[context.rawsplit[3]]
+            w.auth = context.rawsplit[4]
 
 bot.register.module(M_Whois)

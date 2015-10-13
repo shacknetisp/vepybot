@@ -3,7 +3,6 @@ import os
 import sys
 import importlib
 import time
-from lib import db, utils, parser
 import fnmatch
 import imp
 import copy
@@ -23,6 +22,9 @@ def createuserdata():
 
 def reload(m):
     imp.reload(m)
+
+from lib import db, utils, parser
+[reload(x) for x in [utils, parser]]
 
 
 def importmodule(path, r=False):
@@ -80,9 +82,8 @@ def loadnamedmodule(n, p=""):
 
 def make_server(module, kind, name, shared, options):
     global currentplugin
-    currentplugin = kind
-    loadnamedmodule(module)
-    currentplugin = ""
+    if kind not in servers:
+        loadnamedmodule(module)
     if kind not in servers:
         raise IndexError("%s is not a valid server type!" % kind)
     return servers[kind](name, shared, options)
@@ -379,7 +380,6 @@ class Server:
         self.settings.defaults = {}
         self.settings.tree = {}
         self.dohook("core_prepare_settings")
-        self.dohook("prepare_settings")
         for m in list(self.modules.values()):
             for k, v in m.serversettings:
                 self.settings.add(k, v)
@@ -659,7 +659,7 @@ class Context:
                 return True
         raise NoPerms(m or "You must have %s: %s" % (
             "this right" if len(rlist) == 1 else "one of these rights",
-            ', '.join(rlist)))
+            '; '.join(rlist)))
 
     def exceptcancommand(self, module, command):
         """Call _exceptcancommand, raise NoPerms if cannot execute <command>."""

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 from lib import utils
+bot.reload(utils)
 
 
 class Channel:
@@ -29,13 +30,13 @@ class M_Channels(bot.Module):
             self.part_c,
             "part",
             "Part a channel, specify -temp to not forget the channel.",
-            ["-[temp]", "channel"])
+            ["-[temp]", "[channel]"])
 
         self.addcommand(
             self.hop_c,
             "hop",
             "Hop a channel.",
-            ["channel"])
+            ["[channel]"])
 
         self.addsetting("#kickrejoin", True)
 
