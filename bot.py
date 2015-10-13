@@ -7,6 +7,7 @@ import fnmatch
 import imp
 import copy
 import platform
+import textwrap
 
 version = "0.1.0"
 versionname = "Vepybot"
@@ -163,7 +164,9 @@ class Server:
     requiredplugins = []
 
     """Default Options."""
-    options = {}
+    options = {
+        'charlimit': 0,
+        }
 
     class Settings:
 
@@ -380,8 +383,8 @@ class Server:
             for k, v in list(m.commands.items()):
                 self.commands[(m.plugin, m.index, k)] = (m, v)
                 if k not in self.numcommands:
-                    self.numcommands[k] = 0
-                self.numcommands[k] += 1
+                    self.numcommands[k] = []
+                self.numcommands[k].append(m.index)
         self.commands = sorted(list(self.commands.items()),
             key=lambda x: -len(x[0][2].split()))
         self.settings.user = []
@@ -552,32 +555,43 @@ class Server:
 
     def runcommand(self, context, text):
         """Run <text> as <context>."""
+        commands = []
         split = text.split()
         for k, v in self.commands:
             for splitc in [
                     [v[0].plugin] + [v[0].index] + v[1]['name'].split(),
                     [v[0].index] + v[1]['name'].split(),
                     v[1]['name'].split()]:
-                    if splitc == split[:len(splitc)]:
-                        argtext = ' '.join(split[len(splitc):])
-                        try:
-                            context.exceptcancommand(v[0], v[1])
-                            return self.parsecommand(context,
-                                text, v, argtext), None
-                        except ParserBadCommand as e:
-                            return None, e
-                        except NoPerms as e:
-                            if not str(e):
-                                return None, None
-                            return None, e
-                        except NoArg as e:
-                            return None, "%s, Usage: %s %s" % (e,
-                                ' '.join(splitc),
-                                self.gethelp(v[1])[0])
-                        except Exception as e:
-                            import traceback
-                            traceback.print_exc()
-                            return None, "Internal Error: %s" % type(e).__name__
+                        commands.append((splitc, v))
+        commands.sort(key=lambda x: -len(x[0]))
+        for splitc, v in commands:
+            if splitc == split[:len(splitc)]:
+                if len(splitc) == 1:
+                    if len(self.numcommands[splitc[0]]) > 1:
+                        return None, (
+                            "Use <module> %s, %s" % (splitc[0], splitc[0]) +
+                            " is provided by multiple modules: %s" % (
+                                ', '.join(self.numcommands[splitc[0]])
+                                ))
+                argtext = ' '.join(split[len(splitc):])
+                try:
+                    context.exceptcancommand(v[0], v[1])
+                    return self.parsecommand(context,
+                        text, v, argtext), None
+                except ParserBadCommand as e:
+                    return None, e
+                except NoPerms as e:
+                    if not str(e):
+                        return None, None
+                    return None, e
+                except NoArg as e:
+                    return None, "%s, Usage: %s %s" % (e,
+                        ' '.join(splitc),
+                        self.gethelp(v[1])[0])
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    return None, "Internal Error: %s" % type(e).__name__
         responses = []
         self.dohook('command', context, text, responses)
         for r in responses:
@@ -682,3 +696,22 @@ class Context:
                             module.plugin, module.index, command['name']))
                 if r == "ignore":
                     raise NoPerms("")
+
+    def domore(self, message):
+        if not self.server.opt('charlimit'):
+            return message
+        messages = textwrap.wrap(message, self.server.opt('charlimit') - len(
+            " [99 more messages]",
+            ))
+        message = messages[0]
+        if len(messages) > 1:
+            self.server.more[self.idstring()] = messages[1:]
+            try:
+                if self.server.more[self.idstring()]:
+                    l = len(self.server.more[self.idstring()])
+                    message += (' ' + '' +
+                        '[%d more message%s]' % (l,
+                        's' if l != 1 else ''))
+            except KeyError:
+                pass
+        return message

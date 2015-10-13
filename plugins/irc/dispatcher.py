@@ -53,10 +53,15 @@ class Context(bot.Context):
     def code(self, c):
         return self.rawcode.lower() == str(c).lower()
 
-    def reply(self, m):
+    def reply(self, m, more=True):
+        m = m.strip()
+        if not m:
+            return
         sender = self.channel or self.user[0]
         if not sender:
             return
+        if more:
+            m = self.domore(m)
         self.server.send('NOTICE %s :%s' % (sender, m))
 
     def replyctcp(self, m):

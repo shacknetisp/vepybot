@@ -39,6 +39,7 @@ class Server(bot.Server):
     options = {
         'mode': '*',
         'recv': 16384,
+        'charlimit': 440,
         }
 
     class Settings(bot.Server.Settings):
