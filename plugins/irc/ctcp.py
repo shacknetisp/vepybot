@@ -5,7 +5,7 @@ import time
 
 class M_CTCP(bot.Module):
 
-    index = "CTCP"
+    index = "ctcp"
     hidden = False
 
     def register(self):
