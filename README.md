@@ -1,4 +1,4 @@
-Vepybot: A protocol-independent command bot.
+vepybot: the **ve**rsatile **py**thon **bot**.  
 
 Copy config.py.example in userdata to config.py and run with `python3 run.py`.
 
