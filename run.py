@@ -61,6 +61,8 @@ if __name__ == "__main__":
                     server.dotimers()
                     server.run()
                 db.saveall()
+            for server in bot.runningservers:
+                server.shutdown()
             imp.reload(db)
             imp.reload(bot)
             print('Restarting...')
