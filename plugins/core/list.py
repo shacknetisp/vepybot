@@ -11,7 +11,8 @@ class M_List(bot.Module):
         self.addcommand(
             self.list,
             "list",
-            "List modules or commands in a module, module can be * for all.",
+            "List modules or, if <module> is specified, commands in a module, "
+            "<module> can be * for all commands.",
             ["[module]..."])
 
     def list(self, context, args):

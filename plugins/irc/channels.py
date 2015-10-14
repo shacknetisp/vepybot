@@ -89,7 +89,7 @@ class M_Channels(bot.Module):
         if context.channel:
             args.default('channel', context.channel)
         if args.getstr('channel') not in self.channels:
-            return "Not joined in %s."
+            return "Not joined in %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), True)
         self.join(args.getstr('channel'), True)
