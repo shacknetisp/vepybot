@@ -53,19 +53,25 @@ class Context(bot.Context):
     def code(self, c):
         return self.rawcode.lower() == str(c).lower()
 
-    def reply(self, m, more=True, command=None):
+    def reply(self, m, more=True, command=None, priv=False):
         if command is None:
             command = 'NOTICE' if self.server.settings.getchannel(
                 'irc.notice', self) else 'PRIVMSG'
         m = str(m).strip()
         if not m:
             return
-        sender = self.channel or self.user[0]
-        if not sender:
+        if priv:
+            target = self.user[0]
+        else:
+            target = self.channel or self.user[0]
+        if not target:
             return
         if more:
             m = self.domore(m)
-        self.server.send('%s %s :%s' % (command, sender, m))
+        self.server.send('%s %s :%s' % (command, target, m))
+
+    def replypriv(self, *args):
+        self.reply(*args, priv=True)
 
     def replyctcp(self, m):
         self.reply("\1%s\1" % m, more=False, command='NOTICE')

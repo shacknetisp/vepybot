@@ -78,12 +78,16 @@ class M_Channels(bot.Module):
         if context.channel:
             args.default('channel', context.channel)
         if args.getstr('channel') not in self.channels:
-            return "Not joined in %s."
+            return "Not joined in %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), args.getbool('temp'))
-        return "Parted %s (%s autojoin)." % (args.getstr('channel'),
+        ret = "Parted %s (%s autojoin)." % (args.getstr('channel'),
             utils.ynstr(args.getstr('channel')
             in self.server.settings.get("server.channels"), "will", "won't"))
+        if context.channel == args.getstr('channel'):
+            context.replypriv(ret)
+        else:
+            context.reply(ret)
 
     def hop_c(self, context, args):
         if context.channel:
@@ -93,6 +97,7 @@ class M_Channels(bot.Module):
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), True)
         self.join(args.getstr('channel'), True)
+        return "Hopped %s." % args.getstr('channel')
 
     def loggedin(self):
         for channel in self.server.settings.get("server.channels"):

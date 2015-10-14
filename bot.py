@@ -672,6 +672,13 @@ class Context:
     def __init__(self, server):
         self.server = server
 
+    def reply(self, m):
+        """Reply with <m>."""
+
+    def replypriv(self, m):
+        """Reply privately with <m>."""
+        self.reply(m)
+
     def idstring(self):
         """Return the idstring of the context."""
         return self.server.idstring(self)
