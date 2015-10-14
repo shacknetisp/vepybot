@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
 import bot
 
+"""
+load irc/auth/nickserv
+config set modules.nickserv.password hunter2
+config set modules.nickserv.enabled True
+config set modules.nickserv.ghost True
+nickserv register email@do.main
+nickserv verify register myaccount c0d3numb3r
+nickserv identify
+"""
+
 
 class M_NickServ(bot.Module):
 
@@ -17,6 +27,7 @@ class M_NickServ(bot.Module):
         self.addsetting("ghost", True)
 
         self.lastns = ""
+        self.ghosting = True
 
         self.addcommand(self.register_c, "register",
             "Register with NickServ.", ["email"])
@@ -27,6 +38,10 @@ class M_NickServ(bot.Module):
         self.addcommand(self.identify_c, "identify",
             "Identify with NickServ.", [])
 
+    def name(self):
+        return self.getsetting("name") or self.server.settings.get(
+                            'server.user.nick')
+
     def recv(self, context):
         if context.user[0]:
             if context.code('notice') and context.user[0].lower() == 'nickserv':
@@ -36,21 +51,26 @@ class M_NickServ(bot.Module):
                         self.lastns,
                         context.text,
                         ))
+                    if self.ghosting:
+                        self.server.setnick(self.server.settings.get(
+                            'server.user.nick'))
+                        self.ghosting = False
 
     def nickinuse(self, r):
         if (self.getsetting("enabled") and
         self.getsetting("password") and self.getsetting("ghost")):
             self.server.setnick(self.server.nick + "_")
             self.server.send("PRIVMSG nickserv :GHOST %s %s" % (
-                self.getsetting("name"),
+                self.name(),
                 self.getsetting("password"),
                 ))
+            self.ghosting = True
             r.append(True)
 
     def identify(self):
         self.server.log("AUTH", "Identifying with NickServ.")
         self.server.send("PRIVMSG nickserv :IDENTIFY %s %s" % (
-            self.getsetting("name"),
+            self.name(),
             self.getsetting("password"),
             ))
 
