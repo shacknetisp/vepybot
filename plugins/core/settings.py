@@ -15,7 +15,7 @@ class M_Settings(bot.Module):
         self.server.settings.add("messages.notfound", "?")
         self.server.settings.add("parser.prefixes", ['.'])
 
-        self.server.settings.add("server.autoload", [])
+        self.server.settings.add("server.autoload", ['misc'])
 
         self.server.dohook("prepare_settings")
 

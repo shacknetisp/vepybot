@@ -8,6 +8,7 @@ import imp
 import copy
 import platform
 import textwrap
+from threading import Lock
 
 version = "0.1.0"
 versionname = "Vepybot"
@@ -54,6 +55,7 @@ def listmodules(directory):
         ret.append(os.path.splitext(module)[0])
     return ret
 
+modlock = Lock()
 servers = {}
 runningservers = []
 plugins = {}
@@ -298,66 +300,69 @@ class Server:
 
     def loadplugin(self, k):
         """Load the plugin/module <k>."""
-        plugin = k.split('/')[0]
-        loadnamedmodule(k, plugin)
-        modules = plugins[plugin]
-        for index in modules:
-            if index not in newmodules:
-                continue
-            v = modules[index]
-            if index in self.modules:
-                raise ModuleError(
-                    "Module %s already registered from plugin: %s" % (
-                    index,
-                    self.modules[index].plugin
-                    ))
-            v = self.modulesetup(v)
-            self.modules[index] = v(self)
-            self.modules[index].plugin = plugin
-            self.log('LOAD', "%s/%s" % (plugin, index))
-        self.plugins[plugin] = modules
-        self.pluginpaths.append(k)
-        self.build_lists()
-        return True
+        with modlock:
+            plugin = k.split('/')[0]
+            loadnamedmodule(k, plugin)
+            modules = plugins[plugin]
+            for index in modules:
+                if index not in newmodules:
+                    continue
+                v = modules[index]
+                if index in self.modules:
+                    raise ModuleError(
+                        "Module %s already registered from plugin: %s" % (
+                        index,
+                        self.modules[index].plugin
+                        ))
+                v = self.modulesetup(v)
+                self.modules[index] = v(self)
+                self.modules[index].plugin = plugin
+                self.log('LOAD', "%s/%s" % (plugin, index))
+            self.plugins[plugin] = modules
+            self.pluginpaths.append(k)
+            self.build_lists()
+            return True
 
     def unloadplugin(self, plugin):
         """Unload the plugin/module <plugin>."""
-        module = ""
-        if len(plugin.split('/')) > 1:
-            module = plugin.split('/')[-1]
-        plugin = plugin.split('/')[0]
-        if module:
-            self.log('UNLOAD', "%s/%s" % (plugin, module))
-            del self.modules[module]
+        with modlock:
+            module = ""
+            if len(plugin.split('/')) > 1:
+                module = plugin.split('/')[-1]
+            plugin = plugin.split('/')[0]
+            if module:
+                self.log('UNLOAD', "%s/%s" % (plugin, module))
+                del self.modules[module]
+                self.build_lists()
+                return
+            for m in self.plugins[plugin]:
+                self.log('UNLOAD', "%s/%s" % (plugin, m))
+                del self.modules[m]
+            self.pluginpaths = [x for x in self.pluginpaths
+                if x.split('/')[0] != plugin]
+            del self.plugins[plugin]
             self.build_lists()
-            return
-        for m in self.plugins[plugin]:
-            self.log('UNLOAD', "%s/%s" % (plugin, m))
-            del self.modules[m]
-        self.pluginpaths = [x for x in self.pluginpaths
-            if x.split('/')[0] != plugin]
-        del self.plugins[plugin]
-        self.build_lists()
 
     def reloadplugin(self, plugin):
         """Reload the plugin/module <plugin>."""
-        module = ""
-        if len(plugin.split('/')) > 1:
-            module = plugin.split('/')[-1]
-        if module:
+        with modlock:
+            module = ""
+            if len(plugin.split('/')) > 1:
+                module = plugin.split('/')[-1]
+            if module:
+                self.unloadplugin(plugin)
+                if not self.loadplugin(plugin):
+                    return False
+                self.build_lists()
+                return True
+            oldpaths = self.pluginpaths
             self.unloadplugin(plugin)
-            if not self.loadplugin(plugin):
-                return False
+            for pp in oldpaths:
+                if pp.split('/')[0] == plugin:
+                    self.loadplugin(pp)
+            self.log('RELOAD', plugin)
             self.build_lists()
             return True
-        oldpaths = self.pluginpaths
-        self.unloadplugin(plugin)
-        for pp in oldpaths:
-            if pp.split('/')[0] == plugin:
-                self.loadplugin(pp)
-        self.log('RELOAD', plugin)
-        self.build_lists()
-        return True
 
     def addrights(self, d):
         """Add <d> to the rights hierarchy."""
