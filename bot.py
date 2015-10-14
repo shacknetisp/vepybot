@@ -10,6 +10,8 @@ import platform
 import textwrap
 from threading import Lock
 
+threads = True
+
 version = "0.1.0"
 versionname = "Vepybot"
 versionstring = "%s %s" % (versionname, version)
@@ -345,24 +347,23 @@ class Server:
 
     def reloadplugin(self, plugin):
         """Reload the plugin/module <plugin>."""
-        with modlock:
-            module = ""
-            if len(plugin.split('/')) > 1:
-                module = plugin.split('/')[-1]
-            if module:
-                self.unloadplugin(plugin)
-                if not self.loadplugin(plugin):
-                    return False
-                self.build_lists()
-                return True
-            oldpaths = self.pluginpaths
+        module = ""
+        if len(plugin.split('/')) > 1:
+            module = plugin.split('/')[-1]
+        if module:
             self.unloadplugin(plugin)
-            for pp in oldpaths:
-                if pp.split('/')[0] == plugin:
-                    self.loadplugin(pp)
-            self.log('RELOAD', plugin)
+            if not self.loadplugin(plugin):
+                return False
             self.build_lists()
             return True
+        oldpaths = self.pluginpaths
+        self.unloadplugin(plugin)
+        for pp in oldpaths:
+            if pp.split('/')[0] == plugin:
+                self.loadplugin(pp)
+        self.log('RELOAD', plugin)
+        self.build_lists()
+        return True
 
     def addrights(self, d):
         """Add <d> to the rights hierarchy."""

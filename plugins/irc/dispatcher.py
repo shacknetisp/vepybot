@@ -54,7 +54,7 @@ class Context(bot.Context):
         return self.rawcode.lower() == str(c).lower()
 
     def reply(self, m, more=True):
-        m = m.strip()
+        m = str(m).strip()
         if not m:
             return
         sender = self.channel or self.user[0]
