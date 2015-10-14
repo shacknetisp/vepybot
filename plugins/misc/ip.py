@@ -40,6 +40,9 @@ def hostinfo(host, l='en'):
 
             'regions': subdivisions,
             })
+        if subdivisions:
+            ret['region'] = subdivisions[0]['name']
+            ret['regioncode'] = subdivisions[0]['code']
     return ret
 
 
@@ -53,7 +56,8 @@ class M_IP(bot.Module):
             self.ip,
             "ip",
             "Get information about an IP or Hostname. "
-            "Values: ip, ",
+            "Values: ip, host, city, region[code], "
+            "country[code], continent[code]",
             ["ip", "[values]..."])
 
     def ip(self, context, args):
@@ -61,7 +65,11 @@ class M_IP(bot.Module):
         info = hostinfo(args.getstr("ip"))
         if info is None:
             return "Unable to resolve that host."
-        return info
+        out = []
+        for v in args.getstr("values").replace(' ', '').split(','):
+            if v in info and type(info[v]) in [str, int]:
+                out.append("%s: %s" % (v, str(info[v])))
+        return ', '.join(out) or "No results."
 
 
 bot.register.module(M_IP)
