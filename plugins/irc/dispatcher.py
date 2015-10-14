@@ -163,6 +163,9 @@ class M_Dispatcher(bot.Module):
                                 else:
                                     self.server.dohook(
                                         "whois.fromcontext", context)
+                                    context.whois = self.server.whois[
+                                        context.user[0]]
+                                    self.doinput(context, command)
                         else:
                             context.whois = self.server.whois[context.user[0]]
                             self.doinput(context, command)

@@ -104,9 +104,10 @@ class M_Channels(bot.Module):
                 self.join(context.reciever)
         elif context.code("join"):
             if context.user[0] == self.server.nick:
-                self.channels[context.text] = Channel(self.server, context.text)
-                self.server.send("WHO %s" % context.text)
-                self.server.log("JOINED", context.text)
+                c = context.rawsplit[2].strip(':')
+                self.channels[c] = Channel(self.server, c)
+                self.server.send("WHO %s" % c)
+                self.server.log("JOINED", c)
         elif context.code("part"):
             if context.user[0] == self.server.nick:
                 if context.rawsplit[2] in self.channels:
