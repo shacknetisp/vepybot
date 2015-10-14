@@ -83,14 +83,15 @@ class Context(bot.Context):
         return self.exceptrights([("%s,%s" % (self.channel, r)) for r in rlist])
 
     def exceptcancommand(self, module, command):
-        if self.channel and not self.checkright(
-            "%s,op" % self.channel):
+        if self.channel:
             for r in self.server.getrights(self.channelidstring(), self):
                 if fnmatch.fnmatchcase("-%s.%s.%s" % (
                     module.plugin, module.index, command['name']), r):
-                        raise bot.NoPerms(
-                            "The channel may not use %s" % "%s.%s.%s" % (
-                            module.plugin, module.index, command['name']))
+                        if not self.checkright(
+                            "%s,op" % self.channel):
+                            raise bot.NoPerms(
+                                "The channel may not use %s" % "%s.%s.%s" % (
+                                module.plugin, module.index, command['name']))
                 if r == "ignore":
                     raise bot.NoPerms("")
 
