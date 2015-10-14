@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 #The initial config file is written in Python.
-#This will default to True if ommitted, it determines if servers should run in their own threads.
+#This will default to True if omitted, it determines if servers should run in their own threads.
 bot.threads = True
 #Load a server
 bot.load_server(
