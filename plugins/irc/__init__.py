@@ -38,7 +38,7 @@ class Server(bot.Server):
 
     options = {
         'mode': '*',
-        'recv': 16384,
+        'recv': 1024,
         'charlimit': 440,
         }
 
@@ -111,6 +111,7 @@ class Server(bot.Server):
     def ready(self):
         self.loggedin = False
         self.info = {}
+        self.inbuf = bytes()
         self.outbuf = []
         self.addtimer("output", self.output, 100)
         self.socket = socket.socket()
@@ -137,18 +138,17 @@ class Server(bot.Server):
         readyr, _, _ = select.select(
             inr, [], [], 0.1)
         if readyr:
-            ircmsg = ""
-            try:
-                ircmsg = self.socket.recv(self.opt('recv')).decode()
-            except UnicodeDecodeError:
-                pass
-            regex = re.compile(
-            "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
-            for ircmsg in ircmsg.strip().split('\n'):
-                ircmsg = ircmsg.strip('\r')
-                ircmsg = regex.sub("", ircmsg)
-                self.log('IN', ircmsg)
-                self.dohook("server_recv", ircmsg)
+            self.inbuf += self.socket.recv(self.opt('recv'))
+            while b'\n' in self.inbuf:
+                ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode()
+                self.inbuf = self.inbuf[self.inbuf.index(b'\n') + 1:]
+                regex = re.compile(
+                "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
+                for ircmsg in ircmsg.strip().split('\n'):
+                    ircmsg = ircmsg.strip('\r')
+                    ircmsg = regex.sub("", ircmsg)
+                    self.log('IN', ircmsg)
+                    self.dohook("server_recv", ircmsg)
 
     def ischannel(self, x):
         return x and x[0] in self.info['CHANTYPES']
