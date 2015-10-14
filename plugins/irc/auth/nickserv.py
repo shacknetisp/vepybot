@@ -54,8 +54,7 @@ class M_NickServ(bot.Module):
     def setp(self, context, args):
         args.default("password", "")
         self.setsetting("password", args.getstr("password"))
-        return "Set password to a string with length: %d" % len(
-            self.getsetting('password'))
+        return "Set password to: %s" % self.getsetting('password')
 
     def name(self):
         return self.getsetting("name") or self.server.settings.get(
