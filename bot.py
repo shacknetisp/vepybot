@@ -653,6 +653,10 @@ class Module:
         """Add a server hook, prefixing the name with the module index."""
         self.server.addhook(name, "%s:%s" % (self.index, uname), function)
 
+    def addtimer(self, name, function, timeout):
+        """Add a timer hook, prefixing the name with the module index."""
+        self.server.addtimer("%s:%s" % (self.index, name), function, timeout)
+
     def addsetting(self, setting, value):
         """Add a module-specific <setting> with a default value of <value>."""
         self.addserversetting("modules.%s.%s" % (self.index, setting), value)

@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 import bot
+import time
 
 
 class Whois:
+
+    def __init__(self):
+        self.time = time.time()
+
+    ident = ""
+    host = ""
     name = ""
     channels = {}
     auth = ""
@@ -18,14 +25,47 @@ class M_Whois(bot.Module):
 
     def register(self):
         self.addhook("recv", "recv", self.recv)
+        self.addhook("whois.fromcontext", "fromcontext", self.fromcontext)
+        self.addhook("whois.fromtuple", "fromtuple", self.fromtuple)
+        self.addtimer("whois", self.timer, 10 * 1000)
         self.whois = {}
         self.server.whois = self.whois
         self.tmp = {}
+
+    def timer(self):
+        tod = []
+        for w in self.whois:
+            if time.time() - self.whois[w].time > 60:
+                tod.append(w)
+        for d in tod:
+            self.whois.pop(d)
+
+    def fromcontext(self, context):
+        nick = context.user[0]
+        if context.code('nick'):
+            nick = context.rawsplit[2]
+        if nick:
+            if nick not in self.whois:
+                self.whois[nick] = Whois()
+            w = self.whois[nick]
+            w.ident = context.user[1]
+            w.host = context.user[2]
+
+    def fromtuple(self, t):
+        nick = t[0]
+        if nick:
+            if nick not in self.whois:
+                self.whois[nick] = Whois()
+            w = self.whois[nick]
+            w.ident = t[1]
+            w.host = t[2]
 
     def recv(self, context):
         if context.code("311"):
             self.tmp[context.rawsplit[3]] = Whois()
             w = self.tmp[context.rawsplit[3]]
+            w.ident = context.rawsplit[4]
+            w.host = context.rawsplit[5]
             w.name = context.text
         elif context.code("319"):
             w = self.tmp[context.rawsplit[3]]

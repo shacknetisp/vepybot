@@ -209,6 +209,7 @@ class M_Settings(bot.Module):
         self.server.settings.add("parser.#prefixes", ['.'])
 
         self.server.settings.add("server.channels", [])
+        self.server.settings.add("server.whois", True)
         for n in ['nick', 'mode']:
             self.server.settings.add("server.user.%s" % n, self.server.opt(n))
         self.server.settings.add("server.user.name", bot.versionstring)

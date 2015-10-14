@@ -129,6 +129,7 @@ class M_Dispatcher(bot.Module):
         self.server.dohook("recv", context)
 
     def recv(self, context):
+        self.server.dohook("whois.fromcontext", context)
         if context.code("privmsg"):
             if context.ctcp:
                 split = context.ctcp.split()
@@ -156,7 +157,12 @@ class M_Dispatcher(bot.Module):
                                 self.buf[context.user[0]].append(
                                     (context, command))
                                 self.whoistime[context.user[0]] = time.time()
-                                self.server.send("WHOIS %s" % context.user[0])
+                                if self.server.settings.get('server.whois'):
+                                    self.server.send(
+                                        "WHOIS %s" % context.user[0])
+                                else:
+                                    self.server.dohook(
+                                        "whois.fromcontext", context)
                         else:
                             context.whois = self.server.whois[context.user[0]]
                             self.doinput(context, command)
