@@ -25,6 +25,7 @@ class M_NickServ(bot.Module):
         self.addsetting("=name", "")
         self.addsetting("=password", "")
         self.addsetting("enabled", False)
+        self.addsetting("auto", True)
         self.addsetting("ghost", True)
 
         self.lastns = ""
@@ -128,6 +129,7 @@ class M_NickServ(bot.Module):
 
     def login(self):
         if self.getsetting("enabled") and self.getsetting("password"):
-            self.identify()
+            if self.getsetting("auto"):
+                self.identify()
 
 bot.register.module(M_NickServ)
