@@ -13,7 +13,7 @@ from threading import Lock
 threads = True
 run = True
 
-version = "0.1.0"
+version = "0.1.1"
 versionname = "Vepybot"
 versionstring = "%s %s" % (versionname, version)
 versiontuple = (versionname, version, "Python %s on %s" % (
