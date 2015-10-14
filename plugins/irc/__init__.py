@@ -208,6 +208,8 @@ class M_Settings(bot.Module):
     def ready(self):
         self.server.settings.add("parser.#prefixes", ['.'])
 
+        self.server.settings.add("irc.#notice", True)
+
         self.server.settings.add("server.channels", [])
         self.server.settings.add("server.whois", True)
         for n in ['nick', 'mode']:
