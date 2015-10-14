@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import bot
+import time
 
 """
 load irc/auth/nickserv
@@ -27,6 +28,7 @@ class M_NickServ(bot.Module):
         self.addsetting("ghost", True)
 
         self.lastns = ""
+        self.lastnstime = time.time()
         self.ghosting = True
 
         self.addcommand(self.register_c, "register",
@@ -46,8 +48,8 @@ class M_NickServ(bot.Module):
         if context.user[0]:
             if context.code('notice') and context.user[0].lower() == 'nickserv':
                 if context.reciever == self.server.nick:
-                    if self.lastns:
-                        self.server.send("PRIVMSG %s :NickServ -- %s" % (
+                    if self.lastns and time.time() - self.lastnstime < 30:
+                        self.server.send("NOTICE %s :NickServ -- %s" % (
                         self.lastns,
                         context.text,
                         ))
@@ -82,6 +84,7 @@ class M_NickServ(bot.Module):
             return "There is no password set."
         self.identify()
         self.lastns = context.user[0]
+        self.lastnstime = time.time()
 
     def register_c(self, context, args):
         if not self.getsetting("enabled"):
@@ -93,6 +96,7 @@ class M_NickServ(bot.Module):
             args.getstr('email'),
             ))
         self.lastns = context.user[0]
+        self.lastnstime = time.time()
 
     def verify_c(self, context, args):
         if not self.getsetting("enabled"):
@@ -104,6 +108,7 @@ class M_NickServ(bot.Module):
             args.getstr('code'),
             ))
         self.lastns = context.user[0]
+        self.lastnstime = time.time()
 
     def login(self):
         if self.getsetting("enabled") and self.getsetting("password"):
