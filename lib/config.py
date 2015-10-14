@@ -36,8 +36,11 @@ class Module(bot.Module):
         else:
             return str(v)
 
-    def _core(self, action, name, vname, value, get, ignore, toptree):
+    def _core(self, action, name, vname, value,
+        get, ignore, toptree, checkuser=True):
         if action == "get":
+            if name not in self.server.settings.user and checkuser:
+                return "You may not access '%s'" % vname
             try:
                 v = get(vname)
             except KeyError:

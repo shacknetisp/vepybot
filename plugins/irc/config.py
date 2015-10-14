@@ -45,6 +45,6 @@ class M_Config(lib.config.Module):
             lambda x: self.server.settings.getchannel(x,
                 args.getstr('channel')),
             [],
-            ct)
+            ct, checkuser=False)
 
 bot.register.module(M_Config)

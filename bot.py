@@ -682,6 +682,11 @@ class Module:
         """Get a module-specific <setting>."""
         return self.server.settings.get("modules.%s.%s" % (self.index, setting))
 
+    def setsetting(self, setting, value):
+        """Set a module-specific <setting>."""
+        return self.server.settings.set(
+            "modules.%s.%s" % (self.index, setting), value)
+
 
 class Context:
     """Server Specific Context, implement the core functions at least."""

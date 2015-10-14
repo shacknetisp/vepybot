@@ -4,7 +4,7 @@ import time
 
 """
 load irc/auth/nickserv
-config set modules.nickserv.password hunter2
+nickserv set password hunter2
 config set modules.nickserv.enabled True
 config set modules.nickserv.ghost True
 nickserv register email@do.main
@@ -22,8 +22,8 @@ class M_NickServ(bot.Module):
         self.addhook("login", "login", self.login)
         self.addhook("nickinuse", "433", self.nickinuse)
 
-        self.addsetting("name", "")
-        self.addsetting("password", "")
+        self.addsetting("=name", "")
+        self.addsetting("=password", "")
         self.addsetting("enabled", False)
         self.addsetting("ghost", True)
 
@@ -39,6 +39,23 @@ class M_NickServ(bot.Module):
 
         self.addcommand(self.identify_c, "identify",
             "Identify with NickServ.", [])
+
+        self.addcommand(self.setp, "set password",
+            "Set the NickServ password.", ["password"])
+
+        self.addcommand(self.setn, "set name",
+            "Set the NickServ name.", ["[name]"])
+
+    def setn(self, context, args):
+        args.default("name", "")
+        self.setsetting("name", args.getstr("name"))
+        return "Set name to: %s" % self.getsetting('name')
+
+    def setp(self, context, args):
+        args.default("password", "")
+        self.setsetting("password", args.getstr("password"))
+        return "Set password to a string with length: %d" % len(
+            self.getsetting('password'))
 
     def name(self):
         return self.getsetting("name") or self.server.settings.get(
