@@ -128,6 +128,8 @@ class Module(bot.Module):
                 return "%s set to: %s" % (vname, self.display(get(vname)))
             except KeyError:
                 return "'%s' does not exist." % vname
+        else:
+            return "Invalid action."
 
     def config(self, context, args):
         action = args.getstr("action")
