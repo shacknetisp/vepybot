@@ -11,6 +11,7 @@ import textwrap
 from threading import Lock
 
 threads = True
+run = True
 
 version = "0.1.0"
 versionname = "Vepybot"
@@ -557,6 +558,10 @@ class Server:
     def idstring(self, context):
         """Return the rights idstring from <context>.
         Implemented by modules."""
+        pass
+
+    def shutdown(self):
+        """Called on bot restart."""
         pass
 
     def runcommand(self, context, text):

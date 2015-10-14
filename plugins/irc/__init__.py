@@ -4,6 +4,7 @@ import socket
 import select
 import re
 import copy
+import time
 
 """
 IRC Client
@@ -159,6 +160,11 @@ class Server(bot.Server):
         for m in list(self.modules.values()):
             for k, v in list(m.serverchannelsettings.items()):
                 self.settings.addchannel(k, v)
+
+    def shutdown(self):
+        self.socket.send(('QUIT :%s\n' % (bot.versionstring)).encode())
+        time.sleep(0.25)
+        self.socket.close()
 
 
 bot.register.server(Server)
