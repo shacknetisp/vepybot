@@ -8,7 +8,6 @@ class M_Vhost(bot.Module):
 
     def register(self):
         self.addhook("login", "login", self.login)
-        self.channels = {}
 
         self.addsetting("name", "")
         self.addsetting("password", "")
@@ -28,7 +27,7 @@ class M_Vhost(bot.Module):
         if not self.getsetting("enabled"):
             return "VHOST is disabled."
         self.vhost()
-        return "Attempting to VHOST..."
+        return "Attempted to VHOST..."
 
     def login(self):
         if self.getsetting("enabled"):

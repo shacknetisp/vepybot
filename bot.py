@@ -353,6 +353,15 @@ class Server:
             module = plugin.split('/')[-1]
         if module:
             self.unloadplugin(plugin)
+            for pp in self.pluginpaths:
+                if fnmatch.fnmatch(pp, "%s/*/%s" % (
+                        plugin.split('/')[0], module)):
+                    plugin = pp
+                    break
+                elif fnmatch.fnmatch(pp, "%s/%s" % (
+                        plugin.split('/')[0], module)):
+                    plugin = pp
+                    break
             if not self.loadplugin(plugin):
                 return False
             self.build_lists()
@@ -433,6 +442,7 @@ class Server:
     def splitparse(self, text, context=None):
         sections = []
         sectiond = {}
+        sectione = {}
         idx = 0
         try:
             cchar = text[idx]
@@ -482,18 +492,20 @@ class Server:
             elif quoted and not running:
                 if cchar == quoted:
                     quoted = None
+                    if not section:
+                        sectione[len(sections)] = True
                 else:
                     section += cchar
             else:
                 if cchar == ' ' and not running:
-                    if section:
+                    if section or len(sections) in sectione:
                         sections.append(section)
                     section = ""
                 else:
                     section += cchar
             idx += 1
             cchar = text[idx] if idx in range(len(text)) else None
-        if section:
+        if section or len(sections) in sectione:
             sections.append(section)
         section = ""
         return sections, sectiond
