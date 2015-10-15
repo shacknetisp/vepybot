@@ -14,6 +14,7 @@ The commands are:
 * `list`: This will list all modules currently loaded.
 * `list <module>`: This will list commands from a module.
 * `list *`: This will list all commands from all modules.
+
 ## More
 * `more`: If a command goes over the character limit of the protocol, it will place the overflow in a `more` buffer and append a message to the output showing how many lines are in the buffer. The `more` command will return the next line in your more buffer.
 * `more clear`: This will clear your `more` buffer.
