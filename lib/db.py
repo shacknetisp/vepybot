@@ -27,6 +27,9 @@ class DB:
                     except SyntaxError as e:
                         raise SyntaxError(
                             "Invalid AST (%s): %s" % (path, e))
+                    except ValueError as e:
+                        raise ValueError(
+                            "Invalid AST (%s): %s" % (path, e))
             else:
                 dbs[path] = d
         self.d = dbs[path]

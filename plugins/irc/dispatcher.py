@@ -14,11 +14,11 @@ class Context(bot.Context):
         self.rawsplit = split
         self.sender = split[0]
         try:
-            self.user = (self.sender.split('!')[0],
+            self.user = [self.sender.split('!')[0],
                 self.sender.split('!')[1].split('@')[0],
-                self.sender.split('!')[1].split('@')[1])
+                self.sender.split('!')[1].split('@')[1]]
         except IndexError:
-            self.user = (None, None, None)
+            self.user = [None, None, None]
         self.displayname = self.user[0]
         self.auth = ""
         self.rawcode = split[1] if 1 in range(len(split)) else ""
