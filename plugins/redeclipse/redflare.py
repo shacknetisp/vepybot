@@ -118,7 +118,7 @@ class Module(bot.Module):
                 if args.getbool('oneline'):
                     ret += s
                 else:
-                    ret.append(("%s: %s" % (d, '; '.join(s)),
+                    ret.append(("%s -- %s" % (d, '; '.join(s)),
                         len(s)))
         if args.getbool('oneline'):
             return '; '.join(sorted(ret))
