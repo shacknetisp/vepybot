@@ -21,6 +21,7 @@ class M_Channels(bot.Module):
         self.addhook("recv", "recv", self.recv)
         self.addtimer("timer", self.timer, 60 * 1000)
         self.channels = {}
+        self.server.channels = self.channels
 
         self.addcommand(
             self.join_c,

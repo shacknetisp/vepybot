@@ -289,6 +289,7 @@ class Server:
         self.modules = {}
         self.plugins = {}
         self.righttypes = {}
+        self.registry = {}
         self.pluginpaths = []
         for k in ["core",
             self.index] + self.requiredplugins:
@@ -438,6 +439,14 @@ class Server:
             if time.time() - timer['last'] > timer['time'] / 1000:
                 timer['function']()
                 timer['last'] = time.time()
+
+    def r(self, n, v):
+        """Register a function or structure to be used by other modules."""
+        self.registry[n] = v
+
+    def g(self, n):
+        """Get a value from the registry."""
+        return self.registry[n]
 
     def splitparse(self, text, context=None):
         sections = []

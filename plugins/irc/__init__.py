@@ -27,14 +27,21 @@ class Server(bot.Server):
     index = "irc"
 
     requiredplugins = [
+        "irc/serverinfo",
+        "irc/settings",
+
         "irc/rights",
         "irc/alias",
         "irc/config",
+
         "irc/pinger",
         "irc/dispatcher",
         "irc/channels",
         "irc/users",
+
         "irc/ctcp",
+        "irc/msg",
+        "irc/nicktrouble"
     ]
 
     options = {
@@ -228,18 +235,28 @@ bot.register.module(M_Settings)
 
 class M_433(bot.Module):
 
-    index = "433"
+    index = "nicktrouble"
     hidden = True
 
     def register(self):
 
         self.addhook('recv', 'recv', self.recv)
+        self.addsetting('poll', True)
+        self.addtimer('poll', self.poll, 120 * 1000)
 
     def recv(self, context):
         if context.code(433):
+            if context.reciever != '*':
+                self.server.nick = context.reciever
             responses = []
             self.server.dohook('nickinuse', responses)
             if not responses and not self.server.loggedin:
                 self.server.setnick(self.server.nick + "_")
+
+    def poll(self):
+        if self.getsetting("poll"):
+            if self.server.settings.get("server.user.nick") != self.server.nick:
+                self.server.setnick(
+                    self.server.settings.get("server.user.nick"))
 
 bot.register.module(M_433)
