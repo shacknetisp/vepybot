@@ -302,6 +302,7 @@ class Server:
             if plugin not in plugins:
                 return False
             modules = plugins[plugin]
+            n = 0
             for index in modules:
                 if index not in newmodules:
                     continue
@@ -316,6 +317,9 @@ class Server:
                 self.modules[index] = v(self)
                 self.modules[index].plugin = plugin
                 self.log('LOAD', "%s/%s" % (plugin, index))
+                n += 1
+            if n == 0:
+                return False
             self.plugins[plugin] = modules
             self.pluginpaths.append(k)
             self.build_lists()

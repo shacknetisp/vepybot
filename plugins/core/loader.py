@@ -51,6 +51,8 @@ class M_Loader(bot.Module):
             return "That plugin is not loaded."
         if module and module not in self.server.plugins[plugin]:
             return "That module is not loaded."
+        if len(self.server.plugins[plugin]) <= 1:
+            module = ""
         self.server.unloadplugin(pms(plugin, module))
 
         plist = self.server.settings.get("server.autoload")
