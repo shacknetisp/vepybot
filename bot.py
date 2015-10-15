@@ -28,8 +28,10 @@ def createuserdata():
     for d in [
             'servers',
             'shared',
+            'plugins',
         ]:
             os.makedirs(userdata + '/' + d, exist_ok=True)
+    open('%s/plugins/__init__.py' % userdata, 'w')
 
 
 def reload(m):
@@ -71,6 +73,7 @@ def loadnamedmodule(n, p=""):
     global newmodules
     newmodules = []
     for directory in ["plugins", userdata + "/plugins"]:
+        sys.path = sys.path + [directory]
         if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
             os.path.exists("%s/%s.py" % (directory, n))):
                 currentplugin = p or n
@@ -79,6 +82,7 @@ def loadnamedmodule(n, p=""):
                 importmodule("%s/%s" % (directory, n), r=True)
                 currentplugin = ""
                 return True
+        sys.path.pop(sys.path.index(directory))
     return False
 
 
@@ -295,6 +299,8 @@ class Server:
         with modlock:
             plugin = k.split('/')[0]
             loadnamedmodule(k, plugin)
+            if plugin not in plugins:
+                return False
             modules = plugins[plugin]
             for index in modules:
                 if index not in newmodules:
