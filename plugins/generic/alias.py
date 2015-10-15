@@ -32,9 +32,9 @@ class M_Alias(lib.alias.Module):
         return "%s" % (self._get(self.server.settings.get("server.aliases"),
             alias))
 
-    def command(self, context, text, responses):
+    def command(self, context, text, responses, help):
         responses.append(self._command(context, text,
-            self.server.settings.get("server.aliases")))
+            self.server.settings.get("server.aliases"), help))
 
     def add(self, context, args):
         args.default("content", "")

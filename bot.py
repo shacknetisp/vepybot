@@ -627,7 +627,7 @@ class Server:
                     traceback.print_exc()
                     return None, "Internal Error: %s" % type(e).__name__
         responses = []
-        self.dohook('command', context, text, responses)
+        self.dohook('command', context, text, responses, False)
         for r in responses:
             if r[0] is not None:
                 return r[0], None

@@ -110,12 +110,14 @@ class Module(bot.Module):
             cchar = alias[idx] if idx in range(len(alias)) else None
         return fullalias.strip(), adata
 
-    def _command(self, context, text, aliases):
+    def _command(self, context, text, aliases, help):
         split = text.split()
         for k, v in list(aliases.items()):
             for splitc in [[k]]:
                 if splitc == split[:len(splitc)]:
                     argtext = ' '.join(split[len(splitc):])
+                    if help:
+                        return "An alias: " + v
                     r = self.getalias(context, v, argtext)
                     if type(r) is str:
                         return None, r

@@ -45,17 +45,18 @@ class M_Alias(lib.alias.Module):
             return "%s" % (self._get(self.server.settings.get("server.aliases"),
                 alias))
 
-    def command(self, context, text, responses):
+    def command(self, context, text, responses, help):
         if context.channel:
             r = self._command(context, text,
-                self.server.settings.getchannel("server.aliases", context))
+                self.server.settings.getchannel("server.aliases", context),
+                help)
             if r[0] is not None or r[1] is not None:
                 responses.append(r)
                 return
         responses.append(self._command(context, text,
-            self.server.settings.get("server.aliases")))
+            self.server.settings.get("server.aliases"), help))
         responses.append(self._command(context, text,
-            self.server.globalaliases))
+            self.server.globalaliases, help))
 
     def add(self, context, args):
         args.default("channel", "")

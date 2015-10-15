@@ -60,6 +60,12 @@ class M_Help(bot.Module):
                     return "%s: %s" % (
                         ' '.join(splitc),
                         self.server.gethelp(v[1])[1])
+        responses = []
+        self.server.dohook('command', context, args.getstr("command"),
+            responses, True)
+        for r in responses:
+            if r and type(r) is str:
+                return r
         return "That command doesn't exist."
 
 bot.register.module(M_Help)
