@@ -19,6 +19,7 @@ class Context(bot.Context):
                 self.sender.split('!')[1].split('@')[1])
         except IndexError:
             self.user = (None, None, None)
+        self.displayname = self.user[0]
         self.auth = ""
         self.rawcode = split[1] if 1 in range(len(split)) else ""
         self.reciever = split[2] if 2 in range(len(split)) else ""
@@ -133,6 +134,12 @@ class M_Dispatcher(bot.Module):
             return
         try:
             context = Context(self.server, msg)
+            if context.user[0]:
+                if context.user[0] not in self.server.whois:
+                    self.server.dohook(
+                        "whois.fromcontext", context)
+                context.whois = self.server.whois[
+                    context.user[0]]
         except IndexError:
             self.server.log('INVALID IN', msg)
             return
@@ -147,6 +154,10 @@ class M_Dispatcher(bot.Module):
                     self.server.dohook('ctcp.%s' % split[0].lower(),
                         context, split[1:])
             else:
+                responses = []
+                self.server.dohook("dispatcher.ignore", context, responses)
+                if responses:
+                    return
                 #Find if prefixed
                 for prefix in self.server.settings.getchannel(
                     "parser.prefixes", context) + (

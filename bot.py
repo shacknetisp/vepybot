@@ -438,13 +438,17 @@ class Server:
                 timer['function']()
                 timer['last'] = time.time()
 
-    def r(self, n, v):
+    def rset(self, n, v):
         """Register a function or structure to be used by other modules."""
         self.registry[n] = v
 
-    def g(self, n):
+    def rget(self, n):
         """Get a value from the registry."""
         return self.registry[n]
+
+    def rhas(self, n):
+        """Is a key in the registry?"""
+        return n in self.registry
 
     def splitparse(self, text, context=None):
         sections = []

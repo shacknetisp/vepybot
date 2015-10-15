@@ -68,7 +68,7 @@ class M_Channels(bot.Module):
 
     def join_c(self, context, args):
         if args.getstr('channel') in self.channels:
-            return "Already joined %s."
+            return "Already joined %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.join(args.getstr('channel'), args.getbool('temp'))
         return "Attempted to join %s (%s autojoin)." % (args.getstr('channel'),
