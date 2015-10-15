@@ -20,7 +20,9 @@ The commands are:
 
 ## Rights
 Rights are flags like `admin` or `owner` that can be applied to an idstring.
+
 You can also disable modules/commands or add ignoring to an idstring: `rights add irc:*!evilauth -*.echo.*` or `rights add irc:*!evilauth ignore`
+
 An idstring is a protocol-specific string that is used to identify users, rooms, channels, or other entities that can have rights. See the protocol for it's idstring formats.
 
 * `rights get -matches [<idstring>]`: Get the rights an idstring has, if the idstring is omitted it will return your rights and idstring. `-matches` will show the rights entries that were used to give the results.
