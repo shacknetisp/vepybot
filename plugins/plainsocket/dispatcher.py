@@ -12,8 +12,13 @@ class Context(bot.Context):
     def idstring(self):
         return "host:" + str(self.socket.getpeername()[0])
 
-    def reply(self, m):
-        self.socket.send(m.strip().encode() + b'\n')
+    def reply(self, m, more=True, command=None, priv=False):
+        m = m.strip()
+        if not m:
+            return
+        if more:
+            m = self.domore(m)
+        self.socket.send(m.encode() + b'\n')
         self.server.log('OUT', '%s: %s' % (self.socket.getpeername()[0],
             m.strip()))
 

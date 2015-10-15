@@ -34,6 +34,7 @@ class Server(bot.Server):
         'host': '',
         'backlog': 5,
         'recvsize': 4096,
+        'charlimit': 80,
     }
 
     def ready(self):

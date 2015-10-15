@@ -4,7 +4,6 @@ import sys
 import importlib
 import time
 import fnmatch
-import imp
 import copy
 import platform
 import textwrap
@@ -34,29 +33,18 @@ def createuserdata():
 
 
 def reload(m):
-    imp.reload(m)
+    importlib.reload(m)
 
 from lib import db, utils, parser
 [reload(x) for x in [utils, parser]]
 
 
 def importmodule(path, r=False):
-    sys.path = [(os.path.dirname(path))] + sys.path
     module = importlib.import_module(
-        os.path.splitext(os.path.basename(path))[0])
+        os.path.splitext(path)[0].replace('/', '.'))
     if r:
         reload(module)
-    del sys.path[sys.path.index(os.path.dirname(path))]
     return module
-
-
-def listmodules(directory):
-    ret = []
-    for module in os.listdir(directory):
-        if module[0] == '_':
-            continue
-        ret.append(os.path.splitext(module)[0])
-    return ret
 
 modlock = Lock()
 servers = {}
