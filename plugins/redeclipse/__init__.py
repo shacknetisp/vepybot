@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
-from . import REirc
-[bot.reload(x) for x in [REirc]]
+from . import REirc, redflare
+[bot.reload(x) for x in [REirc, redflare]]
 
 
 class Module(bot.Module):

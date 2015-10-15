@@ -34,6 +34,7 @@ class DB:
                 dbs[path] = d
         self.d = dbs[path]
         self.path = path
+        modified[self.path] = True
 
     def save(self):
         with lock:

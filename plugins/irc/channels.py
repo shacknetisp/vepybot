@@ -19,7 +19,7 @@ class M_Channels(bot.Module):
     def register(self):
         self.addhook("loggedin", "loggedin", self.loggedin)
         self.addhook("recv", "recv", self.recv)
-        self.addtimer("timer", self.timer, 60 * 1000)
+        self.addtimer(self.timer, "timer", 60 * 1000)
         self.channels = {}
         self.server.channels = self.channels
 

@@ -27,7 +27,7 @@ class M_Whois(bot.Module):
         self.addhook("recv", "recv", self.recv)
         self.addhook("whois.fromcontext", "fromcontext", self.fromcontext)
         self.addhook("whois.fromtuple", "fromtuple", self.fromtuple)
-        self.addtimer("whois", self.timer, 10 * 1000)
+        self.addtimer(self.timer, "whois", 10 * 1000)
         self.whois = {}
         self.server.whois = self.whois
         self.tmp = {}

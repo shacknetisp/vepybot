@@ -18,7 +18,8 @@ class Context(bot.Context):
             return
         if more:
             m = self.domore(m)
-        self.socket.send(m.encode() + b'\n')
+        sendf = lambda message: self.socket.send(message.encode() + b'\n')
+        self.replydriver(sendf, m, more)
         self.server.log('OUT', '%s: %s' % (self.socket.getpeername()[0],
             m.strip()))
 

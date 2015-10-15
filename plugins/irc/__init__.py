@@ -121,7 +121,7 @@ class Server(bot.Server):
         self.info = {}
         self.inbuf = bytes()
         self.outbuf = []
-        self.addtimer("output", self.output, 100)
+        self.addtimer(self.output, "output", 100)
         self.socket = socket.socket()
         self.socket.connect((self.opt('host'), self.opt('port')))
         self.setnick(self.settings.get('server.user.nick'))
@@ -242,7 +242,7 @@ class M_433(bot.Module):
 
         self.addhook('recv', 'recv', self.recv)
         self.addsetting('poll', True)
-        self.addtimer('poll', self.poll, 120 * 1000)
+        self.addtimer(self.poll, 'poll', 120 * 1000)
 
     def recv(self, context):
         if context.code(433):

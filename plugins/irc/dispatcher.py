@@ -67,9 +67,9 @@ class Context(bot.Context):
             target = self.channel or self.user[0]
         if not target:
             return
-        if more:
-            m = self.domore(m)
-        self.server.send('%s %s :%s' % (command, target, m))
+        sendf = lambda message: self.server.send(
+            '%s %s :%s' % (command, target, message))
+        self.replydriver(sendf, m, more)
 
     def replypriv(self, *args):
         self.reply(*args, priv=True)

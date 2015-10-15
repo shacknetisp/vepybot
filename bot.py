@@ -423,7 +423,7 @@ class Server:
             for f in list(self.hooks[name].values()):
                 f(*args)
 
-    def addtimer(self, n, f, t):
+    def addtimer(self, f, n, t):
         """Add a timer with unique name <n>, function <f> and timeout <t>."""
         self.timers.append({
             'name': n,
@@ -633,6 +633,8 @@ class Server:
                 return r[0], None
             elif r[1] is not None:
                 return None, r[1]
+            else:
+                return None, self.settings.get('messages.notfound')
 
         return None, self.settings.get('messages.notfound')
 
@@ -681,9 +683,9 @@ class Module:
         """Add a server hook, prefixing the name with the module index."""
         self.server.addhook(name, "%s:%s" % (self.index, uname), function)
 
-    def addtimer(self, name, function, timeout):
+    def addtimer(self, function, name, timeout):
         """Add a timer hook, prefixing the name with the module index."""
-        self.server.addtimer("%s:%s" % (self.index, name), function, timeout)
+        self.server.addtimer(function, "%s:%s" % (self.index, name), timeout)
 
     def addsetting(self, setting, value):
         """Add a module-specific <setting> with a default value of <value>."""
@@ -697,6 +699,14 @@ class Module:
         """Set a module-specific <setting>."""
         return self.server.settings.set(
             "modules.%s.%s" % (self.index, setting), value)
+
+    def getdb(self, name, d=None):
+        """Get a database <name> with default <d>."""
+        os.makedirs("%s/servers/%s/%s" % (
+            userdata, self.server.name, self.index), exist_ok=True)
+        return db.DB("servers/%s/%s/%s.json" % (
+            self.server.name,
+            self.index, name), d)
 
 
 class Context:
@@ -765,3 +775,11 @@ class Context:
             except KeyError:
                 pass
         return message
+
+    def replydriver(self, f, message, more):
+        if more and message.count('\n') == 0:
+            message = self.domore(message)
+        for message in message.split('\n'):
+            messages = textwrap.wrap(message, self.server.opt('charlimit')
+                - len('...'))
+            f(messages[0] + ('...' if len(messages) > 1 else ''))
