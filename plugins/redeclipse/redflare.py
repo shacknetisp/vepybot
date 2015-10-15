@@ -59,7 +59,7 @@ class Module(bot.Module):
 
         self.addcommand(self.search, "search",
             "See if a player is online.",
-            ["url", "[-auth]", "[-regex]", "[search...]"])
+            ["url", "[-auth]", "[-oneline]", "[-regex]", "[search...]"])
 
         self.addcommand(self.lastseen, "lastseen",
             "See when a player was last on.",
@@ -115,10 +115,16 @@ class Module(bot.Module):
             if s:
                 d = server['description']
                 d = d[:d.rindex(' [')]
-                ret.append(("%s: %s" % (d, '; '.join(s)),
-                    len(s)))
-        context.reply('\n'.join([r[0] for r in sorted(ret,
-            key=lambda x: -x[1])]) or "No results.", more=True)
+                if args.getbool('oneline'):
+                    ret += s
+                else:
+                    ret.append(("%s: %s" % (d, '; '.join(s)),
+                        len(s)))
+        if args.getbool('oneline'):
+            return '; '.join(sorted(ret))
+        ret = '\n'.join([r[0] for r in sorted(ret,
+            key=lambda x: -x[1])])
+        context.reply(ret or "No results.", more=True)
         return ""
 
     def lastseen(self, context, args):
