@@ -90,15 +90,16 @@ class M_Whois(bot.Module):
             self.whois.pop(d)
 
     def fromcontext(self, context):
-        nick = context.user[0]
+        nicks = [context.user[0]]
         if context.code('nick'):
-            nick = context.rawsplit[2]
-        if nick:
-            if nick not in self.whois:
-                self.whois[nick] = Whois()
-            w = self.whois[nick]
-            w.ident = context.user[1]
-            w.host = context.user[2]
+            nicks.append(context.rawsplit[2])
+        for nick in nicks:
+            if nick:
+                if nick not in self.whois:
+                    self.whois[nick] = Whois()
+                w = self.whois[nick]
+                w.ident = context.user[1]
+                w.host = context.user[2]
 
     def fromtuple(self, t):
         nick = t[0]

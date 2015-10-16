@@ -278,7 +278,7 @@ class M_Nick(bot.Module):
             if not responses and not self.server.loggedin:
                 self.server.setnick(self.server.nick + "_")
         elif context.code('NICK'):
-            if context.reciever == self.server.wantnick:
+            if context.reciever.strip(':') == self.server.wantnick:
                 if self.npending:
                     if self.npending[2]:
                         self.server.settings.set("server.user.nick",

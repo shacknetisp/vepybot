@@ -338,8 +338,9 @@ class Server:
                 self.build_lists()
                 return
             for m in self.plugins[plugin]:
-                self.log('UNLOAD', "%s/%s" % (plugin, m))
-                del self.modules[m]
+                if m in self.modules:
+                    self.log('UNLOAD', "%s/%s" % (plugin, m))
+                    del self.modules[m]
             self.pluginpaths = [x for x in self.pluginpaths
                 if x.split('/')[0] != plugin]
             del self.plugins[plugin]
