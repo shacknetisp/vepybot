@@ -135,6 +135,9 @@ class M_Channels(bot.Module):
                             ]
         elif context.code("315"):
             w = self.tmp[context.rawsplit[3]]
+            if context.rawsplit[3] not in self.channels:
+                self.channels[context.rawsplit[3]] = Channel(
+                    self.server, context.rawsplit[3])
             c = self.channels[context.rawsplit[3]]
             c.names = w['names']
             self.server.rget('whois.updatechannels')(c.names)
