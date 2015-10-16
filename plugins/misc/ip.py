@@ -55,7 +55,7 @@ class M_IP(bot.Module):
         self.addcommand(
             self.ip,
             "ip",
-            "Get information about an IP or Hostname. "
+            "Get information about an IP or Hostname. Space-delimited values."
             "Values: ip, host, city, region[code], "
             "country[code], continent[code]",
             ["ip", "[values]..."])
@@ -66,9 +66,13 @@ class M_IP(bot.Module):
         if info is None:
             return "Unable to resolve that host."
         out = []
-        for v in args.getstr("values").replace(' ', '').split(','):
+        values = args.getstr("values").split()
+        for v in values:
             if v in info and type(info[v]) in [str, int]:
-                out.append("%s: %s" % (v, str(info[v])))
+                if len(values) == 1:
+                    out.append(str(info[v]))
+                else:
+                    out.append("%s: %s" % (v, str(info[v])))
         return ', '.join(out) or "No results."
 
 

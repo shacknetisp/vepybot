@@ -708,6 +708,14 @@ class Module:
             self.server.name,
             self.index, name), d)
 
+    def getshareddb(self, index, name, d=None):
+        """Get a shared database <name> with default <d>."""
+        os.makedirs("%s/servers/%s/%s" % (
+            userdata, self.server.shared, index), exist_ok=True)
+        return db.DB("servers/%s/%s/%s.json" % (
+            self.server.shared,
+            index, name), d)
+
 
 class Context:
     """Server Specific Context, implement the core functions at least."""

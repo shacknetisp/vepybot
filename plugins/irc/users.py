@@ -27,15 +27,64 @@ class M_Whois(bot.Module):
         self.addhook("recv", "recv", self.recv)
         self.addhook("whois.fromcontext", "fromcontext", self.fromcontext)
         self.addhook("whois.fromtuple", "fromtuple", self.fromtuple)
-        self.addtimer(self.timer, "whois", 10 * 1000)
+        self.addhook("chanmodes", "chanmodes", self.chanmodes)
+        self.addtimer(self.timer, "whois", 60 * 1000)
+        self.addtimer(self.chantimer, "chantimer", 60 * 1000)
         self.whois = {}
         self.server.whois = self.whois
         self.tmp = {}
 
+        self.addcommand(self.getwhois, "whois",
+            "Get information about a nick. Space-delimited values."
+            " Values can be: nick, ident, host, channels, or auth/",
+            ["nick", "[values...]"])
+
+        self.server.rset('whois.updatechannels', self.updatechannels)
+
+    def getwhois(self, context, args):
+        args.default('values', 'nick host channels')
+        info = {}
+        if args.getstr("nick") in self.whois:
+            w = self.whois[args.getstr("nick")]
+            info['nick'] = args.getstr("nick")
+            info['ident'] = w.ident
+            info['name'] = w.name
+            info['host'] = w.host
+            info['channels'] = ' '.join(list(w.channels.keys()))
+            info['auth'] = w.auth
+        else:
+            return "Nick not found."
+        out = []
+        values = args.getstr("values").split(' ')
+        for v in values:
+            if v in info and type(info[v]) in [str, int]:
+                if len(values) == 1:
+                    out.append(str(info[v]))
+                else:
+                    out.append("%s: %s" % (v, str(info[v])))
+        return ', '.join(out) or "No results."
+
+    def updatechannels(self, snick=None):
+        nicks = {}
+        for chan in self.server.channels:
+            v = self.server.channels[chan].names
+            for n in v:
+                if snick is not None and n not in snick:
+                    continue
+                if n not in nicks:
+                    nicks[n] = {}
+                nicks[n][chan] = v[n]
+        for nick in nicks:
+            if nick in self.whois:
+                self.whois[nick].channels = nicks[nick]
+
+    def chantimer(self):
+        self.updatechannels()
+
     def timer(self):
         tod = []
         for w in self.whois:
-            if time.time() - self.whois[w].time > 60:
+            if time.time() - self.whois[w].time > 250:
                 tod.append(w)
         for d in tod:
             self.whois.pop(d)
@@ -67,18 +116,6 @@ class M_Whois(bot.Module):
             w.ident = context.rawsplit[4]
             w.host = context.rawsplit[5]
             w.name = context.text
-        elif context.code("319"):
-            w = self.tmp[context.rawsplit[3]]
-            for e in context.text.split():
-                for ct in self.server.info['CHANTYPES']:
-                    split = e.split(ct)
-                    if len(split) == 2:
-                        w.channels[ct + split[1]] = [
-                            self.server.info['PREFIX'][0][
-                            self.server.info['PREFIX'][1].index(m)]
-                            for m in split[0]
-                            ]
-                        break
         elif context.code("312"):
             w = self.tmp[context.rawsplit[3]]
             w.server = context.rawsplit[4]
@@ -93,5 +130,51 @@ class M_Whois(bot.Module):
             #Freenode
             w = self.tmp[context.rawsplit[3]]
             w.auth = context.rawsplit[4]
+        elif context.code("JOIN"):
+            w = self.whois[context.user[0]]
+            channel = context.rawsplit[2].strip(':')
+            if channel not in w.channels:
+                w.channels[channel] = []
+        elif context.code("PART"):
+            w = self.whois[context.user[0]]
+            channel = context.rawsplit[2]
+            if channel in w.channels:
+                w.channels.pop(channel)
+        elif context.code("MODE"):
+            channel = context.rawsplit[2]
+            modes = context.rawsplit[3]
+            final = {}
+            nicks = context.rawsplit[4:]
+            for n in nicks:
+                final[n] = []
+            now = ''
+            idx = 0
+            for cchar in modes:
+                if cchar in '-+':
+                    now = cchar
+                elif now and idx in range(len(nicks)):
+                    final[nicks[idx]].append(now + cchar)
+            self.server.dohook('chanmodes', channel, final)
+
+    def chanmodes(self, channel, modes):
+        for target in modes:
+            if target not in self.whois:
+                continue
+            w = self.whois[target]
+            if channel not in w.channels:
+                w.channels[channel] = []
+            for mode in modes[target]:
+                if mode == '+o':
+                    if 'o' not in w.channels[channel]:
+                        w.channels[channel].append('o')
+                elif mode == '-o':
+                    if 'o' in w.channels[channel]:
+                        w.channels[channel].pop(w.channels[channel].index('o'))
+                elif mode == '+v':
+                    if 'v' not in w.channels[channel]:
+                        w.channels[channel].append('v')
+                elif mode == '-v':
+                    if 'v' in w.channels[channel]:
+                        w.channels[channel].pop(w.channels[channel].index('v'))
 
 bot.register.module(M_Whois)

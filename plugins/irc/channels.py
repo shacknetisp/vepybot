@@ -137,6 +137,7 @@ class M_Channels(bot.Module):
             w = self.tmp[context.rawsplit[3]]
             c = self.channels[context.rawsplit[3]]
             c.names = w['names']
+            self.server.rget('whois.updatechannels')(c.names)
 
 
 bot.register.module(M_Channels)
