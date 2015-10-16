@@ -68,7 +68,11 @@ class Module(bot.Module):
         self.addcommand(self.setup, "setup", "Easy redflare setup.",
             ['url', 'isonalias', 'wasonalias'])
 
+        self.addcommand(self.remove, "remove", "Easy redflare removal.",
+            ['url', 'isonalias', 'wasonalias'])
+
     def setup(self, context, args):
+        context.exceptrights(["admin"])
         url = args.getstr('url')
         ison = args.getstr('isonalias')
         wason = args.getstr('wasonalias')
@@ -82,12 +86,33 @@ class Module(bot.Module):
         if ison in aliases:
             return '%s is already an alias.' % ison
         elif wason in aliases:
-            return '%s is already an alias.' % ison
+            return '%s is already an alias.' % wason
         self.getsetting('redflares').append(url)
         aliases[ison] = "redflare search %s $*" % (url)
         aliases[wason] = "redflare lastseen %s $*" % (url)
         self.server.settings.save()
         return "%s aliased to %s and %s" % (url, ison, wason)
+
+    def remove(self, context, args):
+        context.exceptrights(["admin"])
+        url = args.getstr('url')
+        ison = args.getstr('isonalias')
+        wason = args.getstr('wasonalias')
+        if url not in self.getsetting('redflares'):
+            return 'That URL is not registered.'
+        aliases = self.server.settings.get('server.aliases')
+        if ison not in aliases or (aliases[ison] !=
+            "redflare search %s $*" % (url)):
+            return '%s is not the alias for this url.' % ison
+        elif wason not in aliases or (aliases[ison] !=
+            "redflare search %s $*" % (url)):
+            return '%s is not the alias for this url.' % wason
+        self.getsetting('redflares').pop(
+            self.getsetting('redflares').index(url))
+        aliases.pop(ison)
+        aliases.pop(wason)
+        self.server.settings.save()
+        return "%s removed, with aliases %s and %s" % (url, ison, wason)
 
     def checkurl(self, url):
         if url not in self.getsetting('redflares'):
