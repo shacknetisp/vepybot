@@ -60,7 +60,7 @@ class Server(bot.Server):
         channeldefaults = {}
         channeltree = {}
 
-        def getchannel(self, v, context):
+        def getchannel(self, v, context, pop=False):
             channel = context if type(context) is str else context.channel
             setting = "channels.%s.%s" % (channel, v)
             if channel:
@@ -71,8 +71,11 @@ class Server(bot.Server):
                 if v in self.channeldefaults:
                     self.d[setting] = copy.deepcopy(
                         self.channeldefaults[v])
-                    return self.get(setting)
-            return self.get(v)
+                    ret = self.d[setting]
+                    if type(ret) not in [list, dict] or pop:
+                        self.d.pop(setting)
+                    return ret
+            return self.get(v, pop=pop)
 
         def addbranch(self, ss, n):
             bot.Server.Settings.addbranch(self, copy.deepcopy(ss), n, rm=True)
@@ -102,9 +105,9 @@ class Server(bot.Server):
 
     def modulesetup(self, m):
 
-        def getchannelsetting(self, setting, c):
+        def getchannelsetting(self, setting, c, pop=False):
             return self.server.settings.getchannel(
-                "modules.%s.%s" % (self.index, setting), c)
+                "modules.%s.%s" % (self.index, setting), c, pop)
 
         def addserverchannelsetting(self, n, v):
             self.serverchannelsettings[n] = v

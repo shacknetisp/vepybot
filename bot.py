@@ -209,12 +209,12 @@ class Server:
             self.save()
             return r
 
-        def get(self, n):
+        def get(self, n, pop=False):
             """Return the setting <n> or it's default."""
             if n not in self.d:
                 self.d[n] = copy.deepcopy(self.defaults[n])
                 ret = self.d[n]
-                if type(ret) not in [list, dict]:
+                if type(ret) not in [list, dict] or pop:
                     self.d.pop(n)
                 return ret
             return self.d[n]

@@ -65,6 +65,30 @@ class Module(bot.Module):
             "See when a player was last on.",
             ["url", "[-auth]", "[-regex]", "[search...]"])
 
+        self.addcommand(self.setup, "setup", "Easy redflare setup.",
+            ['url', 'isonalias', 'wasonalias'])
+
+    def setup(self, context, args):
+        url = args.getstr('url')
+        ison = args.getstr('isonalias')
+        wason = args.getstr('wasonalias')
+        try:
+            RedFlare(url)
+        except Exception as e:
+            return "Cannot contact url. (%s)" % (type(e).__name__)
+        if url in self.getsetting('redflares'):
+            return 'That URL is already registered.'
+        aliases = self.server.settings.get('server.aliases')
+        if ison in aliases:
+            return '%s is already an alias.' % ison
+        elif wason in aliases:
+            return '%s is already an alias.' % ison
+        self.getsetting('redflares').append(url)
+        aliases[ison] = "redflare search %s $*" % (url)
+        aliases[wason] = "redflare lastseen %s $*" % (url)
+        self.server.settings.save()
+        return "%s aliased to %s and %s" % (url, ison, wason)
+
     def checkurl(self, url):
         if url not in self.getsetting('redflares'):
             return "That url is not registered."
@@ -76,7 +100,10 @@ class Module(bot.Module):
     def docache(self):
         for url in self.getsetting('redflares'):
             self.server.log('REDFLARE', url)
-            rf = RedFlare(url, timeout=3 if url in self.cache else 8)
+            try:
+                rf = RedFlare(url, timeout=3 if url in self.cache else 8)
+            except requests.exceptions.ReadTimeout:
+                continue
             if url not in self.lastseendb.d:
                 self.lastseendb.d[url] = {}
             d = self.lastseendb.d[url]

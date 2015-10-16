@@ -12,6 +12,8 @@ modified = {}
 
 class DB:
 
+    clear = lambda: None
+
     def __init__(self, path, d=None, userdata=True):
         with lock:
             if d is None:

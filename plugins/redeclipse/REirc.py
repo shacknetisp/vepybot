@@ -17,13 +17,14 @@ class Module(bot.Module):
         self.addhook('recv', 'recv', self.recv)
 
     def dr(self, context, responses):
-        for idstring in self.getchannelsetting('servers', context):
-            if fnmatch.fnmatch(context.idstring(), idstring):
-                responses.append(True)
-                return
+        if context.code('privmsg'):
+            for idstring in self.getchannelsetting('servers', context, True):
+                if fnmatch.fnmatch(context.idstring(), idstring):
+                    responses.append(True)
+                    return
 
     def recv(self, context):
-        for idstring in self.getchannelsetting('servers', context):
+        for idstring in self.getchannelsetting('servers', context, True):
             if fnmatch.fnmatch(context.idstring(), idstring):
                 s = context.text
                 try:
