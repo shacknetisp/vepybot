@@ -5,6 +5,8 @@ import select
 import re
 import copy
 import time
+from lib import utils
+bot.reload(utils)
 
 """
 IRC Client
@@ -41,7 +43,7 @@ class Server(bot.Server):
 
         "irc/ctcp",
         "irc/msg",
-        "irc/nicktrouble"
+        "irc/nick"
     ]
 
     options = {
@@ -124,7 +126,8 @@ class Server(bot.Server):
         self.addtimer(self.output, "output", 100)
         self.socket = socket.socket()
         self.socket.connect((self.opt('host'), self.opt('port')))
-        self.setnick(self.settings.get('server.user.nick'))
+        self.wantnick = self.settings.get("server.user.nick")
+        self.setnick(self.wantnick)
         self.send("USER %s %s * :%s" % (
             self.settings.get('server.user.ident'),
             self.settings.get('server.user.mode'),
@@ -233,9 +236,9 @@ class M_Settings(bot.Module):
 bot.register.module(M_Settings)
 
 
-class M_433(bot.Module):
+class M_Nick(bot.Module):
 
-    index = "nicktrouble"
+    index = "nick"
     hidden = True
 
     def register(self):
@@ -243,20 +246,48 @@ class M_433(bot.Module):
         self.addhook('recv', 'recv', self.recv)
         self.addsetting('poll', True)
         self.addtimer(self.poll, 'poll', 120 * 1000)
+        self.addcommand(
+            self.setnick, 'nick',
+            'Set the bot nick. Use login nick if omitted.',
+            ['[-temp]', '[nick]'])
+        self.npending = None
+
+    def setnick(self, context, args):
+        args.default('nick', self.server.settings.get('server.user.nick'))
+        if args.getstr('nick') == self.server.nick:
+            return "%s is already the nick." % self.server.nick
+        self.server.wantnick = args.getstr('nick')
+        self.server.setnick(self.server.wantnick)
+        ret = "Set nick to %s ({w} set at login)." % (args.getstr('nick'))
+        self.npending = (lambda server: context.reply(ret.format(w=(
+            utils.ynstr(args.getstr('nick')
+            == server.settings.get("server.user.nick"), "will", "won't")
+            ))),
+            lambda: context.reply(
+                "Cannot set nick to %s" % args.getstr('nick')),
+                    args.getstr('nick') if not args.getbool('temp') else '')
 
     def recv(self, context):
         if context.code(433):
+            if self.npending:
+                self.npending[1]()
             if context.reciever != '*':
                 self.server.nick = context.reciever
             responses = []
             self.server.dohook('nickinuse', responses)
             if not responses and not self.server.loggedin:
                 self.server.setnick(self.server.nick + "_")
+        elif context.code('NICK'):
+            if context.reciever == self.server.wantnick:
+                if self.npending:
+                    if self.npending[2]:
+                        self.server.settings.set("server.user.nick",
+                            self.npending[2])
+                    self.npending[0](self.server)
 
     def poll(self):
         if self.getsetting("poll"):
-            if self.server.settings.get("server.user.nick") != self.server.nick:
-                self.server.setnick(
-                    self.server.settings.get("server.user.nick"))
+            if self.server.wantnick != self.server.nick:
+                self.server.setnick(self.server.wantnick)
 
-bot.register.module(M_433)
+bot.register.module(M_Nick)

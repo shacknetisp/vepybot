@@ -71,8 +71,7 @@ class M_NickServ(bot.Module):
                         context.text,
                         ))
                     if self.ghosting:
-                        self.server.setnick(self.server.settings.get(
-                            'server.user.nick'))
+                        self.server.setnick(self.server.wantnick)
                         self.ghosting = False
 
     def nickinuse(self, r):
