@@ -71,6 +71,11 @@ class register:
             newmodules.append(c.index)
 
 
+def reloadall():
+    for server in runningservers:
+        server.reloadall()
+
+
 def loadnamedmodule(n, p=""):
     global currentplugin
     global newmodules
@@ -396,6 +401,14 @@ class Server:
         self.log('RELOAD', plugin)
         self.build_lists()
         return True
+
+    def reloadall(self):
+        toreload = []
+        for plugin in self.plugins:
+            toreload.append(plugin)
+        for r in toreload:
+            if not self.reloadplugin(r):
+                raise ValueError("Cannot reload %s." % r)
 
     def addrights(self, d):
         """Add <d> to the rights hierarchy."""

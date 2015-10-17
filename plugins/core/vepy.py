@@ -14,6 +14,9 @@ class Module(bot.Module):
             "Completely restart the bot, requires the <bot> right.",
             [])
 
+        self.addcommand(self.reloadall, "reload servers",
+            "Reload all plugins.", [])
+
         self.server.addrights({
             "bot": ["owner"],
             })
@@ -21,5 +24,13 @@ class Module(bot.Module):
     def restart(self, context, args):
         context.exceptrights(["bot"])
         bot.run = False
+
+    def reloadall(self, context, args):
+        context.exceptrights(["bot"])
+        try:
+            bot.reloadall()
+            return "Reloaded all possible plugins."
+        except ValueError as e:
+            return str(e)
 
 bot.register.module(Module)

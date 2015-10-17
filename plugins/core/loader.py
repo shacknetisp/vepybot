@@ -34,8 +34,14 @@ class M_Loader(bot.Module):
         self.addcommand(
             self.reload,
             "reload",
-            "reload a plugin, requires admin.",
+            "Reload a plugin, requires admin.",
             ["plugin"])
+
+        self.addcommand(
+            self.reloadall,
+            "reload all",
+            "Reload all plugins, requires admin.",
+            [])
 
     def unload(self, context, args):
         context.exceptrights('admin')
@@ -105,5 +111,13 @@ class M_Loader(bot.Module):
         if not self.server.reloadplugin(plugin):
             return "Cannot load plugin: %s" % plugin
         return "Reloaded plugin: %s" % plugin
+
+    def reloadall(self, context, args):
+        context.exceptrights(["admin"])
+        try:
+            self.server.reloadall()
+            return "Reloaded all possible plugins."
+        except ValueError as e:
+            return str(e)
 
 bot.register.module(M_Loader)

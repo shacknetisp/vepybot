@@ -15,29 +15,28 @@ class DB:
     clear = lambda: None
 
     def __init__(self, path, d=None, userdata=True):
-        with lock:
-            if d is None:
-                d = {}
-            path = ("%s/%s" % (bot.userdata, path)) if userdata else path
-            if path not in dbs:
-                if os.path.exists(path):
+        if d is None:
+            d = {}
+        path = ("%s/%s" % (bot.userdata, path)) if userdata else path
+        if path not in dbs:
+            if os.path.exists(path):
+                try:
+                    dbs[path] = json.load(open(path))
+                except ValueError as e:
+                    print(("(%s) Invalid JSON, loading with AST." % path))
                     try:
-                        dbs[path] = json.load(open(path))
+                        dbs[path] = ast.literal_eval(open(path).read())
+                    except SyntaxError as e:
+                        raise SyntaxError(
+                            "Invalid AST (%s): %s" % (path, e))
                     except ValueError as e:
-                        print(("(%s) Invalid JSON, loading with AST." % path))
-                        try:
-                            dbs[path] = ast.literal_eval(open(path).read())
-                        except SyntaxError as e:
-                            raise SyntaxError(
-                                "Invalid AST (%s): %s" % (path, e))
-                        except ValueError as e:
-                            raise ValueError(
-                                "Invalid AST (%s): %s" % (path, e))
-                else:
-                    dbs[path] = d
-            self.d = dbs[path]
-            self.path = path
-            modified[self.path] = True
+                        raise ValueError(
+                            "Invalid AST (%s): %s" % (path, e))
+            else:
+                dbs[path] = d
+        self.d = dbs[path]
+        self.path = path
+        modified[self.path] = True
 
     def save(self):
         modified[self.path] = True
