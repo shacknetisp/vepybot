@@ -43,10 +43,12 @@ from lib import db, utils, parser
 
 
 def importmodule(path, r=False):
+    sys.path = [os.path.dirname(path)] + sys.path
     module = importlib.import_module(
-        os.path.splitext(path)[0].replace('/', '.'))
+        os.path.basename(os.path.splitext(path)[0]))
     if r:
         reload(module)
+    sys.path.pop(0)
     return module
 
 modlock = Lock()
@@ -336,6 +338,9 @@ class Server:
             if module:
                 self.log('UNLOAD', "%s/%s" % (plugin, module))
                 del self.modules[module]
+                del self.plugins[plugin][module]
+                if not self.plugins[plugin]:
+                    del self.plugins[plugin]
                 self.build_lists()
                 return
             for m in self.plugins[plugin]:
@@ -652,7 +657,7 @@ class Server:
             elif r[1] is not None:
                 return None, r[1]
             else:
-                return None, self.settings.get('messages.notfound')
+                continue
 
         return None, self.settings.get('messages.notfound')
 
