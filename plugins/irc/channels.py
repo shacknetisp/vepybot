@@ -106,6 +106,9 @@ class M_Channels(bot.Module):
 
     def recv(self, context):
         if context.code("kick"):
+            if context.rawsplit[2] in self.channels:
+                self.channels.pop(context.rawsplit[2])
+                self.server.log("KICK PARTED", context.rawsplit[2])
             if self.getchannelsetting("kickrejoin", context.reciever):
                 self.join(context.reciever)
         elif context.code("join"):
