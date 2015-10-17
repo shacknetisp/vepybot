@@ -52,7 +52,7 @@ class Module(bot.Module):
     index = "redflare"
 
     def register(self):
-        self.lastseendb = self.getdb("lastseen")
+        self.lastseendb = self.getshareddb("redflare", "lastseen")
         self.cache = {}
         self.addsetting('redflares', [])
         self.addtimer(self.docache, 'cachetimer', 60 * 1000)

@@ -15,9 +15,10 @@ run = True
 version = "0.1.3"
 versionname = "Vepybot"
 versionstring = "%s %s" % (versionname, version)
-versiontuple = (versionname, version, "Python %s on %s" % (
+versiontuple = (versionname, version, "Python %s on %s (%s)" % (
     platform.python_version(),
-    platform.system()
+    platform.system(),
+    platform.release()
     ))
 source = "https://github.com/shacknetisp/vepybot"
 
@@ -734,13 +735,15 @@ class Module:
         """Get a shared database <name> with default <d>."""
         os.makedirs("%s/shared/%s/%s" % (
             userdata, self.server.shared, index), exist_ok=True)
-        return db.DB("%s/shared/%s/%s/%s.json" % (
-            userdata, self.server.shared,
-            index, name), d, userdata=False)
+        return db.DB("shared/%s/%s/%s.json" % (
+            self.server.shared,
+            index, name), d)
 
 
 class Context:
     """Server Specific Context, implement the core functions at least."""
+
+    moretemplate = "[{n} more message{s}]"
 
     def __init__(self, server):
         self.server = server
@@ -791,7 +794,7 @@ class Context:
         if not self.server.opt('charlimit'):
             return message
         messages = textwrap.wrap(message, self.server.opt('charlimit') - len(
-            " [99 more messages]",
+            " " + self.moretemplate,
             ))
         message = messages[0]
         if len(messages) > 1:
@@ -799,9 +802,9 @@ class Context:
             try:
                 if self.server.more[self.idstring()]:
                     l = len(self.server.more[self.idstring()])
-                    message += (' ' + '' +
-                        '[%d more message%s]' % (l,
-                        's' if l != 1 else ''))
+                    message += (' ' +
+                        self.moretemplate.format(n=l,
+                        s=('s' if l != 1 else '')))
             except KeyError:
                 pass
         return message

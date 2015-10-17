@@ -7,6 +7,8 @@ import fnmatch
 class Context(bot.Context):
 
     def __init__(self, server, text):
+        self.moretemplate = "%s[{n} more message{s}]%s" % (
+            server.codes.bold, server.codes.bold)
         bot.Context.__init__(self, server)
         stext = text.lstrip(':')
         split = stext.split()
