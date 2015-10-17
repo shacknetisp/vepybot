@@ -273,7 +273,10 @@ class M_Settings(bot.Module):
         for n in ['nick', 'mode']:
             self.server.settings.add("server.user.%s" % n, self.server.opt(n))
         self.server.settings.add("server.user.name", bot.versionstring)
-        self.server.settings.add("server.user.ident", self.server.opt('nick'))
+        if 'ident' not in self.server.options:
+            self.server.options['ident'] = self.server.settings.get(
+                'server.user.nick')
+        self.server.settings.add("server.user.ident", self.server.opt('ident'))
 
 bot.register.module(M_Settings)
 
