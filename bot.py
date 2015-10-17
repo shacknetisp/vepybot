@@ -732,11 +732,11 @@ class Module:
 
     def getshareddb(self, index, name, d=None):
         """Get a shared database <name> with default <d>."""
-        os.makedirs("%s/servers/%s/%s" % (
+        os.makedirs("%s/shared/%s/%s" % (
             userdata, self.server.shared, index), exist_ok=True)
-        return db.DB("servers/%s/%s/%s.json" % (
-            self.server.shared,
-            index, name), d)
+        return db.DB("%s/shared/%s/%s/%s.json" % (
+            userdata, self.server.shared,
+            index, name), d, userdata=False)
 
 
 class Context:
