@@ -49,7 +49,7 @@ class Context(bot.Context):
                 self.user[0],
                 self.user[1],
                 self.user[2],
-                self.whois.auth
+                self.whois.auth if hasattr(self, 'whois') else ''
                 )
         return "irc:" + ret
 
