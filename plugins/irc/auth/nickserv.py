@@ -33,7 +33,7 @@ class M_NickServ(bot.Module):
         self.ghosting = True
 
         self.addcommand(self.register_c, "register",
-            "Register with NickServ.", ["email"])
+            "Register with NickServ.", ["[-name]", "email"])
 
         self.addcommand(self.verify_c, "verify register",
             "Verify with NickServ.", ["account", "code"])
@@ -107,7 +107,8 @@ class M_NickServ(bot.Module):
             return "NickServ is disabled."
         if not self.getsetting("password"):
             return "There is no password set."
-        self.server.send("PRIVMSG nickserv :REGISTER %s %s" % (
+        self.server.send("PRIVMSG nickserv :REGISTER %s %s %s" % (
+            self.name() if args.getbool('name') else '',
             self.getsetting("password"),
             args.getstr('email'),
             ))
