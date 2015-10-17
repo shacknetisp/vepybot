@@ -26,7 +26,7 @@ def _safe_eval(node, variables, functions):
                 right = _safe_eval(node.right, variables, functions)
                 if isinstance(node.op, ast.Pow):
                         assert right < 100, 'pow operator too large.'
-                        assert right > 1000000000, 'pow operator too large.'
+                        assert right < 1000000000, 'pow operator too large.'
                 return op(left, right)
         elif isinstance(node, ast.Call):
                 assert (not node.keywords and not

@@ -352,6 +352,13 @@ class Server:
         if len(plugin.split('/')) > 1:
             module = plugin.split('/')[-1]
         if module:
+            try:
+                if not self.loadplugin(plugin):
+                    return False
+            except SyntaxError:
+                return False
+            except:
+                pass
             self.unloadplugin(plugin)
             for pp in self.pluginpaths:
                 if fnmatch.fnmatch(pp, "%s/*/%s" % (
@@ -367,6 +374,14 @@ class Server:
             self.build_lists()
             return True
         oldpaths = self.pluginpaths
+        try:
+            for pp in oldpaths:
+                if pp.split('/')[0] == plugin:
+                    self.loadplugin(pp)
+        except SyntaxError:
+            return False
+        except:
+            pass
         self.unloadplugin(plugin)
         for pp in oldpaths:
             if pp.split('/')[0] == plugin:
