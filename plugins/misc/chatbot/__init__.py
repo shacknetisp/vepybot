@@ -13,18 +13,32 @@ class Module(bot.Module):
         self.lastphrase = {}
         self.lasttime = {}
         if self.server.index in ['irc']:
-            self.addsetting('#db', 'global')
-        else:
-            self.addsetting('db', 'global')
+            self.server.rget('addchannelrights')({
+                'chatbot': ['op'],
+                })
+            self.addsetting('#globaldb', True)
         self.addcommand(self.chat, "chat", "Talk to the bot.", ["text..."])
+        self.addcommandalias('chat', 'c')
+        self.server.addrights({
+            'chatbot': ['admin'],
+            })
 
     def chat(self, context, args):
         if self.server.index in ['irc']:
-            ai = ailib.AI(self.getshareddb('chatbot', self.getsetting('db')).d)
+            if context.channel and not self.getchannelsetting(
+                'globaldb', context):
+                    context.exceptchannelrights(['chatbot'])
+            else:
+                context.exceptrights(['admin', 'chatbot'])
+            cname = ""
+            if context.channel:
+                cname = self.server.name + '.' + context.channel
+            ai = ailib.AI(self.getshareddb('chatbot',
+                'global' if self.getchannelsetting(
+                    'globaldb', context) else (cname or 'global')).d)
             ids = context.channel or context.idstring()
         else:
-            ai = ailib.AI(self.getshareddb('chatbot',
-                self.getchannelsetting('db', context)).d)
+            ai = ailib.AI(self.getshareddb('chatbot', 'global').d)
             ids = context.idstring()
         if ids not in self.lastphrase:
             self.lastphrase[ids] = ""
