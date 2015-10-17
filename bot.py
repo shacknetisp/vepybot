@@ -666,6 +666,7 @@ class Module:
             'help': helptext,
             'args': [],
             'function': function,
+            'alias': None,
             }
         for arg in arguments:
             a = {
@@ -679,6 +680,11 @@ class Module:
                 a['recognizer'] = recognizers[a['name']]
             c['args'].append(a)
         self.commands[c['name']] = c
+
+    def addcommandalias(self, name, newname):
+        self.commands[newname] = self.commands[name].copy()
+        self.commands[newname]['name'] = newname
+        self.commands[newname]['alias'] = name
 
     def addhook(self, name, uname, function):
         """Add a server hook, prefixing the name with the module index."""

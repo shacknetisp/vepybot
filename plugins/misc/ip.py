@@ -34,12 +34,17 @@ def hostinfo(host, l='en'):
             'countrycode': geoip['country']['iso_code'],
 
             'city': geoip['city']['names'][l],
-            'postalcode': geoip['postal']['code'],
 
             'timezone': geoip['location']['time_zone'],
 
             'regions': subdivisions,
             })
+        try:
+            ret.update({
+                'postalcode': geoip['postal']['code'],
+                })
+        except KeyError:
+            pass
         if subdivisions:
             ret['region'] = subdivisions[0]['name']
             ret['regioncode'] = subdivisions[0]['code']
@@ -59,9 +64,10 @@ class M_IP(bot.Module):
             "Values: ip, host, city, region[code], "
             "country[code], continent[code]",
             ["ip", "[values]..."])
+        self.addcommandalias("ip", "geoip")
 
     def ip(self, context, args):
-        args.default("values", "ip,city,region,country")
+        args.default("values", "ip city region country")
         info = hostinfo(args.getstr("ip"))
         if info is None:
             return "Unable to resolve that host."

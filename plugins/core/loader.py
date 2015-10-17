@@ -53,8 +53,6 @@ class M_Loader(bot.Module):
             return "That module is not loaded."
         if len(self.server.plugins[plugin]) <= 1:
             module = ""
-        self.server.unloadplugin(pms(plugin, module))
-
         plist = self.server.settings.get("server.autoload")
         aname = ""
         for p in plist:
@@ -64,10 +62,14 @@ class M_Loader(bot.Module):
                 bmodule = p.split('/')[-1]
             if plugin == bplugin and module == bmodule:
                 aname = p
-                if not args.getbool('temp'):
+                if not args.getbool('temp') and p:
                     plist.pop(plist.index(p))
                 break
         self.server.settings.set("server.autoload", plist)
+        if aname:
+            self.server.unloadplugin(pms(plugin, module))
+        else:
+            return "Cannot unload module."
         return "Unloaded plugin: %s (%s autoload)" % (aname,
             utils.ynstr(aname
             in self.server.settings.get("server.autoload"), "will", "won't"))
