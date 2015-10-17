@@ -374,7 +374,8 @@ class Server:
                 return False
             self.build_lists()
             return True
-        oldpaths = self.pluginpaths
+        with modlock:
+            oldpaths = copy.deepcopy(self.pluginpaths)
         try:
             for pp in oldpaths:
                 if pp.split('/')[0] == plugin:

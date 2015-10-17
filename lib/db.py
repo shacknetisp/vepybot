@@ -40,8 +40,7 @@ class DB:
             modified[self.path] = True
 
     def save(self):
-        with lock:
-            modified[self.path] = True
+        modified[self.path] = True
 
 
 def saveall():

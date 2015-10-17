@@ -16,8 +16,10 @@ def runserver(server):
     while bot.run:
         try:
             time.sleep(0.05)
-            server.dotimers()
-            server.run()
+            with db.lock:
+                server.dotimers()
+            with db.lock:
+                server.run()
         except:
             print("Fatal Exception!")
             import traceback
