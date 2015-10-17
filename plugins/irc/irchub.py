@@ -40,6 +40,7 @@ class Module(bot.Module):
                     name,
                     oldidstring.replace('irc:', ''),
                 )
+                self.server.log('IRCHUB', newcontext.idstring() + " :" + text)
                 self.server.dohook('recv', newcontext)
                 return
 

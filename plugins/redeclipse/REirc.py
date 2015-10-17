@@ -39,6 +39,7 @@ class Module(bot.Module):
                 newcontext.idstring = lambda: "re:%s" % (
                     oldidstring.replace('irc:', ''),
                     )
+                self.server.log('REIRC', newcontext.idstring() + " :" + text)
                 for prefix in self.server.settings.getchannel(
                     "parser.prefixes", context):
                     if text.startswith(prefix):
