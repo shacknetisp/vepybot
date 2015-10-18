@@ -44,7 +44,8 @@ class Server(bot.Server):
 
         "irc/core/ctcp",
         "irc/core/msg",
-        "irc/core/nick"
+        "irc/core/nick",
+        "irc/core/logger",
     ]
 
     options = {
@@ -142,6 +143,10 @@ class Server(bot.Server):
 
     def send(self, msg):
         self.outbuf.append(msg)
+
+    def sendto(self, command, target, msg):
+        self.send("%s %s :%s" % (command, target, msg))
+        self.dohook('log', 'sendto', command.upper(), (target.lower(), msg))
 
     def output(self):
         if self.outbuf:

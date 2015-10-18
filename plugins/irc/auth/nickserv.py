@@ -66,10 +66,11 @@ class M_NickServ(bot.Module):
             if context.code('notice') and context.user[0].lower() == 'nickserv':
                 if context.reciever == self.server.nick:
                     if self.lastns and time.time() - self.lastnstime < 30:
-                        self.server.send("NOTICE %s :NickServ -- %s" % (
-                        self.lastns,
-                        context.text,
-                        ))
+                        self.server.sendto("NOTICE", self.lastns,
+                            "NickServ -- %s" % (
+                            self.lastns,
+                            context.text,
+                            ))
                     if self.ghosting:
                         self.server.setnick(self.server.wantnick)
                         self.ghosting = False
@@ -78,7 +79,7 @@ class M_NickServ(bot.Module):
         if (self.getsetting("enabled") and
         self.getsetting("password") and self.getsetting("ghost")):
             self.server.setnick(self.server.nick + "_")
-            self.server.send("PRIVMSG nickserv :GHOST %s %s" % (
+            self.server.sendto("PRIVMSG", "nickserv", "GHOST %s %s" % (
                 self.name(),
                 self.getsetting("password"),
                 ))
@@ -87,7 +88,7 @@ class M_NickServ(bot.Module):
 
     def identify(self):
         self.server.log("AUTH", "Identifying with NickServ.")
-        self.server.send("PRIVMSG nickserv :IDENTIFY %s %s" % (
+        self.server.sendto("PRIVMSG", "nickserv", "IDENTIFY %s %s" % (
             self.name(),
             self.getsetting("password"),
             ))
@@ -107,7 +108,7 @@ class M_NickServ(bot.Module):
             return "NickServ is disabled."
         if not self.getsetting("password"):
             return "There is no password set."
-        self.server.send("PRIVMSG nickserv :REGISTER %s %s %s" % (
+        self.server.sendto("PRIVMSG", "nickserv", "REGISTER %s %s %s" % (
             self.name() if args.getbool('name') else '',
             self.getsetting("password"),
             args.getstr('email'),
@@ -120,7 +121,7 @@ class M_NickServ(bot.Module):
             return "NickServ is disabled."
         if not self.getsetting("password"):
             return "There is no password set."
-        self.server.send("PRIVMSG nickserv :VERIFY REGISTER %s %s" % (
+        self.server.sendto("PRIVMSG", "nickserv", "VERIFY REGISTER %s %s" % (
             args.getstr('account'),
             args.getstr('code'),
             ))

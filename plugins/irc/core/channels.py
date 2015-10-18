@@ -105,12 +105,15 @@ class M_Channels(bot.Module):
             self.join(channel)
 
     def recv(self, context):
-        if context.code("kick") and context.rawsplit[3] == self.server.nick:
-            if context.rawsplit[2] in self.channels:
-                self.channels.pop(context.rawsplit[2])
-                self.server.log("KICK PARTED", context.rawsplit[2])
-            if self.getchannelsetting("kickrejoin", context.reciever):
-                self.join(context.reciever)
+        if context.code("kick"):
+            self.server.dohook('log', 'kick', context.rawsplit[0],
+                (context.rawsplit[2], context.rawsplit[3]))
+            if context.rawsplit[3] == self.server.nick:
+                if context.rawsplit[2] in self.channels:
+                    self.channels.pop(context.rawsplit[2])
+                    self.server.log("KICK PARTED", context.rawsplit[2])
+                if self.getchannelsetting("kickrejoin", context.reciever):
+                    self.join(context.reciever)
         elif context.code("join"):
             if context.user[0] == self.server.nick:
                 c = context.rawsplit[2].strip(':')

@@ -138,12 +138,22 @@ class M_Whois(bot.Module):
             if channel not in w.channels:
                 w.channels[channel] = []
             self.server.dohook('join', channel, context.user[0])
+            self.server.dohook('log', 'join', context.user,
+                channel)
         elif context.code("PART"):
             self.fromcontext(context)
             w = self.whois[context.user[0]]
             channel = context.rawsplit[2]
             if channel in w.channels:
                 w.channels.pop(channel)
+            self.server.dohook('log', 'part', context.user,
+                (channel, context.text))
+        elif context.code("QUIT"):
+            self.fromcontext(context)
+            w = self.whois[context.user[0]]
+            self.server.dohook('log', 'quit', (context.rawsplit[0],
+                context.user),
+                (list(w.channels.keys()), context.text))
         elif context.code("MODE"):
             channel = context.rawsplit[2]
             modes = context.rawsplit[3]
@@ -159,6 +169,8 @@ class M_Whois(bot.Module):
                 elif now and idx in range(len(nicks)):
                     final[nicks[idx]].append(now + cchar)
             self.server.dohook('chanmodes', channel, final)
+            self.server.dohook('log', 'mode', context.rawsplit[0],
+                (channel, modes, ' '.join(nicks)))
 
     def chanmodes(self, channel, modes):
         for target in modes:

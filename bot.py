@@ -424,6 +424,7 @@ class Server:
     def log(self, category, text):
         """Log <text> under <category>."""
         print(("%s %s: %s" % (self.name, category, text.strip())))
+        self.dohook("log", "bot", category, text.strip())
 
     def build_settings(self):
         """Ready to build settings."""

@@ -69,8 +69,8 @@ class Context(bot.Context):
             target = self.channel or self.user[0]
         if not target:
             return
-        sendf = lambda message: self.server.send(
-            '%s %s :%s' % (command, target, message))
+        sendf = lambda message: self.server.sendto(
+            command, target, message)
         self.replydriver(sendf, m, more)
 
     def replypriv(self, *args):
@@ -151,6 +151,13 @@ class M_Dispatcher(bot.Module):
         self.server.dohook("recv", context)
 
     def recv(self, context):
+        if context.code('privmsg') or context.code('notice'):
+            self.server.dohook('log', 'chat',
+                context.rawcode.upper(),
+                (
+                context.reciever.lower(),
+                context.user,
+                context.text))
         self.server.dohook("whois.fromcontext", context)
         if context.code("privmsg"):
             if context.ctcp:
