@@ -130,14 +130,17 @@ class Module(bot.Module):
             except requests.exceptions.ReadTimeout:
                 continue
             if url not in self.lastseendb.d:
-                self.lastseendb.d[url] = {}
+                self.lastseendb.d[url] = {
+                    "names": {},
+                    "auths": {},
+                    }
             d = self.lastseendb.d[url]
             for player in rf.players:
                 if player:
-                    d['=' + player] = time.time()
+                    d['names'][player] = time.time()
             for player in rf.playerauths:
                 if player[1]:
-                    d['+' + player[1]] = time.time()
+                    d['auths'][player[1]] = time.time()
             self.cache[url] = rf
         self.lastseendb.save()
 
@@ -189,16 +192,13 @@ class Module(bot.Module):
             return e
         d = self.lastseendb.d[args.getstr('url')]
         s = {}
+        d = d['auths'] if args.getbool('auth') else d['names']
         for p in d:
             v = d[p]
-            if ((args.getbool('auth') and p[0] == '+')
-                or (not args.getbool('auth') and p[0] == '=')):
-                    p = p[1:]
-                    if p:
-                        if re.match(search, p,
-                            re.IGNORECASE) is not None or p == args.getstr(
-                                "search"):
-                                    s[p] = v
+            if re.match(search, p,
+                re.IGNORECASE) is not None or p == args.getstr(
+                    "search"):
+                        s[p] = v
         if not s:
             return "No results."
         p = sorted(s, key=lambda x: -s[x])[0]
