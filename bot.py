@@ -343,10 +343,7 @@ class Server:
             plugin = plugin.split('/')[0]
             if module:
                 self.log('UNLOAD', "%s/%s" % (plugin, module))
-                for timer in self.modules[module].timers:
-                    self.timers.pop(timer)
-                for hook in self.modules[module].hooks:
-                    self.hooks[hook[0]].pop(hook[1])
+                self.modules[module].unload()
                 del self.modules[module]
                 del self.plugins[plugin][module]
                 if not self.plugins[plugin]:
@@ -356,10 +353,7 @@ class Server:
             for m in self.plugins[plugin]:
                 if m in self.modules:
                     self.log('UNLOAD', "%s/%s" % (plugin, m))
-                    for timer in self.modules[module].timers:
-                        self.timers.pop(timer)
-                    for hook in self.modules[module].hooks:
-                        self.hooks[hook[0]].pop(hook[1])
+                    self.modules[m].unload()
                     del self.modules[m]
             self.pluginpaths = [x for x in self.pluginpaths
                 if x.split('/')[0] != plugin]
@@ -720,6 +714,7 @@ class Module:
         self.serversettings = []
         self.timers = []
         self.hooks = []
+        self.ssets = []
         self.register()
 
     def addserversetting(self, n, v):
@@ -779,6 +774,11 @@ class Module:
         return self.server.settings.set(
             "modules.%s.%s" % (self.index, setting), value)
 
+    def serverset(self, name, value):
+        """Add <name> as <value> to the server registry."""
+        self.server.rset(name, value)
+        self.ssets.append(name)
+
     def getdb(self, name, d=None):
         """Get a database <name> with default <d>."""
         os.makedirs("%s/servers/%s/%s" % (
@@ -794,6 +794,14 @@ class Module:
         return db.DB("shared/%s/%s/%s.json" % (
             self.server.shared,
             index, name), d)
+
+    def unload(self):
+        for timer in self.timers:
+            self.server.timers.pop(timer)
+        for hook in self.hooks:
+            self.server.hooks[hook[0]].pop(hook[1])
+        for sset in self.ssets:
+            self.server.registry.pop(sset)
 
 
 class Context:

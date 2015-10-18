@@ -39,7 +39,7 @@ class M_Whois(bot.Module):
             " Values can be: nick, ident, host, channels, or auth/",
             ["nick", "[values...]"])
 
-        self.server.rset('whois.updatechannels', self.updatechannels)
+        self.serverset('whois.updatechannels', self.updatechannels)
 
     def getwhois(self, context, args):
         args.default('values', 'nick host channels')
