@@ -282,7 +282,7 @@ class Server:
         self.shared = shared
         self.hooks = {}
         self.globalaliases = {}
-        self.timers = []
+        self.timers = {}
         self.otimers = []
         self.options.update(options)
         self.settings = self.Settings(self)
@@ -331,7 +331,7 @@ class Server:
                 return False
             self.plugins[plugin] = modules
             self.pluginpaths.append(k)
-            self.build_lists()
+            self.build = True
             return True
 
     def unloadplugin(self, plugin):
@@ -343,6 +343,10 @@ class Server:
             plugin = plugin.split('/')[0]
             if module:
                 self.log('UNLOAD', "%s/%s" % (plugin, module))
+                for timer in self.modules[module].timers:
+                    self.timers.pop(timer)
+                for hook in self.modules[module].hooks:
+                    self.hooks[hook[0]].pop(hook[1])
                 del self.modules[module]
                 del self.plugins[plugin][module]
                 if not self.plugins[plugin]:
@@ -352,11 +356,15 @@ class Server:
             for m in self.plugins[plugin]:
                 if m in self.modules:
                     self.log('UNLOAD', "%s/%s" % (plugin, m))
+                    for timer in self.modules[module].timers:
+                        self.timers.pop(timer)
+                    for hook in self.modules[module].hooks:
+                        self.hooks[hook[0]].pop(hook[1])
                     del self.modules[m]
             self.pluginpaths = [x for x in self.pluginpaths
                 if x.split('/')[0] != plugin]
             del self.plugins[plugin]
-            self.build_lists()
+            self.build = True
 
     def reloadplugin(self, plugin):
         """Reload the plugin/module <plugin>."""
@@ -400,7 +408,7 @@ class Server:
             if pp.split('/')[0] == plugin:
                 self.loadplugin(pp)
         self.log('RELOAD', plugin)
-        self.build_lists()
+        self.build = True
         return True
 
     def reloadall(self):
@@ -462,12 +470,12 @@ class Server:
 
     def addtimer(self, f, n, t):
         """Add a timer with unique name <n>, function <f> and timeout <t>."""
-        self.timers.append({
+        self.timers[n] = {
             'name': n,
             'function': f,
             'time': t,
             'last': 0,
-            })
+            }
 
     def callonce(self, f, t):
         """Call f after <t> ms."""
@@ -478,7 +486,7 @@ class Server:
             })
 
     def dotimers(self):
-        for timer in self.timers:
+        for timer in list(self.timers.values()):
             if time.time() - timer['last'] > timer['time'] / 1000:
                 timer['function']()
                 timer['last'] = time.time()
@@ -504,6 +512,12 @@ class Server:
     def rhas(self, n):
         """Is a key in the registry?"""
         return n in self.registry
+
+    def corerun(self):
+        if self.build:
+            self.build = False
+            self.build_lists()
+        self.run()
 
     def splitparse(self, text, context=None):
         sections = []
@@ -704,6 +718,8 @@ class Module:
         self.server = server
         self.commands = {}
         self.serversettings = []
+        self.timers = []
+        self.hooks = []
         self.register()
 
     def addserversetting(self, n, v):
@@ -743,10 +759,12 @@ class Module:
     def addhook(self, name, uname, function):
         """Add a server hook, prefixing the name with the module index."""
         self.server.addhook(name, "%s:%s" % (self.index, uname), function)
+        self.hooks.append((name, "%s:%s" % (self.index, uname)))
 
     def addtimer(self, function, name, timeout):
         """Add a timer hook, prefixing the name with the module index."""
         self.server.addtimer(function, "%s:%s" % (self.index, name), timeout)
+        self.timers.append("%s:%s" % (self.index, name))
 
     def addsetting(self, setting, value):
         """Add a module-specific <setting> with a default value of <value>."""

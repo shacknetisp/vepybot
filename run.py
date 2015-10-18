@@ -19,7 +19,7 @@ def runserver(server):
             with db.lock:
                 server.dotimers()
             with db.lock:
-                server.run()
+                server.corerun()
         except:
             print("Fatal Exception!")
             import traceback
@@ -61,7 +61,7 @@ if __name__ == "__main__":
             while bot.run:
                 for server in bot.runningservers:
                     server.dotimers()
-                    server.run()
+                    server.corerun()
                 db.saveall()
             for server in bot.runningservers:
                 server.shutdown()
