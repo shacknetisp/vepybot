@@ -79,6 +79,8 @@ class Module(bot.Module):
             else:
                 return "%s" % (' '.join(out))
         elif action == "reset":
+            if name not in self.server.settings.user and checkuser:
+                return "You may not access '%s'" % vname
             if name in self.server.settings.defaults:
                 self.server.settings.pop(name)
                 return "%s reset to: %s" % (vname, self.display(get(vname)))
@@ -92,6 +94,8 @@ class Module(bot.Module):
                 except KeyError:
                     return "'%s' does not exist." % vname
         elif action == "set":
+            if name not in self.server.settings.user and checkuser:
+                return "You may not access '%s'" % vname
             try:
                 t = type(get(vname))
                 if t in [str]:
@@ -109,6 +113,8 @@ class Module(bot.Module):
             except KeyError:
                 return "'%s' does not exist." % vname
         elif action == "add":
+            if name not in self.server.settings.user and checkuser:
+                return "You may not access '%s'" % vname
             try:
                 t = type(get(vname))
                 if t not in [list]:
@@ -120,6 +126,8 @@ class Module(bot.Module):
             except KeyError:
                 return "'%s' does not exist." % vname
         elif action == "remove":
+            if name not in self.server.settings.user and checkuser:
+                return "You may not access '%s'" % vname
             try:
                 t = type(get(vname))
                 if t not in [list]:

@@ -35,6 +35,7 @@ class Server(bot.Server):
         "irc/rights",
         "irc/alias",
         "irc/config",
+        "irc/automode",
 
         "irc/pinger",
         "irc/dispatcher",
@@ -54,7 +55,7 @@ class Server(bot.Server):
 
     class Settings(bot.Server.Settings):
 
-        idents = '.=#'
+        idents = bot.Server.Settings.idents + '#'
         mglob = bot.Server.Settings.mglob + ['channels.*.modules.{m}.*']
 
         channeldefaults = {}
@@ -78,7 +79,10 @@ class Server(bot.Server):
             return self.get(v, pop=pop)
 
         def addbranch(self, ss, n):
-            bot.Server.Settings.addbranch(self, copy.deepcopy(ss), n, rm=True)
+            if '~' not in n:
+                bot.Server.Settings.addbranch(
+                    self, copy.deepcopy(ss), n, rm=True)
+            n = n.replace('~', '')
             if '#' in n:
                 s = None
                 d = self.channeltree

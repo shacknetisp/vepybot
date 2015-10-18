@@ -132,11 +132,14 @@ class M_Whois(bot.Module):
             w = self.tmp[context.rawsplit[3]]
             w.auth = context.rawsplit[4]
         elif context.code("JOIN"):
+            self.fromcontext(context)
             w = self.whois[context.user[0]]
             channel = context.rawsplit[2].strip(':')
             if channel not in w.channels:
                 w.channels[channel] = []
+            self.server.dohook('join', channel, context.user[0])
         elif context.code("PART"):
+            self.fromcontext(context)
             w = self.whois[context.user[0]]
             channel = context.rawsplit[2]
             if channel in w.channels:

@@ -176,7 +176,7 @@ class Server:
     class Settings:
 
         """Indicator Characters."""
-        idents = '.='
+        idents = '.=~'
         """Module search glob, {m} is replaced with the module name."""
         mglob = ['modules.{m}.*']
 
@@ -272,7 +272,7 @@ class Server:
             basen = split[-1]
             truename = '.'.join(sections + [basen.strip(self.idents)])
             self.defaults[truename] = copy.deepcopy(v)
-            if '=' not in basen:
+            if '=' not in basen and '~' not in basen:
                 self.user.append(truename)
             self.addbranch(sections, basen)
             self.save()
@@ -283,6 +283,7 @@ class Server:
         self.hooks = {}
         self.globalaliases = {}
         self.timers = []
+        self.otimers = []
         self.options.update(options)
         self.settings = self.Settings(self)
         self.build_settings()
@@ -468,11 +469,29 @@ class Server:
             'last': 0,
             })
 
+    def callonce(self, f, t):
+        """Call f after <t> ms."""
+        self.otimers.append({
+            'start': time.time(),
+            'function': f,
+            'time': t,
+            })
+
     def dotimers(self):
         for timer in self.timers:
             if time.time() - timer['last'] > timer['time'] / 1000:
                 timer['function']()
                 timer['last'] = time.time()
+        tod = []
+        i = 0
+        for timer in self.otimers:
+            if time.time() - timer['start'] > timer['time'] / 1000:
+                timer['function']()
+                tod.append(i)
+            i += 1
+        tod.reverse()
+        for i in tod:
+            del self.otimers[i]
 
     def rset(self, n, v):
         """Register a function or structure to be used by other modules."""
