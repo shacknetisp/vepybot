@@ -32,19 +32,19 @@ class Server(bot.Server):
         "irc/serverinfo",
         "irc/settings",
 
-        "irc/rights",
-        "irc/alias",
-        "irc/config",
-        "irc/automode",
+        "irc/core/rights",
+        "irc/core/alias",
+        "irc/core/config",
+        "irc/core/automode",
 
-        "irc/pinger",
-        "irc/dispatcher",
-        "irc/channels",
-        "irc/users",
+        "irc/core/pinger",
+        "irc/core/dispatcher",
+        "irc/core/channels",
+        "irc/core/users",
 
-        "irc/ctcp",
-        "irc/msg",
-        "irc/nick"
+        "irc/core/ctcp",
+        "irc/core/msg",
+        "irc/core/nick"
     ]
 
     options = {

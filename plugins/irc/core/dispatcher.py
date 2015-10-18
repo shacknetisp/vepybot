@@ -91,6 +91,9 @@ class Context(bot.Context):
         rlist = rlist + ['op']
         return self.exceptrights([("%s,%s" % (self.channel, r)) for r in rlist])
 
+    def getrights(self):
+        return self.server.getrights(self.idstring(), self)
+
     def exceptcancommand(self, module, command):
         if self.channel:
             for r in self.server.getrights(self.channelidstring(), self):

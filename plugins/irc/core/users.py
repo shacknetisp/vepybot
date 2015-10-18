@@ -7,11 +7,11 @@ class Whois:
 
     def __init__(self):
         self.time = time.time()
+        self.channels = {}
 
     ident = ""
     host = ""
     name = ""
-    channels = {}
     auth = ""
     idle = 0
     signon = 0

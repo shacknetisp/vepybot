@@ -105,7 +105,7 @@ class M_Channels(bot.Module):
             self.join(channel)
 
     def recv(self, context):
-        if context.code("kick"):
+        if context.code("kick") and context.rawsplit[3] == self.server.nick:
             if context.rawsplit[2] in self.channels:
                 self.channels.pop(context.rawsplit[2])
                 self.server.log("KICK PARTED", context.rawsplit[2])
@@ -143,7 +143,7 @@ class M_Channels(bot.Module):
                     self.server, context.rawsplit[3])
             c = self.channels[context.rawsplit[3]]
             c.names = w['names']
-            self.server.rget('whois.updatechannels')(c.names)
+            self.server.rget('whois.updatechannels')(list(c.names.keys()))
 
 
 bot.register.module(M_Channels)
