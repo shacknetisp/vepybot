@@ -343,7 +343,7 @@ class Server:
             plugin = plugin.split('/')[0]
             if module:
                 self.log('UNLOAD', "%s/%s" % (plugin, module))
-                self.modules[module].unload()
+                self.modules[module]._unload()
                 del self.modules[module]
                 del self.plugins[plugin][module]
                 if not self.plugins[plugin]:
@@ -353,7 +353,7 @@ class Server:
             for m in self.plugins[plugin]:
                 if m in self.modules:
                     self.log('UNLOAD', "%s/%s" % (plugin, m))
-                    self.modules[m].unload()
+                    self.modules[m]._unload()
                     del self.modules[m]
             self.pluginpaths = [x for x in self.pluginpaths
                 if x.split('/')[0] != plugin]
@@ -796,7 +796,7 @@ class Module:
             self.server.shared,
             index, name), d)
 
-    def unload(self):
+    def _unload(self):
         for timer in self.timers:
             self.server.timers.pop(timer)
         for hook in self.hooks:
