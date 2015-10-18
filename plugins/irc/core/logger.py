@@ -70,7 +70,7 @@ class Module(bot.Module):
                 return
             p = (("channels/%s" % text[0])
                 if self.server.ischannel(text[0]) else
-                ("users/%s" % text[1][0]))
+                ("users/%s" % text[1][0].lower()))
             r = "<>" if subcat == "PRIVMSG" else "--"
             with self.openlog(p) as f:
                 self.writelog(f, "%s%s%s %s" % (
