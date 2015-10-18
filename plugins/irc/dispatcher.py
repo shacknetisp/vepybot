@@ -206,6 +206,9 @@ class M_Dispatcher(bot.Module):
             del self.buf[user]
 
     def doinput(self, context, command):
+        import string
+        if not command.strip(string.punctuation):
+            return
         out, errout = self.server.runcommand(context, command)
         if out or errout:
             context.reply(out if out else errout)
