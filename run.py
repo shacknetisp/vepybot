@@ -6,9 +6,21 @@ from lib import db
 from threading import Thread
 import time
 import imp
+import signal
 
 fatal = False
+run = True
 threads = []
+
+
+def signal_handler(signal, frame):
+    global run
+    run = False
+    bot.run = False
+
+
+def hup_handler(signal, frame):
+    bot.run = False
 
 
 def runserver(server):
@@ -32,7 +44,14 @@ if __name__ == "__main__":
         bot.userdata = sys.argv[1]
     bot.createuserdata()
     initial = True
-    while True:
+    for s in [
+        signal.SIGINT,
+        signal.SIGTERM,
+        signal.SIGQUIT,
+        ]:
+            signal.signal(s, signal_handler)
+    signal.signal(signal.SIGHUP, hup_handler)
+    while run:
         bot.importmodule("%s/config.py" % bot.userdata, r=not initial)
         initial = False
         bot.run = True
@@ -54,17 +73,18 @@ if __name__ == "__main__":
                         thread.join()
                     imp.reload(db)
                     imp.reload(bot)
-                    print('Restarting...')
                     break
         else:
             print("Running unthreaded...")
             while bot.run:
                 for server in bot.runningservers:
-                    server.dotimers()
-                    server.corerun()
+                    try:
+                        server.dotimers()
+                        server.corerun()
+                    except InterruptedError:
+                        pass
                 db.saveall()
             for server in bot.runningservers:
                 server.shutdown()
             imp.reload(db)
             imp.reload(bot)
-            print('Restarting...')
