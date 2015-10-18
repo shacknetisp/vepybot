@@ -10,9 +10,9 @@ class Module(bot.Module):
 
         self.addsetting('#enabled', False)
         self.addhook('recv', 'recv', self.recv)
-        self.addsetting('#tolerance', 24)
+        self.addsetting('#tolerance', 9)
         self.addhook('dispatcher.ignore', 'dr', self.dr)
-        self.addtimer(self.timer, 'timer', 3 * 1000)
+        self.addtimer(self.timer, 'timer', 1 * 1000)
         self.d = {}
         self.b = set()
 
@@ -26,9 +26,9 @@ class Module(bot.Module):
             tol = self.getchannelsetting('tolerance', channel)
             for user in self.d[channel]:
                 self.d[channel][user][0] = max(0,
-                    self.d[channel][user][0] - 6)
+                    self.d[channel][user][0] - 1)
                 self.d[channel][user][1] = max(0,
-                    self.d[channel][user][1] - (6 / tol))
+                    self.d[channel][user][1] - (0.5 / tol))
 
     def recv(self, context):
         if not context.channel:
@@ -54,19 +54,18 @@ class Module(bot.Module):
         if ('%s,op' % context.channel) in context.getrights():
             return
         if ('%s,v' % context.channel) in context.getrights():
-            priv += 1.5
+            priv += 1
         avgcount = (len(context.text) / len(set(context.text)))
         d[0] += max((
             1 +
-            avgcount +
-            (len(context.text) / len(context.text.split()))) -
+            avgcount) -
             priv, 0)
         if d[0] >= tol:
             d[0] /= 1.5
             d[1] += 1
             if d[1] <= 1:
                 context.reply("%s: Don't spam." % context.user[0])
-            elif d[1] <= 3:
+            elif d[1] <= 2:
                 self.server.send("KICK %s %s :%s" % (
                     context.channel,
                     context.user[0],
@@ -87,7 +86,8 @@ class Module(bot.Module):
                     )), 10 * 1000)
                 self.server.callonce(lambda: self.b.discard(
                     context.user[0]), 10 * 1000)
-                self.server.send("KICK %s %s" % (
+                self.server.send(
+                    "KICK %s %s: The ban will lift in 10 seconds." % (
                     context.channel,
                     context.user[0],
                     ))
