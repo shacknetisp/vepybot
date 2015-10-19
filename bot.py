@@ -489,13 +489,21 @@ class Server:
     def dotimers(self):
         for timer in list(self.timers.values()):
             if time.time() - timer['last'] > timer['time'] / 1000:
-                timer['function']()
+                try:
+                    timer['function']()
+                except:
+                    import traceback
+                    traceback.print_exc()
                 timer['last'] = time.time()
         tod = []
         i = 0
         for timer in self.otimers:
             if time.time() - timer['start'] > timer['time'] / 1000:
-                timer['function']()
+                try:
+                    timer['function']()
+                except:
+                    import traceback
+                    traceback.print_exc()
                 tod.append(i)
             i += 1
         tod.reverse()
@@ -518,7 +526,11 @@ class Server:
         if self.build:
             self.build = False
             self.build_lists()
-        self.run()
+        try:
+            self.run()
+        except:
+            import traceback
+            traceback.print_exc()
 
     def splitparse(self, text, context=None):
         sections = []

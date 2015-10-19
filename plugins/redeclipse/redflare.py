@@ -3,7 +3,6 @@ import bot
 import requests
 import time
 import re
-import json
 from lib import timeutils
 bot.reload(timeutils)
 
@@ -12,6 +11,7 @@ class RedFlare:
 
     def __init__(self, url, timeout=5):
         j = requests.get(url, timeout=timeout).json()
+        self.time = time.time()
         self.servers = []
         self.players = []
         self.playerauths = []
@@ -123,26 +123,29 @@ class Module(bot.Module):
         if url not in self.cache or url not in self.lastseendb.d:
             return "Unable to contact url."
 
+    def onecache(self, url, ls=False, timeout=3):
+        self.server.log('REDFLARE', url)
+        try:
+            rf = RedFlare(url, timeout=timeout if url in self.cache else 8)
+        except:
+            return
+        if url not in self.lastseendb.d:
+            self.lastseendb.d[url] = {
+                "names": {},
+                "auths": {},
+                }
+        d = self.lastseendb.d[url]
+        for player in rf.players:
+            if player:
+                d['names'][player] = time.time()
+        for player in rf.playerauths:
+            if player[1]:
+                d['auths'][player[1]] = time.time()
+        self.cache[url] = rf
+
     def docache(self):
         for url in self.getsetting('redflares'):
-            self.server.log('REDFLARE', url)
-            try:
-                rf = RedFlare(url, timeout=3 if url in self.cache else 8)
-            except requests.exceptions.ReadTimeout:
-                continue
-            if url not in self.lastseendb.d:
-                self.lastseendb.d[url] = {
-                    "names": {},
-                    "auths": {},
-                    }
-            d = self.lastseendb.d[url]
-            for player in rf.players:
-                if player:
-                    d['names'][player] = time.time()
-            for player in rf.playerauths:
-                if player[1]:
-                    d['auths'][player[1]] = time.time()
-            self.cache[url] = rf
+            self.onecache(url, True)
         self.lastseendb.save()
 
     def search(self, context, args):
@@ -153,6 +156,8 @@ class Module(bot.Module):
         e = self.checkurl(args.getstr('url'))
         if e:
             return e
+        if time.time() - self.cache[args.getstr('url')].time > 30:
+            self.onecache(args.getstr('url'), timeout=2)
         rf = self.cache[args.getstr('url')]
         ret = []
         for server in rf.servers:
