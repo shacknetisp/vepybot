@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
-import socket
+from lib import net
+bot.reload(net)
 import select
 
 """
@@ -40,7 +41,7 @@ class Server(bot.Server):
     def ready(self):
         self.outbuf = []
         self.sockets = []
-        self.listener = socket.socket()
+        self.listener = net.socket(self.proxy)
         self.listener.bind((self.opt('host'), self.opt('port')))
         self.listener.listen(self.opt('backlog'))
 

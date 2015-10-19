@@ -43,6 +43,13 @@ class M_Loader(bot.Module):
             "Reload all plugins, requires admin.",
             [])
 
+    def willautoload(self, name):
+        if name in self.server.settings.get("server.noautoload"):
+            return False
+        if name.split('/')[0] in self.server.settings.get("server.noautoload"):
+            return False
+        return True
+
     def unload(self, context, args):
         context.exceptrights('admin')
         plugin = args.getstr("plugin")
@@ -69,14 +76,15 @@ class M_Loader(bot.Module):
                 if not args.getbool('temp') and p:
                     plist.pop(plist.index(p))
                 break
+        aname = aname or pms(plugin, module)
         self.server.settings.set("server.autoload", plist)
-        if aname:
-            self.server.unloadplugin(pms(plugin, module))
-        else:
-            return "Module not in autoload list."
+        self.server.unloadplugin(pms(plugin, module))
+        nl = self.server.settings.get("server.noautoload")
+        if aname not in nl and aname.split('/')[0] not in nl:
+            nl.append(aname)
+        self.server.settings.set("server.noautoload", nl)
         return "Unloaded plugin: %s (%s autoload)" % (aname,
-            utils.ynstr(aname
-            in self.server.settings.get("server.autoload"), "will", "won't"))
+            utils.ynstr(self.willautoload(aname), "will", "won't"))
 
     def load(self, context, args):
         context.exceptrights('admin')
@@ -91,12 +99,19 @@ class M_Loader(bot.Module):
             return str(e)
         if not args.getbool('temp'):
             plist = self.server.settings.get("server.autoload")
-            if plugin not in plist:
+            if plugin not in plist and plugin.split('/')[0] not in plist:
                 plist.append(plugin)
+            tod = []
+            nl = self.server.settings.get("server.noautoload")
+            for n in nl:
+                if n == plugin or n == plugin.split('/')[0]:
+                    tod.append(n)
+            for n in tod:
+                nl.pop(nl.index(n))
+            self.server.settings.set("server.noautoload", nl)
             self.server.settings.set("server.autoload", plist)
         return "Loaded plugin: %s (%s autoload)" % (plugin,
-            utils.ynstr(plugin
-            in self.server.settings.get("server.autoload"), "will", "won't"))
+            utils.ynstr(self.willautoload(plugin), "will", "won't"))
 
     def reload(self, context, args):
         context.exceptrights('admin')

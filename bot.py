@@ -85,7 +85,15 @@ def loadnamedmodule(n, p=""):
     global currentplugin
     global newmodules
     newmodules = []
-    for directory in ["plugins", userdata + "/plugins"]:
+    paths = [
+        "",
+        "protocols",
+    ]
+    d = []
+    for f in paths:
+        d.append("plugins/" + f)
+        d.append(userdata + "/plugins/" + f)
+    for directory in d:
         sys.path = sys.path + [directory]
         if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
             os.path.exists("%s/%s.py" % (directory, n))):
@@ -177,6 +185,14 @@ class Server:
     options = {
         'charlimit': 0,
         }
+
+    """Optionally loaded plugins."""
+    autoload = []
+
+    dautoload = [
+        "misc",
+        "internet",
+    ]
 
     class Settings:
 
@@ -291,6 +307,7 @@ class Server:
         self.timers = {}
         self.otimers = []
         self.options.update(options)
+        self.proxy = self.opt('proxy')
         self.settings = self.Settings(self)
         self.build_settings()
         self.modules = {}
@@ -302,17 +319,19 @@ class Server:
             self.index] + self.requiredplugins:
                 self.loadplugin(k)
         self.build_lists()
-        for k in self.settings.get(
+        for k in self.dautoload + self.autoload + self.settings.get(
             "server.autoload"):
-                self.loadplugin(k)
+                self.loadplugin(k, auto=True)
         self.build_lists()
         self.addhook("server_ready", "sinit", self.ready)
         self.dohook("server_ready")
 
-    def loadplugin(self, k):
+    def loadplugin(self, k, auto=False):
         """Load the plugin/module <k>."""
         with modlock:
             plugin = k.split('/')[0]
+            if auto and plugin in self.settings.get("server.noautoload"):
+                return False
             loadnamedmodule(k, plugin)
             if plugin not in plugins:
                 return False
@@ -321,6 +340,9 @@ class Server:
             for index in modules:
                 if index not in newmodules:
                     continue
+                if auto and (plugin + "/" + index
+                    ) in self.settings.get("server.noautoload"):
+                        continue
                 v = modules[index]
                 if index in self.modules:
                     raise ModuleError(
@@ -425,6 +447,8 @@ class Server:
 
     def opt(self, n):
         """Get config.py value <n>."""
+        if n not in self.options and n in Server.options:
+            return Server.options[n]
         return self.options[n]
 
     def log(self, category, text):

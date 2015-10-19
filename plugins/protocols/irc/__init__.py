@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import bot
-import socket
 import select
 import re
 import copy
@@ -8,6 +7,16 @@ import time
 from lib import utils
 bot.reload(utils)
 
+
+def socket(proxy):
+    if proxy:
+        import socks
+        s = socks.socksocket()
+        s.setproxy(socks.PROXY_TYPE_SOCKS5, proxy[0], proxy[1])
+        return s
+    else:
+        import socket
+        return socket.socket()
 """
 IRC Client
 bot.load_server(
@@ -53,7 +62,12 @@ class Server(bot.Server):
         'mode': '*',
         'recv': 1024,
         'charlimit': 440,
+        'proxy': None,
         }
+
+    autoload = [
+        "irc/moderator"
+    ]
 
     class Settings(bot.Server.Settings):
 
@@ -133,7 +147,7 @@ class Server(bot.Server):
         self.inbuf = bytes()
         self.outbuf = []
         self.addtimer(self.output, "output", 100)
-        self.socket = socket.socket()
+        self.socket = socket(self.proxy)
         self.socket.connect((self.opt('host'), self.opt('port')))
         self.wantnick = self.settings.get("server.user.nick")
         self.setnick(self.wantnick)
