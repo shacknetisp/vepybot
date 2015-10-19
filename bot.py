@@ -12,7 +12,7 @@ from threading import Lock
 threads = True
 run = True
 
-version = "0.2.0"
+version = "0.2.1"
 versionname = "Vepybot"
 versionstring = "%s %s" % (versionname, version)
 versiontuple = (versionname, version, "Python %s on %s (%s)" % (
@@ -38,8 +38,8 @@ def createuserdata():
 def reload(m):
     importlib.reload(m)
 
-from lib import db, utils, parser, httpserver
-[reload(x) for x in [utils, parser, httpserver]]
+from lib import db, utils, parser
+[reload(x) for x in [utils, parser]]
 
 
 def importmodule(path, r=False):

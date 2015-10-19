@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
-from lib import net
-bot.reload(net)
 import select
+import socket
 
 """
 Plain Socket Server
@@ -41,7 +40,7 @@ class Server(bot.Server):
     def ready(self):
         self.outbuf = []
         self.sockets = []
-        self.listener = net.socket(self.proxy)
+        self.listener = socket.socket()
         self.listener.bind((self.opt('host'), self.opt('port')))
         self.listener.listen(self.opt('backlog'))
 

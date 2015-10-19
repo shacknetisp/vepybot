@@ -1,21 +1,27 @@
 # -*- coding: utf-8 -*-
 import bot
-import requests
-import socket
 
 
-def hostinfo(host, l='en'):
+def hostinfo(http, inhost, l='en'):
+    ip = inhost
+    host = inhost
     try:
-        ip = socket.gethostbyname(host)
-        host = socket.gethostbyname_ex(host)[0]
-    except socket.gaierror:
-        return None
-    try:
-        geoip = requests.get(
-            "http://geoip.nekudo.com/api/%s/full" % ip).json()
+        r = http.request("http://api.statdns.com/%s/a" % inhost).json()
+        if 'error' not in r and r['answer']:
+            ip = r['answer'][0]['rdata']
+        r = http.request("http://api.statdns.com/x/%s" % ip).json()
+        if 'error' not in r and r['answer']:
+            host = r['answer'][0]['rdata'].rstrip('.')
     except ValueError:
+        pass
+    except http.Error:
+        pass
+    try:
+        geoip = http.request(
+            "http://geoip.nekudo.com/api/%s/full" % ip).json()
+    except http.Error:
         geoip = {}
-    except requests.exceptions.RequestException:
+    except ValueError:
         geoip = {}
     ret = {
         'ip': ip,
@@ -70,7 +76,7 @@ class M_IP(bot.Module):
 
     def ip(self, context, args):
         args.default("values", "ip city region country")
-        info = hostinfo(args.getstr("ip"))
+        info = hostinfo(self.server.rget("http.url"), args.getstr("ip"))
         if info is None:
             return "Unable to resolve that host."
         out = []

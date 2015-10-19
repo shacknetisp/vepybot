@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import bot
-import requests
 import time
 import re
 from lib import timeutils
@@ -9,8 +8,8 @@ bot.reload(timeutils)
 
 class RedFlare:
 
-    def __init__(self, url, timeout=5):
-        j = requests.get(url, timeout=timeout).json()
+    def __init__(self, url, http, timeout=5):
+        j = http.request(url, timeout=timeout).json()
         self.time = time.time()
         self.servers = []
         self.players = []
@@ -78,7 +77,7 @@ class Module(bot.Module):
         ison = args.getstr('isonalias')
         wason = args.getstr('wasonalias')
         try:
-            RedFlare(url)
+            RedFlare(url, self.server.rget('http.url'))
         except Exception as e:
             return "Cannot contact url. (%s)" % (type(e).__name__)
         if url in self.getsetting('redflares'):
@@ -126,8 +125,9 @@ class Module(bot.Module):
     def onecache(self, url, ls=False, timeout=3):
         self.server.log('REDFLARE', url)
         try:
-            rf = RedFlare(url, timeout=timeout if url in self.cache else 8)
-        except requests.exceptions.RequestException:
+            rf = RedFlare(url, self.server.rget('http.url'),
+                timeout=timeout if url in self.cache else 8)
+        except self.server.rget('http.url').Error:
             return
         except ValueError:
             return

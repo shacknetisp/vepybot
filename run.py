@@ -70,7 +70,6 @@ if __name__ == "__main__":
                 if fatal:
                     bot.run = False
                     run = False
-                bot.httpserver.run()
                 with db.lock:
                     db.saveall()
                 if not bot.run:
@@ -85,10 +84,8 @@ if __name__ == "__main__":
                 for server in bot.runningservers:
                     server.dotimers()
                     server.corerun()
-                bot.httpserver.run()
                 db.saveall()
             for server in bot.runningservers:
                 server.shutdown()
             imp.reload(db)
             imp.reload(bot)
-        bot.httpserver.shutdown()

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import bot
-import requests
 
 
 class Module(bot.Module):
@@ -13,11 +12,12 @@ class Module(bot.Module):
         self.addcommandalias('urbandictionary', 'ud')
 
     def ud(self, context, args):
+        http = self.server.rget('http.url')
         term = args.getstr('term')
         try:
-            r = requests.get('http://api.urbandictionary.com/v0/define',
+            r = http.request('http://api.urbandictionary.com/v0/define',
                 params={'term': term}).json()
-        except requests.exceptions.RequestException:
+        except http.Error:
             return "Unable to contact the urbandictionary.com api."
         except ValueError:
             return "Invalid response from the urbandictionary.com api."

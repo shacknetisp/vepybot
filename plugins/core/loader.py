@@ -115,8 +115,10 @@ class M_Loader(bot.Module):
             tod = []
             nl = self.server.settings.get("server.noautoload")
             for n in nl:
-                if n == plugin or n == plugin.split('/')[0]:
-                    tod.append(n)
+                for p in [plugin.split('/')[0]] + [
+                    (plugin.split('/')[0] + '/' + x) for x in bot.newmodules]:
+                        if n == p or n == p.split('/')[0]:
+                            tod.append(n)
             for n in tod:
                 nl.pop(nl.index(n))
             self.server.settings.set("server.noautoload", nl)
