@@ -14,8 +14,11 @@ class Module(bot.Module):
 
     def ud(self, context, args):
         term = args.getstr('term')
-        r = requests.get('http://api.urbandictionary.com/v0/define',
-            params={'term': term}).json()
+        try:
+            r = requests.get('http://api.urbandictionary.com/v0/define',
+                params={'term': term}).json()
+        except:
+            return "Unable to contact the urbandictionary.com api."
         possible = []
         first = ""
         final = ""
