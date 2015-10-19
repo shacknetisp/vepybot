@@ -62,5 +62,6 @@ def start(host, port):
 
 
 def run():
-    if select.select([server], [], [], 0.1)[0]:
-        server.handle_request()
+    if server:
+        if select.select([server], [], [], 0.1)[0]:
+            server.handle_request()
