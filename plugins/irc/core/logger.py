@@ -14,6 +14,8 @@ class Module(bot.Module):
         self.writelog = self.server.rget('writelog')
 
     def log(self, cat, subcat, text):
+        if not self.server.settings.get('logger.enabled'):
+            return
         if cat == "join":
             with self.openlog("channels/%s" % text) as f:
                 self.writelog(f, "--> %s!%s@%s has joined %s" % (

@@ -14,6 +14,8 @@ class Module(bot.Module):
         self.addhook('log', 'log', self.log)
         self.serverset('openlog', self.openlog)
         self.serverset('writelog', self.writelog)
+        self.addserversetting("logger.enabled", True)
+        self.server.settings.add("logger.enabled", True)
         self.addserversetting("logger.localtime", True)
         self.server.settings.add("logger.localtime", True)
         with self.openlog("bot", 'w'):
@@ -38,7 +40,8 @@ class Module(bot.Module):
         f.write("[%s] %s\n" % (timestr, text.strip()))
 
     def log(self, cat, subcat, text):
-
+        if not self.server.settings.get('logger.enabled'):
+            return
         if cat == "bot":
             with self.openlog("bot") as f:
                 self.writelog(f, "[%s] %s" % (subcat, text))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import bot
 #Start the general web server.
-bot.httpserver.start('', 5710)
+bot.httpserver.start('', 5721)
 #The initial config file is written in Python.
 #This will default to True if omitted, it determines if servers should run in their own threads.
 bot.threads = True

@@ -31,8 +31,8 @@ class Context(bot.Context):
             self.text = ""
         try:
             self.channel = (
-                self.reciever
-                if self.reciever[0] in server.info['CHANTYPES']
+                self.reciever.strip(':')
+                if self.reciever.strip(':')[0] in server.info['CHANTYPES']
                 else
                 None
                 ) if 'CHANTYPES' in server.info else None

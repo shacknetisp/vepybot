@@ -46,6 +46,7 @@ class Server(bot.Server):
         "irc/core/msg",
         "irc/core/nick",
         "irc/core/logger",
+        "irc/core/seen",
     ]
 
     options = {

@@ -29,7 +29,8 @@ class httpd:
                 if paths and paths[0] == server.name:
                     with server.runlock:
                         responses = []
-                        server.dohook('corehttp', paths[1:], params, environ)
+                        server.dohook('corehttp',
+                            paths[1:], params, environ, responses)
                         if responses:
                             start_response(responses[0][0], responses[0][1])
                             sys.stdout.write('...done [%f]\n' % (
