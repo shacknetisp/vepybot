@@ -16,6 +16,8 @@ class Module(bot.Module):
         self.addhook('recv', 'recv', self.recv)
 
     def recv(self, context):
+        if not self.server.settings.get('logger.enabled'):
+            return
         if not context.user[0]:
             return
         if context.code('privmsg') or context.code('notice'):
@@ -45,6 +47,8 @@ class Module(bot.Module):
             self.db.save()
 
     def seen(self, context, args):
+        if not self.server.settings.get('logger.enabled'):
+            return "Logger disabled."
         if args.getbool('chat'):
             d = self.db.d['chat']
         else:
