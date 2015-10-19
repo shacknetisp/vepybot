@@ -39,7 +39,16 @@ class M_Whois(bot.Module):
             " Values can be: nick, ident, host, channels, or auth/",
             ["nick", "[values...]"])
 
+        self.addcommand(self.runwhois, "authme",
+            "Auth via WHOIS.", [])
+
         self.serverset('whois.updatechannels', self.updatechannels)
+
+    def runwhois(self, context, args):
+        if not self.server.settings.get('server.whois'):
+            return "WHOIS is disabled."
+        self.server.send("WHOIS %s" % context.user[0])
+        return "Done, check your rights with: rights get"
 
     def getwhois(self, context, args):
         args.default('values', 'nick host channels')

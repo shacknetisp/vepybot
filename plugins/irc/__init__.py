@@ -307,6 +307,7 @@ class M_Nick(bot.Module):
         self.npending = None
 
     def setnick(self, context, args):
+        context.exceptrights(["admin"])
         args.default('nick', self.server.settings.get('server.user.nick'))
         if args.getstr('nick') == self.server.nick:
             return "%s is already the nick." % self.server.nick

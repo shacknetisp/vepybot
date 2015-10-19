@@ -38,8 +38,8 @@ def createuserdata():
 def reload(m):
     importlib.reload(m)
 
-from lib import db, utils, parser
-[reload(x) for x in [utils, parser]]
+from lib import db, utils, parser, httpserver
+[reload(x) for x in [utils, parser, httpserver]]
 
 
 def importmodule(path, r=False):
@@ -58,6 +58,7 @@ plugins = {}
 pluginfiles = {}
 currentplugin = ""
 newmodules = []
+registry = {}
 
 
 class register:
@@ -69,6 +70,10 @@ class register:
         plugins[currentplugin][c.index] = c
         if c.index not in newmodules:
             newmodules.append(c.index)
+
+    def value(c, v):
+        if c not in registry:
+            registry[c] = v
 
 
 def reloadall():
@@ -282,6 +287,7 @@ class Server:
         self.shared = shared
         self.hooks = {}
         self.globalaliases = {}
+        self.runlock = Lock()
         self.timers = {}
         self.otimers = []
         self.options.update(options)

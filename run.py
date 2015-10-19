@@ -28,10 +28,12 @@ def runserver(server):
     while bot.run:
         try:
             time.sleep(0.05)
-            with db.lock:
-                server.dotimers()
-            with db.lock:
-                server.corerun()
+            with server.runlock:
+                with db.lock:
+                    server.dotimers()
+            with server.runlock:
+                with db.lock:
+                    server.corerun()
         except:
             print("Fatal Exception!")
             import traceback
@@ -65,7 +67,7 @@ if __name__ == "__main__":
             while True:
                 if fatal:
                     sys.exit(1)
-                time.sleep(0.05)
+                bot.httpserver.run()
                 with db.lock:
                     db.saveall()
                 if not bot.run:
@@ -83,6 +85,7 @@ if __name__ == "__main__":
                         server.corerun()
                     except InterruptedError:
                         pass
+                bot.httpserver.run()
                 db.saveall()
             for server in bot.runningservers:
                 server.shutdown()
