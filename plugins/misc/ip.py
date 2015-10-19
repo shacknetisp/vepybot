@@ -15,7 +15,7 @@ def hostinfo(host, l='en'):
             "http://geoip.nekudo.com/api/%s/full" % ip).json()
     except ValueError:
         geoip = {}
-    except:
+    except requests.exceptions.RequestException:
         geoip = {}
     ret = {
         'ip': ip,

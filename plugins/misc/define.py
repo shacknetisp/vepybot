@@ -17,8 +17,10 @@ class Module(bot.Module):
         try:
             r = requests.get('http://api.urbandictionary.com/v0/define',
                 params={'term': term}).json()
-        except:
+        except requests.exceptions.RequestException:
             return "Unable to contact the urbandictionary.com api."
+        except ValueError:
+            return "Invalid response from the urbandictionary.com api."
         possible = []
         first = ""
         final = ""

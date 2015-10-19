@@ -127,7 +127,9 @@ class Module(bot.Module):
         self.server.log('REDFLARE', url)
         try:
             rf = RedFlare(url, timeout=timeout if url in self.cache else 8)
-        except:
+        except requests.exceptions.RequestException:
+            return
+        except ValueError:
             return
         if url not in self.lastseendb.d:
             self.lastseendb.d[url] = {
