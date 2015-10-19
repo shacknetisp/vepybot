@@ -63,5 +63,12 @@ def start(host, port):
 
 def run():
     if server:
-        if select.select([server], [], [], 0.1)[0]:
-            server.handle_request()
+        try:
+            if select.select([server], [], [], 0.1)[0]:
+                server.handle_request()
+        except InterruptedError:
+            return
+
+def shutdown():
+    if server:
+        server.close()

@@ -43,12 +43,23 @@ class M_Loader(bot.Module):
             "Reload all plugins, requires admin.",
             [])
 
-    def willautoload(self, name):
-        if name in self.server.settings.get("server.noautoload"):
-            return False
-        if name.split('/')[0] in self.server.settings.get("server.noautoload"):
-            return False
-        return True
+    def willautoload(self, name, c=False):
+        if not c:
+            if name in self.server.settings.get("server.noautoload"):
+                return False
+            if name.split('/')[0] in self.server.settings.get(
+                "server.noautoload"):
+                    return False
+        conglomerate = (self.server.requiredplugins +
+            self.server.dautoload + self.server.autoload +
+            self.server.settings.get('server.autoload'))
+        for c in conglomerate:
+            p = c.split('/')[0]
+            if len(c.split('/')) > 1:
+                p = p + '/' + c.split('/')[-1]
+            if p in [name.split('/')[0], name]:
+                return True
+        return False
 
     def unload(self, context, args):
         context.exceptrights('admin')
@@ -99,7 +110,7 @@ class M_Loader(bot.Module):
             return str(e)
         if not args.getbool('temp'):
             plist = self.server.settings.get("server.autoload")
-            if plugin not in plist and plugin.split('/')[0] not in plist:
+            if not self.willautoload(plugin, True):
                 plist.append(plugin)
             tod = []
             nl = self.server.settings.get("server.noautoload")

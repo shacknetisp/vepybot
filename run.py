@@ -14,12 +14,14 @@ threads = []
 
 
 def signal_handler(signal, frame):
+    print("Caught signal, exiting.")
     global run
     run = False
     bot.run = False
 
 
 def hup_handler(signal, frame):
+    print('Reloading from HUP.')
     bot.run = False
 
 
@@ -42,18 +44,18 @@ def runserver(server):
     server.shutdown()
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        bot.userdata = sys.argv[1]
-    bot.createuserdata()
     initial = True
     for s in [
         signal.SIGINT,
         signal.SIGTERM,
-        signal.SIGQUIT,
         ]:
             signal.signal(s, signal_handler)
+            signal.siginterrupt(s, False)
     signal.signal(signal.SIGHUP, hup_handler)
     while run:
+        if len(sys.argv) > 1:
+            bot.userdata = sys.argv[1]
+        bot.createuserdata()
         bot.importmodule("%s/config.py" % bot.userdata, r=not initial)
         initial = False
         bot.run = True
@@ -66,7 +68,8 @@ if __name__ == "__main__":
                 threads.append(t)
             while True:
                 if fatal:
-                    sys.exit(1)
+                    bot.run = False
+                    run = False
                 bot.httpserver.run()
                 with db.lock:
                     db.saveall()
@@ -80,14 +83,12 @@ if __name__ == "__main__":
             print("Running unthreaded...")
             while bot.run:
                 for server in bot.runningservers:
-                    try:
-                        server.dotimers()
-                        server.corerun()
-                    except InterruptedError:
-                        pass
+                    server.dotimers()
+                    server.corerun()
                 bot.httpserver.run()
                 db.saveall()
             for server in bot.runningservers:
                 server.shutdown()
             imp.reload(db)
             imp.reload(bot)
+        bot.httpserver.shutdown()

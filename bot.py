@@ -12,7 +12,7 @@ from threading import Lock
 threads = True
 run = True
 
-version = "0.1.8"
+version = "0.2.0"
 versionname = "Vepybot"
 versionstring = "%s %s" % (versionname, version)
 versiontuple = (versionname, version, "Python %s on %s (%s)" % (
@@ -307,7 +307,6 @@ class Server:
         self.timers = {}
         self.otimers = []
         self.options.update(options)
-        self.proxy = self.opt('proxy')
         self.settings = self.Settings(self)
         self.build_settings()
         self.modules = {}

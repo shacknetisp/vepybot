@@ -8,15 +8,19 @@ from lib import utils
 bot.reload(utils)
 
 
-def socket(proxy):
+def socket(proxy, usessl):
     if proxy:
         import socks
-        s = socks.socksocket()
+        import socket
+        s = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
         s.setproxy(socks.PROXY_TYPE_SOCKS5, proxy[0], proxy[1])
-        return s
     else:
         import socket
-        return socket.socket()
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if usessl:
+        import ssl
+        s = ssl.wrap_socket(s)
+    return s
 """
 IRC Client
 bot.load_server(
@@ -29,6 +33,8 @@ bot.load_server(
         'port': 6667,
         'nick': 'vepybot',
         'owner': 'irc:*',
+        #'proxy': ('127.0.0.1', 9050),
+        #'ssl': True,
     })
 """
 
@@ -141,14 +147,17 @@ class Server(bot.Server):
         self.nick = nick
         self.send("NICK %s" % (nick))
 
+    def connect(self):
+        self.socket = socket(self.opt('proxy'), self.opt('ssl'))
+        self.socket.connect((self.opt('host'), self.opt('port')))
+
     def ready(self):
+        self.socket = None
         self.loggedin = False
         self.info = {}
         self.inbuf = bytes()
         self.outbuf = []
         self.addtimer(self.output, "output", 100)
-        self.socket = socket(self.proxy)
-        self.socket.connect((self.opt('host'), self.opt('port')))
         self.wantnick = self.settings.get("server.user.nick")
         self.setnick(self.wantnick)
         self.send("USER %s %s * :%s" % (
@@ -164,6 +173,8 @@ class Server(bot.Server):
         self.dohook('log', 'sendto', command.upper(), (target.lower(), msg))
 
     def output(self):
+        if not self.socket:
+            self.connect()
         if self.outbuf:
             o = bytes(self.outbuf.pop(0), 'UTF-8')
             if o[-1] != b'\n':
@@ -172,9 +183,14 @@ class Server(bot.Server):
             self.socket.send(o)
 
     def run(self):
+        if not self.socket:
+            self.connect()
         inr = [self.socket]
-        readyr, _, _ = select.select(
-            inr, [], [], 0.1)
+        try:
+            readyr, _, _ = select.select(
+                inr, [], [], 0.1)
+        except InterruptedError:
+            return
         if readyr:
             self.inbuf += self.socket.recv(self.opt('recv'))
             while b'\n' in self.inbuf:
@@ -199,8 +215,11 @@ class Server(bot.Server):
                 self.settings.addchannel(k, v)
 
     def shutdown(self):
+        import socket
         self.socket.send(('QUIT :%s\n' % (bot.versionstring)).encode())
-        time.sleep(0.25)
+        time.sleep(0.1)
+        self.socket.shutdown(socket.SHUT_RDWR)
+        time.sleep(0.1)
         self.socket.close()
 
     #References:
