@@ -69,6 +69,7 @@ class Server(bot.Server):
         'recv': 1024,
         'charlimit': 440,
         'proxy': None,
+        'ssl': False,
         }
 
     autoload = [
