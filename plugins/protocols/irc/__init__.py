@@ -190,7 +190,10 @@ class Server(bot.Server):
             if o[-1] != b'\n':
                 o += b'\n'
             self.log("OUT", o.decode())
-            self.socket.send(o)
+            try:
+                self.socket.send(o)
+            except BrokenPipeError:
+                self.outbuf.insert(0, o.decode())
 
     def run(self):
         if not self.socket:
