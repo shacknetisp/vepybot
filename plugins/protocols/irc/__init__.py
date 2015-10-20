@@ -145,11 +145,13 @@ class Server(bot.Server):
         self.send("NICK %s" % (nick))
 
     def connect(self):
+        self.log("SOCK CONN", "Starting.")
         self.socket = ircsocket(self.opt('proxy'))
         self.socket.connect((self.opt('host'), self.opt('port')))
         if self.opt('ssl'):
             import ssl
             self.socket = ssl.wrap_socket(self.socket)
+        self.log("SOCK CONN", "Done.")
 
     def ready(self):
         self.socket = None

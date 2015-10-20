@@ -1,18 +1,45 @@
 # -*- coding: utf-8 -*-
 import bot
+import socket
 
 
-def hostinfo(http, inhost, l='en'):
+def is_valid_ipv4_address(address):
+    try:
+        socket.inet_pton(socket.AF_INET, address)
+    except AttributeError:  # no inet_pton here, sorry
+        try:
+            socket.inet_aton(address)
+        except socket.error:
+            return False
+        return address.count('.') == 3
+    except socket.error:  # not a valid address
+        return False
+
+    return True
+
+
+def is_valid_ipv6_address(address):
+    try:
+        socket.inet_pton(socket.AF_INET6, address)
+    except socket.error:  # not a valid address
+        return False
+    return True
+
+
+def hostinfo(http, inhost, l='en', rdns=False):
     ip = inhost
     host = inhost
     try:
-        r = http.request(
-            "http://api.statdns.com/%s/a" % inhost, timeout=2).json()
-        if 'error' not in r and r['answer']:
-            ip = r['answer'][0]['rdata']
-        r = http.request("http://api.statdns.com/x/%s" % ip, timeout=2).json()
-        if 'error' not in r and r['answer']:
-            host = r['answer'][0]['rdata'].rstrip('.')
+        if not is_valid_ipv6_address(ip) and not is_valid_ipv4_address(ip):
+            r = http.request(
+                "http://api.statdns.com/%s/a" % inhost, timeout=2).json()
+            if 'error' not in r and r['answer']:
+                ip = r['answer'][0]['rdata']
+        if rdns:
+            r = http.request(
+                "http://api.statdns.com/x/%s" % ip, timeout=2).json()
+            if 'error' not in r and r['answer']:
+                host = r['answer'][0]['rdata'].rstrip('.')
     except ValueError:
         pass
     except http.Error:
@@ -77,7 +104,8 @@ class M_IP(bot.Module):
 
     def ip(self, context, args):
         args.default("values", "ip city region country")
-        info = hostinfo(self.server.rget("http.url"), args.getstr("ip"))
+        info = hostinfo(self.server.rget("http.url"), args.getstr("ip"),
+            rdns='host' in args.getstr("values").split())
         if info is None:
             return "Unable to resolve that host."
         out = []
