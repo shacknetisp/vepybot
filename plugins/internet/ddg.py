@@ -22,6 +22,7 @@ class Module(bot.Module):
             r = http.request("http://api.duckduckgo.com/", params={
                 "q": query,
                 "format": 'json',
+                "t": bot.versionname.lower(),
                 }).json()
         except http.Error:
             return "Cannot contact the Duck Duck Go API."
@@ -31,6 +32,8 @@ class Module(bot.Module):
             if r['Results']:
                 return "%s [%s]" % (html.unescape(r['AbstractText']),
                     r['Results'][0]['FirstURL'])
+        elif r['AnswerType'] == 'calc':
+            return "%s" % tag_re.sub('', r['Answer'])
         elif r['RelatedTopics']:
             return "%s [%s]" % (' '.join(tag_re.sub('',
                     r['RelatedTopics'][0]['Result'].replace(
