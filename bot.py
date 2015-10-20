@@ -554,6 +554,8 @@ class Server:
         except:
             import traceback
             traceback.print_exc()
+            global run
+            run = False
 
     def splitparse(self, text, context=None):
         sections = []
