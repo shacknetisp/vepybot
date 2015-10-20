@@ -6,20 +6,16 @@ import copy
 import time
 from lib import utils
 bot.reload(utils)
+from deps import socks
+import socket
 
 
-def socket(proxy, usessl):
+def ircsocket(proxy):
     if proxy:
-        import socks
-        import socket
-        s = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socks.socksocket()
         s.setproxy(socks.PROXY_TYPE_SOCKS5, proxy[0], proxy[1])
     else:
-        import socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    if usessl:
-        import ssl
-        s = ssl.wrap_socket(s)
     return s
 """
 IRC Client
@@ -149,8 +145,11 @@ class Server(bot.Server):
         self.send("NICK %s" % (nick))
 
     def connect(self):
-        self.socket = socket(self.opt('proxy'), self.opt('ssl'))
+        self.socket = ircsocket(self.opt('proxy'))
         self.socket.connect((self.opt('host'), self.opt('port')))
+        if self.opt('ssl'):
+            import ssl
+            self.socket = ssl.wrap_socket(self.socket)
 
     def ready(self):
         self.socket = None
@@ -216,7 +215,6 @@ class Server(bot.Server):
                 self.settings.addchannel(k, v)
 
     def shutdown(self):
-        import socket
         self.socket.send(('QUIT :%s\n' % (bot.versionstring)).encode())
         time.sleep(0.1)
         self.socket.shutdown(socket.SHUT_RDWR)

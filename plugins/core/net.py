@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import bot
-import httplib2
+import urllib.request
 import json
-from lib import socklock
-import socket
+from deps import socks
+from deps.sockshandler import SocksiPyHandler
 import urllib.parse
+import socket
 
 
 class HTTPURL:
@@ -16,8 +17,7 @@ class HTTPURL:
     class Response:
 
         def __init__(self, content):
-            self.headers = content[0]
-            self.content = content[1]
+            self.content = content.read()
 
         def raw(self):
             return self.content
@@ -36,26 +36,36 @@ class HTTPURL:
             return None
 
     def request(self, url, code="GET", params={},
-        body="", headers={}, timeout=None):
+        body=None, headers={}, timeout=None):
             if params:
                 if code == "GET":
                     url += '?' + urllib.parse.urlencode(params)
-                elif code == "POST":
-                    body = urllib.parse.urlencode(params)
-            with socklock.lock(httplib2, self.socks()):
+                elif code == "POST" and body is None:
+                    body = urllib.parse.urlencode(params).encode()
+
+            def maker():
+                req = urllib.request.Request(url)
+                for r in headers:
+                    req.add_header(r, headers[r])
                 try:
-                    http = httplib2.Http(timeout=timeout)
-                    try:
-                        return self.Response(http.request(url,
-                            code, body=body, headers=headers))
-                    except httplib2.RelativeURIError:
-                        url = "http://%s" % url
-                        return self.Response(http.request(url,
-                            code, body=body, headers=headers))
+                    if self.socks():
+                        o = urllib.request.build_opener(
+                            SocksiPyHandler(socks.SOCKS5,
+                                self.socks()[0], self.socks()[1]))
+                        return self.Response(o.open(req, data=body,
+                            timeout=timeout))
+                    else:
+                        return self.Response(urllib.request.urlopen(
+                            req, data=body, timeout=timeout))
                 except socket.timeout:
                     raise self.TimeoutError()
-                except httplib2.ServerNotFoundError:
+                except urllib.error.URLError:
                     raise self.ResolveError()
+            try:
+                return maker()
+            except ValueError:
+                url = "http://%s" % url
+                return maker()
 
     class Error(Exception):
         pass

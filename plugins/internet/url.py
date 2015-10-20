@@ -41,7 +41,8 @@ class Module(bot.Module):
 
     def title(self, context, args):
         try:
-            r = self.server.rget("http.url").request(args.getstr("url"))
+            r = self.server.rget("http.url").request(args.getstr("url"),
+                timeout=4)
         except self.server.rget("http.url").Error:
             return "Error while trying to read that url."
         p = LinksParser()

@@ -127,6 +127,7 @@ class Module(bot.Module):
         try:
             rf = RedFlare(url, self.server.rget('http.url'),
                 timeout=timeout if url in self.cache else 8)
+            self.server.log('REDFLARE DONE', url)
         except self.server.rget('http.url').Error:
             return
         except ValueError:

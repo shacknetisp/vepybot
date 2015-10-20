@@ -69,7 +69,7 @@ class M_Loader(bot.Module):
             module = plugin.split('/')[-1]
         plugin = plugin.split('/')[0]
 
-        if pms(plugin, module) in self.protected:
+        if pms(plugin, module) in self.protected or plugin in self.protected:
             return "You cannot unload the core plugins."
         if plugin not in self.server.plugins:
             return "That plugin is not loaded."

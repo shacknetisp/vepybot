@@ -16,7 +16,7 @@ class Module(bot.Module):
         term = args.getstr('term')
         try:
             r = http.request('http://api.urbandictionary.com/v0/define',
-                params={'term': term}).json()
+                params={'term': term}, timeout=4).json()
         except http.Error:
             return "Unable to contact the urbandictionary.com api."
         except ValueError:

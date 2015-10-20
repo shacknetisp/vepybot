@@ -6,10 +6,11 @@ def hostinfo(http, inhost, l='en'):
     ip = inhost
     host = inhost
     try:
-        r = http.request("http://api.statdns.com/%s/a" % inhost).json()
+        r = http.request(
+            "http://api.statdns.com/%s/a" % inhost, timeout=2).json()
         if 'error' not in r and r['answer']:
             ip = r['answer'][0]['rdata']
-        r = http.request("http://api.statdns.com/x/%s" % ip).json()
+        r = http.request("http://api.statdns.com/x/%s" % ip, timeout=2).json()
         if 'error' not in r and r['answer']:
             host = r['answer'][0]['rdata'].rstrip('.')
     except ValueError:
@@ -18,7 +19,7 @@ def hostinfo(http, inhost, l='en'):
         pass
     try:
         geoip = http.request(
-            "http://geoip.nekudo.com/api/%s/full" % ip).json()
+            "http://geoip.nekudo.com/api/%s/full" % ip, timeout=2).json()
     except http.Error:
         geoip = {}
     except ValueError:
