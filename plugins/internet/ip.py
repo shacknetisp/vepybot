@@ -57,11 +57,24 @@ def hostinfo(http, inhost, l='en', rdns=False):
         }
     if geoip:
         subdivisions = []
-        for sd in geoip['subdivisions']:
-            subdivisions.append({
-                'code': sd['iso_code'],
-                'name': sd['names'][l],
-                })
+        if 'subdivisions' in geoip:
+            for sd in geoip['subdivisions']:
+                subdivisions.append({
+                    'code': sd['iso_code'],
+                    'name': sd['names'][l],
+                    })
+
+        def add(k, k2):
+            d = geoip
+            try:
+                for kv in k2:
+                    d = d[kv]
+                ret[k] = d
+            except KeyError:
+                pass
+        add('timezone', ['location', 'time_zone'])
+        add('city', ['city', 'names', l])
+        add('postalcode', ['postal', 'code'])
         ret.update({
             'continent': geoip['continent']['names'][l],
             'continentcode': geoip['continent']['code'],
@@ -69,18 +82,8 @@ def hostinfo(http, inhost, l='en', rdns=False):
             'country': geoip['country']['names'][l],
             'countrycode': geoip['country']['iso_code'],
 
-            'city': geoip['city']['names'][l],
-
-            'timezone': geoip['location']['time_zone'],
-
             'regions': subdivisions,
             })
-        try:
-            ret.update({
-                'postalcode': geoip['postal']['code'],
-                })
-        except KeyError:
-            pass
         if subdivisions:
             ret['region'] = subdivisions[0]['name']
             ret['regioncode'] = subdivisions[0]['code']
