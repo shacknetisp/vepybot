@@ -205,6 +205,8 @@ class Server(bot.Server):
                     self.dohook("server_recv", ircmsg)
 
     def ischannel(self, x):
+        if 'CHANTYPES' not in self.info:
+            return x and True
         return x and x[0] in self.info['CHANTYPES']
 
     def build_lists(self):
