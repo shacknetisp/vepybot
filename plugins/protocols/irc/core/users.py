@@ -36,7 +36,7 @@ class M_Whois(bot.Module):
 
         self.addcommand(self.getwhois, "whois",
             "Get information about a nick. Space-delimited values."
-            " Values can be: nick, ident, host, channels, or auth/",
+            " Values can be: nick, ident, host, or auth.",
             ["nick", "[values...]"])
 
         self.addcommand(self.runwhois, "authme",
@@ -59,7 +59,6 @@ class M_Whois(bot.Module):
             info['ident'] = w.ident
             info['name'] = w.name
             info['host'] = w.host
-            info['channels'] = ' '.join(list(w.channels.keys()))
             info['auth'] = w.auth
         else:
             return "Nick not found."
@@ -134,6 +133,9 @@ class M_Whois(bot.Module):
             w.idle = int(context.rawsplit[4])
             w.signon = int(context.rawsplit[5])
         elif context.code("318"):
+            if context.rawsplit[3] in self.whois:
+                self.tmp[context.rawsplit[3]].channels = self.whois[
+                    context.rawsplit[3]].channels
             self.whois[context.rawsplit[3]] = self.tmp[context.rawsplit[3]]
             self.server.dohook("whois", context.rawsplit[3])
         elif context.code("330"):
