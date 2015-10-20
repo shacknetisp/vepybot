@@ -29,7 +29,7 @@ def runserver(server):
     global fatal
     while bot.run:
         try:
-            time.sleep(0.05)
+            time.sleep(0.01)
             with server.runlock:
                 with db.lock:
                     server.dotimers()
