@@ -73,15 +73,16 @@ def hostinfo(http, inhost, l='en', rdns=False):
             except KeyError:
                 pass
         add('timezone', ['location', 'time_zone'])
+
         add('city', ['city', 'names', l])
         add('postalcode', ['postal', 'code'])
+
+        add('country', ['country', 'names', l])
+        add('country', ['country', 'iso_code'])
+
+        add('continent', ['continent', 'names', l])
+        add('continentcode', ['continent', 'code'])
         ret.update({
-            'continent': geoip['continent']['names'][l],
-            'continentcode': geoip['continent']['code'],
-
-            'country': geoip['country']['names'][l],
-            'countrycode': geoip['country']['iso_code'],
-
             'regions': subdivisions,
             })
         if subdivisions:
