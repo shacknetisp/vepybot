@@ -41,8 +41,13 @@ class M_Channels(bot.Module):
             "Hop a channel.",
             ["[channel]"])
 
+        self.addcommand(self.get, "channels", "List channels.", [])
+
         self.addsetting("#kickrejoin", True)
         self.tmp = {}
+
+    def get(self, c, a):
+        return ' '.join(list(self.channels.keys())) or 'No channels joined.'
 
     def timer(self):
         for channel in self.channels:
