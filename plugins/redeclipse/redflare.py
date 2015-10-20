@@ -118,7 +118,7 @@ class Module(bot.Module):
         if url not in self.getsetting('redflares'):
             return "That url is not registered."
         if url not in self.cache or url not in self.lastseendb.d:
-            self.docache()
+            self.onecache(url, True)
         if url not in self.cache or url not in self.lastseendb.d:
             return "Unable to contact url."
 
@@ -126,7 +126,7 @@ class Module(bot.Module):
         self.server.log('REDFLARE', url)
         try:
             rf = RedFlare(url, self.server.rget('http.url'),
-                timeout=timeout if url in self.cache else 8)
+                timeout=timeout if url in self.cache else 4)
             self.server.log('REDFLARE DONE', url)
         except self.server.rget('http.url').Error:
             return
