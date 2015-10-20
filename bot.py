@@ -329,7 +329,7 @@ class Server:
         self.addhook("server_ready", "sinit", self.ready)
         self.dohook("server_ready")
 
-    def loadplugin(self, k, auto=False):
+    def loadplugin(self, k, auto=False, can=False):
         """Load the plugin/module <k>."""
         with modlock:
             plugin = k.split('/')[0]
@@ -358,7 +358,7 @@ class Server:
                 self.modules[index].plugin = plugin
                 self.log('LOAD', "%s/%s" % (plugin, index))
                 n += 1
-            if n == 0:
+            if n == 0 and not can:
                 return False
             self.plugins[plugin] = modules
             self.pluginpaths.append(k)
@@ -398,7 +398,7 @@ class Server:
             module = plugin.split('/')[-1]
         if module:
             try:
-                if not self.loadplugin(plugin):
+                if not self.loadplugin(plugin, can=True):
                     return False
             except SyntaxError:
                 return False
