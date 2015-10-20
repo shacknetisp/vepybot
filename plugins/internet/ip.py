@@ -31,11 +31,13 @@ def hostinfo(http, inhost, l='en', rdns=False):
     host = inhost
     try:
         if not is_valid_ipv6_address(ip) and not is_valid_ipv4_address(ip):
+            ip = ""
             r = http.request(
                 "http://api.statdns.com/%s/a" % inhost, timeout=2).json()
             if 'error' not in r and r['answer']:
                 ip = r['answer'][0]['rdata']
-        if rdns:
+                host = ip
+        if rdns and ip:
             r = http.request(
                 "http://api.statdns.com/x/%s" % ip, timeout=2).json()
             if 'error' not in r and r['answer']:
@@ -44,6 +46,8 @@ def hostinfo(http, inhost, l='en', rdns=False):
         pass
     except http.Error:
         pass
+    if not ip:
+        return {}
     try:
         geoip = http.request(
             "http://geoip.nekudo.com/api/%s/full" % ip, timeout=2).json()
