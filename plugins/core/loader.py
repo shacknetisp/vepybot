@@ -16,9 +16,6 @@ class M_Loader(bot.Module):
 
     def register(self):
 
-        self.protected = [
-            "core", self.server.index] + self.server.requiredplugins
-
         self.addcommand(
             self.load,
             "load",
@@ -57,7 +54,7 @@ class M_Loader(bot.Module):
             p = c.split('/')[0]
             if len(c.split('/')) > 1:
                 p = p + '/' + c.split('/')[-1]
-            if p in [name.split('/')[0], name]:
+            if p in [name.split('/')[0], name] or c == name:
                 return True
         return False
 
@@ -67,9 +64,10 @@ class M_Loader(bot.Module):
         module = ""
         if len(plugin.split('/')) > 1:
             module = plugin.split('/')[-1]
+        if plugin in self.server.protected:
+            return "You cannot unload the core plugins."
         plugin = plugin.split('/')[0]
-
-        if pms(plugin, module) in self.protected or plugin in self.protected:
+        if pms(plugin, module) in self.server.protected:
             return "You cannot unload the core plugins."
         if plugin not in self.server.plugins:
             return "That plugin is not loaded."
@@ -91,8 +89,11 @@ class M_Loader(bot.Module):
         self.server.settings.set("server.autoload", plist)
         self.server.unloadplugin(pms(plugin, module))
         nl = self.server.settings.get("server.noautoload")
-        if aname not in nl and aname.split('/')[0] not in nl:
-            nl.append(aname)
+        cname = aname
+        if len(cname.split('/')) > 1:
+            cname = cname.split('/')[0] + '/' + cname.split('/')[-1]
+        if cname not in nl and cname.split('/')[0] not in nl:
+            nl.append(cname)
         self.server.settings.set("server.noautoload", nl)
         return "Unloaded plugin: %s (%s autoload)" % (aname,
             utils.ynstr(self.willautoload(aname), "will", "won't"))
@@ -110,18 +111,18 @@ class M_Loader(bot.Module):
             return str(e)
         if not args.getbool('temp'):
             plist = self.server.settings.get("server.autoload")
-            if not self.willautoload(plugin, True):
-                plist.append(plugin)
             tod = []
             nl = self.server.settings.get("server.noautoload")
             for n in nl:
-                for p in [plugin.split('/')[0]] + [
+                for p in [plugin, plugin.split('/')[0]] + [
                     (plugin.split('/')[0] + '/' + x) for x in bot.newmodules]:
                         if n == p or n == p.split('/')[0]:
                             tod.append(n)
             for n in tod:
                 nl.pop(nl.index(n))
             self.server.settings.set("server.noautoload", nl)
+            if not self.willautoload(plugin, True):
+                plist.append(plugin)
             self.server.settings.set("server.autoload", plist)
         return "Loaded plugin: %s (%s autoload)" % (plugin,
             utils.ynstr(self.willautoload(plugin), "will", "won't"))

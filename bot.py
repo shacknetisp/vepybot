@@ -311,12 +311,16 @@ class Server:
         self.build_settings()
         self.modules = {}
         self.plugins = {}
+        self.protected = []
         self.righttypes = {}
         self.registry = {}
         self.pluginpaths = []
         for k in ["core",
             self.index] + self.requiredplugins:
                 self.loadplugin(k)
+                self.protected.append(k)
+                for x in newmodules:
+                    self.protected.append(k.split('/')[0] + '/%s' % x)
         self.build_lists()
         for k in self.dautoload + self.autoload + self.settings.get(
             "server.autoload"):
