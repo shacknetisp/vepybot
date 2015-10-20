@@ -72,6 +72,7 @@ if __name__ == "__main__":
                     run = False
                 with db.lock:
                     db.saveall()
+                time.sleep(0.01)
                 if not bot.run:
                     for thread in threads:
                         thread.join()
@@ -85,6 +86,7 @@ if __name__ == "__main__":
                     server.dotimers()
                     server.corerun()
                 db.saveall()
+                time.sleep(0.01)
             for server in bot.runningservers:
                 server.shutdown()
             imp.reload(db)

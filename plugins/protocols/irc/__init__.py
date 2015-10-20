@@ -199,23 +199,26 @@ class Server(bot.Server):
         if not self.socket:
             self.connect()
         inr = [self.socket]
-        try:
-            readyr, _, _ = select.select(
-                inr, [], [], 0.1)
-        except InterruptedError:
-            return
-        if readyr:
-            self.inbuf += self.socket.recv(self.opt('recv'))
-            while b'\n' in self.inbuf:
-                ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode()
-                self.inbuf = self.inbuf[self.inbuf.index(b'\n') + 1:]
-                regex = re.compile(
-                "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
-                for ircmsg in ircmsg.strip().split('\n'):
-                    ircmsg = ircmsg.strip('\r')
-                    ircmsg = regex.sub("", ircmsg)
-                    self.log('IN', ircmsg)
-                    self.dohook("server_recv", ircmsg)
+        for _ in range(100):
+            try:
+                readyr, _, _ = select.select(
+                    inr, [], [], 0.025)
+            except InterruptedError:
+                return
+            if readyr:
+                self.inbuf += self.socket.recv(self.opt('recv'))
+                while b'\n' in self.inbuf:
+                    ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode()
+                    self.inbuf = self.inbuf[self.inbuf.index(b'\n') + 1:]
+                    regex = re.compile(
+                    "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
+                    for ircmsg in ircmsg.strip().split('\n'):
+                        ircmsg = ircmsg.strip('\r')
+                        ircmsg = regex.sub("", ircmsg)
+                        self.log('IN', ircmsg)
+                        self.dohook("server_recv", ircmsg)
+            else:
+                break
 
     def ischannel(self, x):
         if 'CHANTYPES' not in self.info:
