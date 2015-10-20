@@ -27,6 +27,15 @@ class M_Alias(lib.alias.Module):
             "Remove an alias.",
             ["alias"],)
 
+        self.addcommand(
+            self.show,
+            "list",
+            "List aliases.", [])
+
+    def show(self, context, args):
+        l = list(self.server.settings.get("server.aliases").keys())
+        return ", ".join(l) or "No aliases."
+
     def get(self, context, args):
         alias = args.getstr('alias')
         return "%s" % (self._get(self.server.settings.get("server.aliases"),

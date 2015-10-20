@@ -30,8 +30,23 @@ class M_Alias(lib.alias.Module):
             ["[channel]", "alias"],
             recognizers={'channel': self.server.ischannel})
 
+        self.addcommand(
+            self.show,
+            "list",
+            "List aliases.",
+            ["[channel]"],
+            recognizers={'channel': self.server.ischannel})
+
         self.addserversetting("server.=#aliases", {})
         self.addserverchannelsetting("aliases", {})
+
+    def show(self, context, args):
+        args.default("channel", "")
+        l = list(self.server.settings.get("server.aliases").keys())
+        if args.getstr("channel"):
+            l = list(self.server.settings.getchannel(
+                    "aliases", args.getstr("channel")).keys())
+        return ", ".join(l) or "No aliases."
 
     def get(self, context, args):
         args.default("channel", "")
