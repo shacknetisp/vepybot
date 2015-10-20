@@ -2,7 +2,7 @@
 import bot
 import html
 import re
-tag_re = re.compile(r'(<!--.*?-->|<[^>]*>)')
+tag_re = re.compile(r'<.*?>.*?<\/.*?>')
 
 
 class Module(bot.Module):
@@ -23,6 +23,8 @@ class Module(bot.Module):
                 "q": query,
                 "format": 'json',
                 "t": bot.versionname.lower(),
+                "no_redirect": 1,
+                "no_html": 1,
                 }).json()
         except http.Error:
             return "Cannot contact the Duck Duck Go API."
@@ -30,15 +32,16 @@ class Module(bot.Module):
             return "Invalid response from the Duck Duck Go API."
         if r['AbstractText']:
             if r['Results']:
-                return "%s [%s]" % (html.unescape(r['AbstractText']),
-                    r['Results'][0]['FirstURL'])
+                return "[%s] %s" % (r['Results'][0]['FirstURL'],
+                    html.unescape(r['AbstractText']))
         elif r['AnswerType'] == 'calc':
             return "%s" % tag_re.sub('', r['Answer'])
         elif r['RelatedTopics']:
-            return "%s [%s]" % (' '.join(tag_re.sub('',
-                    r['RelatedTopics'][0]['Result'].replace(
-                        '</a>', '</a>: ', 1)).split()),
-                    r['RelatedTopics'][0]['FirstURL'])
+            return "[%s] %s" % (r['RelatedTopics'][0]['FirstURL'],
+                    ' '.join(tag_re.sub('',
+                    r['RelatedTopics'][0]['Result']).split()))
+        elif r['Redirect']:
+            return "%s" % r['Redirect']
         return "No results."
 
 bot.register.module(Module)
