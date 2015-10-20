@@ -29,7 +29,7 @@ class Module(bot.Module):
         if alias in aliases:
             return aliases[alias]
         else:
-            return "That alias does not exist."
+            return "That alias does not exist in the config."
 
     def _remove(self, aliases, alias):
         if alias in aliases:
@@ -37,7 +37,7 @@ class Module(bot.Module):
             del aliases[alias]
             return "Removed %s, contained: %s" % (alias, content)
         else:
-            return "That alias does not exist."
+            return "That alias does not exist in the config."
 
     def getalias(self, context, alias, argtext=None):
         if argtext is not None:

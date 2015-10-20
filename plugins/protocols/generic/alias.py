@@ -33,7 +33,8 @@ class M_Alias(lib.alias.Module):
             "List aliases.", [])
 
     def show(self, context, args):
-        l = list(self.server.settings.get("server.aliases").keys())
+        l = list(self.server.settings.get("server.aliases").keys()) + (
+            list(self.server.globalaliases.keys()))
         return ", ".join(l) or "No aliases."
 
     def get(self, context, args):
