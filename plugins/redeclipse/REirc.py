@@ -44,10 +44,11 @@ class Module(bot.Module):
                     "parser.prefixes", context):
                     if text.startswith(prefix):
                         command = text[len(prefix):].strip()
-                        out, errout = self.server.runcommand(
-                            newcontext, command)
-                        if out or errout:
-                            newcontext.reply(out if out else errout)
+                        if not command.startswith('/'):
+                            out, errout = self.server.runcommand(
+                                newcontext, command)
+                            if out or errout:
+                                newcontext.reply(out if out else errout)
                 return
 
 bot.register.module(Module)
