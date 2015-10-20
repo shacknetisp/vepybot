@@ -32,9 +32,9 @@ class Module(bot.Module):
                 return "%s [%s]" % (html.unescape(r['AbstractText']),
                     r['Results'][0]['FirstURL'])
         elif r['RelatedTopics']:
-            return "%s [%s]" % (tag_re.sub('',
+            return "%s [%s]" % (' '.join(tag_re.sub('',
                     r['RelatedTopics'][0]['Result'].replace(
-                        '</a>', '</a>: ', 1)),
+                        '</a>', '</a>: ', 1)).split()),
                     r['RelatedTopics'][0]['FirstURL'])
         return "No results."
 
