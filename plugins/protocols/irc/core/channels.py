@@ -4,14 +4,6 @@ from lib import utils
 bot.reload(utils)
 
 
-class Channel:
-
-    def __init__(self, server, name):
-        self.server = server
-        self.name = name
-        self.names = {}
-
-
 class M_Channels(bot.Module):
 
     index = "channels"
@@ -20,8 +12,6 @@ class M_Channels(bot.Module):
         self.addhook("loggedin", "loggedin", self.loggedin)
         self.addhook("recv", "recv", self.recv)
         self.addtimer(self.timer, "timer", 60 * 1000)
-        self.channels = {}
-        self.server.channels = self.channels
 
         self.addcommand(
             self.join_c,
@@ -47,10 +37,11 @@ class M_Channels(bot.Module):
         self.tmp = {}
 
     def get(self, c, a):
-        return ' '.join(list(self.channels.keys())) or 'No channels joined.'
+        return ' '.join(list(
+            self.server.channels.keys())) or 'No channels joined.'
 
     def timer(self):
-        for channel in self.channels:
+        for channel in self.server.channels:
             self.server.send("WHO %s" % channel)
 
     def join(self, c, temp=False):
@@ -72,7 +63,7 @@ class M_Channels(bot.Module):
         self.server.settings.set("server.channels", clist)
 
     def join_c(self, context, args):
-        if args.getstr('channel') in self.channels:
+        if args.getstr('channel') in self.server.channels:
             return "Already joined %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.join(args.getstr('channel'), args.getbool('temp'))
@@ -83,7 +74,7 @@ class M_Channels(bot.Module):
     def part_c(self, context, args):
         if context.channel:
             args.default('channel', context.channel)
-        if args.getstr('channel') not in self.channels:
+        if args.getstr('channel') not in self.server.channels:
             return "Not joined in %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), args.getbool('temp'))
@@ -98,7 +89,7 @@ class M_Channels(bot.Module):
     def hop_c(self, context, args):
         if context.channel:
             args.default('channel', context.channel)
-        if args.getstr('channel') not in self.channels:
+        if args.getstr('channel') not in self.server.channels:
             return "Not joined in %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), True)
@@ -114,21 +105,21 @@ class M_Channels(bot.Module):
             self.server.dohook('log', 'kick', context.rawsplit[0],
                 (context.rawsplit[2], context.rawsplit[3]))
             if context.rawsplit[3] == self.server.nick:
-                if context.rawsplit[2] in self.channels:
-                    self.channels.pop(context.rawsplit[2])
+                if context.rawsplit[2] in self.server.channels:
+                    self.server.channels.pop(context.rawsplit[2])
                     self.server.log("KICK PARTED", context.rawsplit[2])
                 if self.getchannelsetting("kickrejoin", context.reciever):
                     self.join(context.reciever)
         elif context.code("join"):
             if context.user[0] == self.server.nick:
                 c = context.rawsplit[2].strip(':')
-                self.channels[c] = Channel(self.server, c)
+                self.server.channels[c] = self.server.Channel(self.server, c)
                 self.server.send("WHO %s" % c)
                 self.server.log("JOINED", c)
         elif context.code("part"):
             if context.user[0] == self.server.nick:
-                if context.rawsplit[2] in self.channels:
-                    self.channels.pop(context.rawsplit[2])
+                if context.rawsplit[2] in self.server.channels:
+                    self.server.channels.pop(context.rawsplit[2])
                     self.server.log("PARTED", context.rawsplit[2])
         elif context.code("352"):
             self.server.dohook('whois.fromtuple', (context.rawsplit[7],
@@ -146,10 +137,10 @@ class M_Channels(bot.Module):
                             ]
         elif context.code("315"):
             w = self.tmp[context.rawsplit[3]]
-            if context.rawsplit[3] not in self.channels:
-                self.channels[context.rawsplit[3]] = Channel(
+            if context.rawsplit[3] not in self.server.channels:
+                self.server.channels[context.rawsplit[3]] = self.server.Channel(
                     self.server, context.rawsplit[3])
-            c = self.channels[context.rawsplit[3]]
+            c = self.server.channels[context.rawsplit[3]]
             c.names = w['names']
             self.server.rget('whois.updatechannels')(list(c.names.keys()))
 

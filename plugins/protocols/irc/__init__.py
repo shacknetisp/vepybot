@@ -153,10 +153,18 @@ class Server(bot.Server):
             self.socket = ssl.wrap_socket(self.socket)
         self.log("SOCK CONN", "Done.")
 
+    class Channel:
+
+        def __init__(self, server, name):
+            self.server = server
+            self.name = name
+            self.names = {}
+
     def ready(self):
         self.socket = None
         self.loggedin = False
         self.info = {}
+        self.channels = {}
         self.inbuf = bytes()
         self.outbuf = []
         self.addtimer(self.output, "output", 100)
