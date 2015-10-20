@@ -26,7 +26,7 @@ class Module(bot.Module):
             r = http.request("http://api.duckduckgo.com/", params={
                 "q": query,
                 "format": 'json',
-                "t": bot.versionname.lower(),
+                "t": bot.version.name.lower(),
                 "no_redirect": 1,
                 "no_html": 1,
                 }).json()

@@ -40,8 +40,11 @@ class HTTPURL:
             if params:
                 if code == "GET":
                     url += '?' + urllib.parse.urlencode(params)
-                elif code == "POST" and body is None:
-                    body = urllib.parse.urlencode(params).encode()
+                elif code == "POST":
+                    if body is None:
+                        body = urllib.parse.urlencode(params).encode()
+                    else:
+                        url += '?' + urllib.parse.urlencode(params)
 
             def maker():
                 req = urllib.request.Request(url)

@@ -233,7 +233,7 @@ class Server(bot.Server):
                 self.settings.addchannel(k, v)
 
     def shutdown(self):
-        self.socket.send(('QUIT :%s\n' % (bot.versionstring)).encode())
+        self.socket.send(('QUIT :%s\n' % (bot.version.namever)).encode())
         time.sleep(0.1)
         self.socket.shutdown(socket.SHUT_RDWR)
         time.sleep(0.1)
@@ -332,7 +332,7 @@ class M_Settings(bot.Module):
         self.server.settings.add("server.whois", True)
         for n in ['nick', 'mode']:
             self.server.settings.add("server.user.%s" % n, self.server.opt(n))
-        self.server.settings.add("server.user.name", bot.versionstring)
+        self.server.settings.add("server.user.name", bot.version.namever)
         if 'ident' not in self.server.options:
             self.server.options['ident'] = self.server.settings.get(
                 'server.user.nick')

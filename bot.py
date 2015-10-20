@@ -5,22 +5,12 @@ import importlib
 import time
 import fnmatch
 import copy
-import platform
 import textwrap
+import version
 from threading import Lock
 
 threads = True
 run = True
-
-version = "0.2.2"
-versionname = "Vepybot"
-versionstring = "%s %s" % (versionname, version)
-versiontuple = (versionname, version, "Python %s on %s (%s)" % (
-    platform.python_version(),
-    platform.system(),
-    platform.release()
-    ))
-source = "https://github.com/shacknetisp/vepybot"
 
 userdata = 'userdata'
 
@@ -77,6 +67,7 @@ class register:
 
 
 def reloadall():
+    reload(version)
     for server in runningservers:
         server.reloadall()
 

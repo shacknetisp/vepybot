@@ -21,7 +21,7 @@ class M_Versions(bot.Module):
             [])
 
     def version(self, context, args):
-        return "%s" % (bot.versionstring)
+        return "%s" % (bot.version.namever)
 
     def source(self, context, args):
         return "%s" % (bot.source)

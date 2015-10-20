@@ -19,7 +19,7 @@ class M_CTCP(bot.Module):
         self.addhook("ctcp.source", "ctcp.source", self.ctcp_source)
 
     def ctcp_version(self, context, args):
-        context.replyctcp("VERSION %s %s -- %s" % (bot.versiontuple))
+        context.replyctcp("VERSION %s %s -- %s" % (bot.version.platformtuple))
 
     def ctcp_ping(self, context, args):
         if args:
