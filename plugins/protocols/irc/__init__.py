@@ -226,7 +226,7 @@ class Server(bot.Server):
                     self.log('RECONN', 'TIMEOUT')
                     bot.run = False
                     return
-        if time.time() - self.lastpong > 30 and self.socket:
+        if time.time() - self.lastpong > 120 and self.socket:
             self.log('CONN', 'TIMEOUT')
             self.shutdown()
             self.socket = None
