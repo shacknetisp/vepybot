@@ -29,7 +29,7 @@ class M_CTCP(bot.Module):
         context.replyctcp("TIME %s" % time.ctime())
 
     def ctcp_source(self, context, args):
-        context.replyctcp("SOURCE %s" % bot.source)
+        context.replyctcp("SOURCE %s" % bot.version.source)
 
     def ctcp_errmsg(self, context, args):
         context.replyctcp("ERRMSG An error has occurred.")
