@@ -146,12 +146,34 @@ class Server(bot.Server):
 
     def connect(self):
         self.log("SOCK CONN", "Starting.")
-        self.socket = ircsocket(self.opt('proxy'))
-        self.socket.connect((self.opt('host'), self.opt('port')))
-        if self.opt('ssl'):
-            import ssl
-            self.socket = ssl.wrap_socket(self.socket)
+        self.lastconnectattempt = time.time()
+        try:
+            self.socket = ircsocket(self.opt('proxy'))
+            self.socket.settimeout(5)
+            self.socket.connect((self.opt('host'), self.opt('port')))
+            if self.opt('ssl'):
+                import ssl
+                self.socket = ssl.wrap_socket(self.socket)
+        except:
+            import traceback
+            traceback.print_exc()
+            self.socket = None
+            return
+        self.socketup = True
         self.log("SOCK CONN", "Done.")
+        self.initialnick()
+
+    def initialnick(self):
+        self.wantnick = self.settings.get("server.user.nick")
+        self.setnick(self.wantnick)
+        self.send("USER %s %s * :%s" % (
+            self.settings.get('server.user.ident'),
+            self.settings.get('server.user.mode'),
+            self.settings.get('server.user.name')))
+
+    def reconnect(self):
+        self.log("RECONNECT", "Starting.")
+        self.connect()
 
     class Channel:
 
@@ -162,18 +184,16 @@ class Server(bot.Server):
 
     def ready(self):
         self.socket = None
+        self.socketup = False
         self.loggedin = False
         self.info = {}
         self.channels = {}
+        self.lastpong = time.time()
+        self.lastconnectattempt = 0
         self.inbuf = bytes()
         self.outbuf = []
         self.addtimer(self.output, "output", 100)
-        self.wantnick = self.settings.get("server.user.nick")
-        self.setnick(self.wantnick)
-        self.send("USER %s %s * :%s" % (
-            self.settings.get('server.user.ident'),
-            self.settings.get('server.user.mode'),
-            self.settings.get('server.user.name')))
+        self.initialnick()
 
     def send(self, msg):
         self.outbuf.append(msg)
@@ -183,21 +203,33 @@ class Server(bot.Server):
         self.dohook('log', 'sendto', command.upper(), (target.lower(), msg))
 
     def output(self):
-        if not self.socket:
-            self.connect()
+        if not self.socketup or not self.socket:
+            return False
         if self.outbuf:
             o = bytes(self.outbuf.pop(0), 'UTF-8')
             if o[-1] != b'\n':
                 o += b'\n'
             self.log("OUT", o.decode())
-            try:
-                self.socket.send(o)
-            except BrokenPipeError:
-                self.outbuf.insert(0, o.decode())
+            self.socket.send(o)
 
     def run(self):
-        if not self.socket:
+        if not self.socketup and (time.time() - self.lastconnectattempt > 15):
             self.connect()
+            return
+        if self.socketup and not self.socket and (
+            time.time() - self.lastconnectattempt > 15):
+                if self.settings.get('server.reconnect'):
+                    self.reconnect()
+                    return
+                else:
+                    self.log('CONN', 'TIMEOUT')
+                    bot.run = False
+                    return
+        if time.time() - self.lastpong > 60:
+            self.socket = None
+            return
+        if not self.socket:
+            return
         inr = [self.socket]
         for _ in range(100):
             try:
@@ -206,7 +238,11 @@ class Server(bot.Server):
             except InterruptedError:
                 return
             if readyr:
-                self.inbuf += self.socket.recv(self.opt('recv'))
+                r = self.socket.recv(self.opt('recv'))
+                if not r:
+                    self.socket = None
+                    return
+                self.inbuf += r
                 while b'\n' in self.inbuf:
                     ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode()
                     self.inbuf = self.inbuf[self.inbuf.index(b'\n') + 1:]
@@ -233,11 +269,12 @@ class Server(bot.Server):
                 self.settings.addchannel(k, v)
 
     def shutdown(self):
-        self.socket.send(('QUIT :%s\n' % (bot.version.namever)).encode())
-        time.sleep(0.1)
-        self.socket.shutdown(socket.SHUT_RDWR)
-        time.sleep(0.1)
-        self.socket.close()
+        if self.socketup and self.socket:
+            self.socket.send(('QUIT :%s\n' % (bot.version.namever)).encode())
+            time.sleep(0.1)
+            self.socket.shutdown(socket.SHUT_RDWR)
+            time.sleep(0.1)
+            self.socket.close()
 
     #References:
     #http://stackoverflow.com/a/13382032
@@ -330,6 +367,7 @@ class M_Settings(bot.Module):
 
         self.server.settings.add("server.channels", [])
         self.server.settings.add("server.whois", True)
+        self.server.settings.add("server.reconnect", True)
         for n in ['nick', 'mode']:
             self.server.settings.add("server.user.%s" % n, self.server.opt(n))
         self.server.settings.add("server.user.name",
