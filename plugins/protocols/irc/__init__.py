@@ -159,6 +159,7 @@ class Server(bot.Server):
             traceback.print_exc()
             self.socket = None
             return
+        self.lastpong = time.time()
         self.socketup = True
         self.log("SOCK CONN", "Done.")
         self.initialnick()
@@ -222,10 +223,12 @@ class Server(bot.Server):
                     self.reconnect()
                     return
                 else:
-                    self.log('CONN', 'TIMEOUT')
+                    self.log('RECONN', 'TIMEOUT')
                     bot.run = False
                     return
-        if time.time() - self.lastpong > 60:
+        if time.time() - self.lastpong > 30 and self.socket:
+            self.log('CONN', 'TIMEOUT')
+            self.shutdown()
             self.socket = None
             return
         if not self.socket:
@@ -274,6 +277,7 @@ class Server(bot.Server):
             time.sleep(0.1)
             self.socket.shutdown(socket.SHUT_RDWR)
             time.sleep(0.1)
+        if self.socket:
             self.socket.close()
 
     #References:
