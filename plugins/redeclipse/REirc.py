@@ -2,6 +2,7 @@
 import bot
 import fnmatch
 import copy
+import string
 
 
 class Module(bot.Module):
@@ -44,6 +45,8 @@ class Module(bot.Module):
                     "parser.prefixes", context):
                     if text.startswith(prefix):
                         command = text[len(prefix):].strip()
+                        if not command.strip(string.punctuation):
+                            return
                         if not command.startswith('/'):
                             out, errout = self.server.runcommand(
                                 newcontext, command)
