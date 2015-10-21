@@ -63,7 +63,7 @@ class Module(bot.Module):
 
         self.addcommand(self.lastseen, "lastseen",
             "See when a player was last on.",
-            ["url", "[-auth]", "[-regex]", "[search...]"])
+            ["url", "[-auth]", "[-regex]", "[-count]", "[search...]"])
 
         self.addcommand(self.setup, "setup", "Easy redflare setup.",
             ['url', 'isonalias', 'wasonalias'])
@@ -210,6 +210,8 @@ class Module(bot.Module):
                         s[p] = v
         if not s:
             return "No results."
+        if args.getbool('count'):
+            return "The number of entries: %d" % len(s)
         p = sorted(s, key=lambda x: -s[x])[0]
         return "%s: %s -- %s ago." % (p,
             time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(s[p])),
