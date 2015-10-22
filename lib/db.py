@@ -50,7 +50,7 @@ def literal_eval(node_or_string):
                 return left + right
             else:
                 return left - right
-        if node.id in ['true', 'false']:
+        elif node.id in ['true', 'false']:
             return node.id == 'true'
         raise ValueError('malformed node or string: ' + repr(node))
     return _convert(node_or_string)
