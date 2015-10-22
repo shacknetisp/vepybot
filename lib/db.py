@@ -10,6 +10,52 @@ dbs = {}
 modified = {}
 
 
+def literal_eval(node_or_string):
+    if isinstance(node_or_string, str):
+        node_or_string = ast.parse(node_or_string, mode='eval')
+    if isinstance(node_or_string, ast.Expression):
+        node_or_string = node_or_string.body
+
+    def _convert(node):
+        if isinstance(node, (ast.Str, ast.Bytes)):
+            return node.s
+        elif isinstance(node, ast.Num):
+            return node.n
+        elif isinstance(node, ast.Tuple):
+            return tuple(map(_convert, node.elts))
+        elif isinstance(node, ast.List):
+            return list(map(_convert, node.elts))
+        elif isinstance(node, ast.Set):
+            return set(map(_convert, node.elts))
+        elif isinstance(node, ast.Dict):
+            return dict((_convert(k), _convert(v)) for k, v
+                        in zip(node.keys, node.values))
+        elif isinstance(node, ast.NameConstant):
+            return node.value
+        elif isinstance(node, ast.UnaryOp) and \
+             isinstance(node.op, (ast.UAdd, ast.USub)) and \
+             isinstance(node.operand, (ast.Num, ast.UnaryOp, ast.BinOp)):
+            operand = _convert(node.operand)
+            if isinstance(node.op, ast.UAdd):
+                return + operand
+            else:
+                return - operand
+        elif isinstance(node, ast.BinOp) and \
+             isinstance(node.op, (ast.Add, ast.Sub)) and \
+             isinstance(node.right, (ast.Num, ast.UnaryOp, ast.BinOp)) and \
+             isinstance(node.left, (ast.Num, ast.UnaryOp, ast.BinOp)):
+            left = _convert(node.left)
+            right = _convert(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            else:
+                return left - right
+        if node.id in ['true', 'false']:
+            return node.id == 'true'
+        raise ValueError('malformed node or string: ' + repr(node))
+    return _convert(node_or_string)
+
+
 class DB:
 
     clear = lambda: None
@@ -25,7 +71,7 @@ class DB:
                 except ValueError as e:
                     print(("(%s) Invalid JSON, loading with AST." % path))
                     try:
-                        dbs[path] = ast.literal_eval(open(path).read())
+                        dbs[path] = literal_eval(open(path).read())
                     except SyntaxError as e:
                         raise SyntaxError(
                             "Invalid AST (%s): %s" % (path, e))
