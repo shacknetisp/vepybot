@@ -17,9 +17,6 @@ class Module(bot.Module):
         self.addcommand(self.reloadall, "reload servers",
             "Reload all plugins.", [])
 
-        self.addcommand(self.reloadall, "stats",
-            "Show running information about the bot.", [])
-
         self.server.addrights({
             "bot": ["owner"],
             })
