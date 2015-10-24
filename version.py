@@ -7,5 +7,5 @@ platformtuple = (name, version, "Python %s on %s (%s)" % (
     platform.python_version(),
     platform.system(),
     platform.release()
-    ))
+))
 source = "https://github.com/shacknetisp/vepybot"

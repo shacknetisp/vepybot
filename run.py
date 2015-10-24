@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import bot
 import sys
 from lib import db
@@ -48,10 +49,12 @@ if __name__ == "__main__":
     for s in [
         signal.SIGINT,
         signal.SIGTERM,
-        ]:
-            signal.signal(s, signal_handler)
-    if hasattr(signal, 'SIGHUP'):
+    ]:
+        signal.signal(s, signal_handler)
+    try:
         signal.signal(signal.SIGHUP, hup_handler)
+    except:
+        pass
     while run:
         if len(sys.argv) > 1:
             bot.userdata = sys.argv[1]
