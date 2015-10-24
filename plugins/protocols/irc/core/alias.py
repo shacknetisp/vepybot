@@ -32,7 +32,7 @@ class M_Alias(lib.alias.Module):
 
         self.addcommand(
             self.show,
-            "list",
+            "alias list",
             "List aliases.",
             ["[channel]"],
             recognizers={'channel': self.server.ischannel})
