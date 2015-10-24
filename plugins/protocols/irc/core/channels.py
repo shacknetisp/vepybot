@@ -27,9 +27,11 @@ class M_Channels(bot.Module):
 
         self.addcommand(
             self.hop_c,
-            "hop",
-            "Hop a channel.",
+            "cycle",
+            "Cycle on a channel.",
             ["[channel]"])
+
+        self.addcommandalias('cycle', 'hop')
 
         self.addcommand(self.get, "channels", "List channels.", [])
 
@@ -94,7 +96,7 @@ class M_Channels(bot.Module):
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), True)
         self.join(args.getstr('channel'), True)
-        return "Hopped %s." % args.getstr('channel')
+        return "Cycled %s." % args.getstr('channel')
 
     def loggedin(self):
         for channel in self.server.settings.get("server.channels"):
