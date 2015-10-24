@@ -51,10 +51,8 @@ if __name__ == "__main__":
         signal.SIGTERM,
     ]:
         signal.signal(s, signal_handler)
-    try:
+    if hasattr(signal, "SIGHUP")
         signal.signal(signal.SIGHUP, hup_handler)
-    except:
-        pass
     while run:
         if len(sys.argv) > 1:
             bot.userdata = sys.argv[1]
