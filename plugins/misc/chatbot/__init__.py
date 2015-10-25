@@ -15,19 +15,19 @@ class Module(bot.Module):
         if self.server.index in ['irc']:
             self.server.rget('addchannelrights')({
                 'chatbot': ['op'],
-                })
+            })
             self.addsetting('#globaldb', True)
         self.addcommand(self.chat, "chat", "Talk to the bot.", ["text..."])
         self.addcommandalias('chat', 'c')
         self.server.addrights({
             'chatbot': ['admin'],
-            })
+        })
 
     def chat(self, context, args):
         if self.server.index in ['irc']:
             if context.channel and not self.getchannelsetting(
-                'globaldb', context):
-                    context.exceptchannelrights(['chatbot'])
+                    'globaldb', context):
+                context.exceptchannelrights(['chatbot'])
             else:
                 context.exceptrights(['admin', 'chatbot'])
             cname = ""
