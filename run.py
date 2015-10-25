@@ -51,7 +51,7 @@ if __name__ == "__main__":
         signal.SIGTERM,
     ]:
         signal.signal(s, signal_handler)
-    if hasattr(signal, "SIGHUP")
+    if hasattr(signal, "SIGHUP"):
         signal.signal(signal.SIGHUP, hup_handler)
     while run:
         if len(sys.argv) > 1:
