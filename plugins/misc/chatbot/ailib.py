@@ -54,7 +54,7 @@ class AI:
         try:
             out = list(reversed(sorted(possible, key=lambda x: diff(x[2]))))[
                 0:max(min(round(len(possible) / 7),
-                random.randrange(1, 5)), 1)]
+                          random.randrange(1, 5)), 1)]
             out = random.choice(out)
             self.lastphrase = out[1]
             return out[1]

@@ -6,12 +6,12 @@ import math
 import random
 
 _operations = {
-        ast.Add: operator.add,
-        ast.Sub: operator.sub,
-        ast.Mult: operator.mul,
-        ast.Div: operator.truediv,
-        ast.Pow: operator.pow,
-        ast.BitXor: operator.xor,
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.Pow: operator.pow,
+    ast.BitXor: operator.xor,
 }
 
 
@@ -30,12 +30,12 @@ def _safe_eval(node, variables, functions):
                 return op(left, right)
         elif isinstance(node, ast.Call):
                 assert (not node.keywords and not
-                    node.starargs and not node.kwargs)
+                        node.starargs and not node.kwargs)
                 assert isinstance(node.func,
-                    ast.Name), 'Unsafe function derivation.'
+                                  ast.Name), 'Unsafe function derivation.'
                 func = functions[node.func.id]
                 args = [_safe_eval(arg, variables, functions)
-                for arg in node.args]
+                        for arg in node.args]
                 return func(*args)
 
         assert False, 'Unsupported operation.'
@@ -53,7 +53,7 @@ class Module(bot.Module):
     def register(self):
 
         self.addcommand(self.calc, "calc", "Evaluate an expression.",
-            ['expr...'])
+                        ['expr...'])
 
     def calc(self, context, args):
         expr = args.getstr('expr')

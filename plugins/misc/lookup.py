@@ -12,12 +12,12 @@ class Module(bot.Module):
     def register(self):
 
         self.addcommand(self.ud, 'ud',
-            'Look up a term in Urban Dictionary.', ['term...'])
+                        'Look up a term in Urban Dictionary.', ['term...'])
 
         self.addcommand(self.ddg, "ddg",
-            "Look up something on Duck Duck Go. "
-            "http://duckduckgo.com",
-            ["query..."])
+                        "Look up something on Duck Duck Go. "
+                        "http://duckduckgo.com",
+                        ["query..."])
 
     def ddg(self, context, args):
         query = args.getstr('query')
@@ -29,7 +29,7 @@ class Module(bot.Module):
                 "t": bot.version.name.lower(),
                 "no_redirect": 1,
                 "no_html": 1,
-                }).json()
+            }).json()
         except http.Error:
             return "Cannot contact the Duck Duck Go API."
         except ValueError:
@@ -37,13 +37,13 @@ class Module(bot.Module):
         if r['AbstractText']:
             if r['Results']:
                 return "[%s] %s" % (r['Results'][0]['FirstURL'],
-                    html.unescape(r['AbstractText']))
+                                    html.unescape(r['AbstractText']))
         elif r['AnswerType'] == 'calc':
             return "%s" % tag_re.sub('', r['Answer'])
         elif r['RelatedTopics']:
             return "[%s] %s" % (r['RelatedTopics'][0]['FirstURL'],
-                    ' '.join(tag_re.sub('',
-                    r['RelatedTopics'][0]['Result']).split()))
+                                ' '.join(tag_re.sub('',
+                                r['RelatedTopics'][0]['Result']).split()))
         elif r['Redirect']:
             return "%s" % r['Redirect']
         return "No results."
@@ -53,7 +53,7 @@ class Module(bot.Module):
         term = args.getstr('term')
         try:
             r = http.request('http://api.urbandictionary.com/v0/define',
-                params={'term': term}, timeout=4).json()
+                             params={'term': term}, timeout=4).json()
         except http.Error:
             return "Unable to contact the urbandictionary.com api."
         except ValueError:

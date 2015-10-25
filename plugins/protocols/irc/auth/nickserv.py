@@ -33,19 +33,19 @@ class M_NickServ(bot.Module):
         self.ghosting = True
 
         self.addcommand(self.register_c, "register",
-            "Register with NickServ.", ["[-name]", "email"])
+                        "Register with NickServ.", ["[-name]", "email"])
 
         self.addcommand(self.verify_c, "verify register",
-            "Verify with NickServ.", ["account", "code"])
+                        "Verify with NickServ.", ["account", "code"])
 
         self.addcommand(self.identify_c, "identify",
-            "Identify with NickServ.", [])
+                        "Identify with NickServ.", [])
 
         self.addcommand(self.setp, "set password",
-            "Set the NickServ password.", ["password"])
+                        "Set the NickServ password.", ["password"])
 
         self.addcommand(self.setn, "set name",
-            "Set the NickServ name.", ["[name]"])
+                        "Set the NickServ name.", ["[name]"])
 
     def setn(self, context, args):
         args.default("name", "")
@@ -59,7 +59,7 @@ class M_NickServ(bot.Module):
 
     def name(self):
         return self.getsetting("name") or self.server.settings.get(
-                            'server.user.nick')
+            'server.user.nick')
 
     def recv(self, context):
         if context.user[0]:
@@ -67,22 +67,22 @@ class M_NickServ(bot.Module):
                 if context.reciever == self.server.nick:
                     if self.lastns and time.time() - self.lastnstime < 30:
                         self.server.sendto("NOTICE", self.lastns,
-                            "NickServ -- %s" % (
-                            self.lastns,
-                            context.text,
-                            ))
+                                           "NickServ -- %s" % (
+                                               self.lastns,
+                                               context.text,
+                                           ))
                     if self.ghosting:
                         self.server.setnick(self.server.wantnick)
                         self.ghosting = False
 
     def nickinuse(self, r):
         if (self.getsetting("enabled") and
-        self.getsetting("password") and self.getsetting("ghost")):
+           self.getsetting("password") and self.getsetting("ghost")):
             self.server.setnick(self.server.nick + "_")
             self.server.sendto("PRIVMSG", "nickserv", "GHOST %s %s" % (
                 self.name(),
                 self.getsetting("password"),
-                ))
+            ))
             self.ghosting = True
             r.append(True)
 
@@ -91,7 +91,7 @@ class M_NickServ(bot.Module):
         self.server.sendto("PRIVMSG", "nickserv", "IDENTIFY %s %s" % (
             self.name(),
             self.getsetting("password"),
-            ))
+        ))
 
     def identify_c(self, context, args):
         context.exceptrights(["admin"])
@@ -112,7 +112,7 @@ class M_NickServ(bot.Module):
             self.name() if args.getbool('name') else '',
             self.getsetting("password"),
             args.getstr('email'),
-            ))
+        ))
         self.lastns = context.user[0]
         self.lastnstime = time.time()
 
@@ -124,7 +124,7 @@ class M_NickServ(bot.Module):
         self.server.sendto("PRIVMSG", "nickserv", "VERIFY REGISTER %s %s" % (
             args.getstr('account'),
             args.getstr('code'),
-            ))
+        ))
         self.lastns = context.user[0]
         self.lastnstime = time.time()
 
