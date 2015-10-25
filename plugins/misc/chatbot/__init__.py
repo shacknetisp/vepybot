@@ -33,9 +33,10 @@ class Module(bot.Module):
             cname = ""
             if context.channel:
                 cname = self.server.name + '.' + context.channel
-            ai = ailib.AI(self.getshareddb('chatbot',
-                'global' if self.getchannelsetting(
-                    'globaldb', context) else (cname or 'global')).d)
+            dbname = ('global'
+                if self.getchannelsetting('globaldb', context)
+                else (cname or 'global'))
+            ai = ailib.AI(self.getshareddb('chatbot', dbname).d)
             ids = context.channel or context.idstring()
         else:
             ai = ailib.AI(self.getshareddb('chatbot', 'global').d)
