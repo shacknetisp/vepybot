@@ -17,6 +17,7 @@ class HTTPURL:
     class Response:
 
         def __init__(self, content):
+            self.headers = dict(content.headers)
             self.content = content.read()
 
         def raw(self):
