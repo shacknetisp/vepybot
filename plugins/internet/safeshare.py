@@ -34,3 +34,4 @@ class Module(bot.Module):
                                 headers={}, timeout=None).json()
         return "%s" % ("http://safeshare.tv/v/" +
                        response['data'][0]['safeshare_id'])
+bot.register.module(Module)
