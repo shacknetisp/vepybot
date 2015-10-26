@@ -58,7 +58,7 @@ def hostinfo(http, inhost, l='en', rdns=False):
     ret = {
         'ip': ip,
         'host': host,
-        }
+    }
     if geoip:
         subdivisions = []
         if 'subdivisions' in geoip:
@@ -66,7 +66,7 @@ def hostinfo(http, inhost, l='en', rdns=False):
                 subdivisions.append({
                     'code': sd['iso_code'],
                     'name': sd['names'][l],
-                    })
+                })
 
         def add(k, k2):
             d = geoip
@@ -88,7 +88,7 @@ def hostinfo(http, inhost, l='en', rdns=False):
         add('continentcode', ['continent', 'code'])
         ret.update({
             'regions': subdivisions,
-            })
+        })
         if subdivisions:
             ret['region'] = subdivisions[0]['name']
             ret['regioncode'] = subdivisions[0]['code']
@@ -113,7 +113,7 @@ class M_IP(bot.Module):
     def ip(self, context, args):
         args.default("values", "ip city region country")
         info = hostinfo(self.server.rget("http.url"), args.getstr("ip"),
-            rdns='host' in args.getstr("values").split())
+                        rdns='host' in args.getstr("values").split())
         if info is None:
             return "Unable to resolve that host."
         out = []

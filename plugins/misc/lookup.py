@@ -43,7 +43,7 @@ class Module(bot.Module):
         elif r['RelatedTopics']:
             return "[%s] %s" % (r['RelatedTopics'][0]['FirstURL'],
                                 ' '.join(tag_re.sub('',
-                                r['RelatedTopics'][0]['Result']).split()))
+                                         r['RelatedTopics'][0]['Result']).split()))
         elif r['Redirect']:
             return "%s" % r['Redirect']
         return "No results."
