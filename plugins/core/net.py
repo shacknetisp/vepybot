@@ -49,6 +49,9 @@ class HTTPURL:
 
             def maker():
                 req = urllib.request.Request(url)
+                if 'User-agent' not in headers:
+                    req.add_header('User-agent',
+                        'python-vepybot-net/%s' % bot.version.version)
                 for r in headers:
                     req.add_header(r, headers[r])
                 try:
