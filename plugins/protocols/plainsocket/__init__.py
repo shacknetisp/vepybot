@@ -61,7 +61,7 @@ class Server(bot.Server):
                     continue
                 if data:
                     self.log("IN", "%s: %s" % (socket.getpeername()[0],
-                        data.strip()))
+                                               data.strip()))
                     self.dohook('server_recv', socket, data)
                 else:
                     done.append(socket)

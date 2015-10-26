@@ -25,10 +25,10 @@ class M_Vhost(bot.Module):
         self.addcommand(self.vhost_c, "vhost", "Authenticate with VHOST.", [])
 
         self.addcommand(self.setp, "set password",
-            "Set the VHOST password.", ["password"])
+                        "Set the VHOST password.", ["password"])
 
         self.addcommand(self.setn, "set name",
-            "Set the VHOST name.", ["[name]"])
+                        "Set the VHOST name.", ["[name]"])
 
     def isset(self):
         return self.getsetting('name') and self.getsetting('password')
@@ -48,7 +48,7 @@ class M_Vhost(bot.Module):
         self.server.send("VHOST %s %s" % (
             self.getsetting("name"),
             self.getsetting("password"),
-            ))
+        ))
 
     def vhost_c(self, context, args):
         context.exceptrights(["admin"])
@@ -61,7 +61,7 @@ class M_Vhost(bot.Module):
 
     def login(self):
         if self.getsetting("enabled") and self.getsetting(
-            "auto") and self.isset():
+                "auto") and self.isset():
                 self.vhost()
 
 bot.register.module(M_Vhost)

@@ -33,11 +33,11 @@ class M_Rights(lib.rights.Module):
             'ignore': ['op'],
         }
         self.serverset('addchannelrights',
-            lambda r: self.righttypes.update(r))
+                       lambda r: self.righttypes.update(r))
         self.server.globalaliases.update({
             'idhost': 'echo irc:*@$*!*',
             'idauth': 'echo irc:*!$*',
-            })
+        })
 
     def _contextrights(self, idstring, context):
         rights = []

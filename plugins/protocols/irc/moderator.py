@@ -26,9 +26,10 @@ class Module(bot.Module):
             tol = self.getchannelsetting('tolerance', channel)
             for user in self.d[channel]:
                 self.d[channel][user][0] = max(0,
-                    self.d[channel][user][0] - 1)
+                                               self.d[channel][user][0] - 1)
                 self.d[channel][user][1] = max(0,
-                    self.d[channel][user][1] - (0.5 / tol))
+                                               (self.d[channel][user][1] -
+                                                (0.5 / tol)))
 
     def recv(self, context):
         if not context.channel:
@@ -70,26 +71,26 @@ class Module(bot.Module):
                     context.channel,
                     context.user[0],
                     "Don't spam.",
-                    ))
+                ))
             else:
                 d[0] = 0
                 d[1] = 0
                 self.server.send("MODE %s +b %s!*@*" % (
                     context.channel,
                     context.user[0],
-                    ))
+                ))
                 self.b.add(context.user[0])
                 self.server.callonce(lambda: self.server.send(
-                        "MODE %s -b %s!*@*" % (
-                        context.channel,
-                        context.user[0],
+                    "MODE %s -b %s!*@*" % (
+                    context.channel,
+                    context.user[0],
                     )), 10 * 1000)
                 self.server.callonce(lambda: self.b.discard(
                     context.user[0]), 10 * 1000)
                 self.server.send(
                     "KICK %s %s: The ban will lift in 10 seconds." % (
-                    context.channel,
-                    context.user[0],
+                        context.channel,
+                        context.user[0],
                     ))
 
 bot.register.module(Module)

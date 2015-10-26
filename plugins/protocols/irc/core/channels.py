@@ -69,9 +69,12 @@ class M_Channels(bot.Module):
             return "Already joined %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.join(args.getstr('channel'), args.getbool('temp'))
+        ynstr = utils.ynstr((args.getstr('channel')
+                             in self.server.settings.get("server.channels"),
+                             "will",
+                             "won't"))
         return "Attempted to join %s (%s autojoin)." % (args.getstr('channel'),
-            utils.ynstr(args.getstr('channel')
-            in self.server.settings.get("server.channels"), "will", "won't"))
+                                                        ynstr)
 
     def part_c(self, context, args):
         if context.channel:
@@ -80,9 +83,12 @@ class M_Channels(bot.Module):
             return "Not joined in %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), args.getbool('temp'))
+        ynstr = utils.ynstr((args.getstr('channel')
+                             in self.server.settings.get("server.channels"),
+                             "will",
+                             "won't"))
         ret = "Parted %s (%s autojoin)." % (args.getstr('channel'),
-            utils.ynstr(args.getstr('channel')
-            in self.server.settings.get("server.channels"), "will", "won't"))
+                                            ynstr)
         if context.channel == args.getstr('channel'):
             context.replypriv(ret)
         else:
@@ -105,7 +111,7 @@ class M_Channels(bot.Module):
     def recv(self, context):
         if context.code("kick"):
             self.server.dohook('log', 'kick', context.rawsplit[0],
-                (context.rawsplit[2], context.rawsplit[3]))
+                               (context.rawsplit[2], context.rawsplit[3]))
             if context.rawsplit[3] == self.server.nick:
                 if context.rawsplit[2] in self.server.channels:
                     self.server.channels.pop(context.rawsplit[2])
@@ -125,18 +131,19 @@ class M_Channels(bot.Module):
                     self.server.log("PARTED", context.rawsplit[2])
         elif context.code("352"):
             self.server.dohook('whois.fromtuple', (context.rawsplit[7],
-                context.rawsplit[4], context.rawsplit[5]))
+                                                   context.rawsplit[4],
+                                                   context.rawsplit[5]))
             if context.rawsplit[3] not in self.tmp:
                 self.tmp[context.rawsplit[3]] = {
                     'names': {},
-                    }
+                }
             w = self.tmp[context.rawsplit[3]]
             w['names'][context.rawsplit[7]] = [
-                            self.server.info['PREFIX'][0][
-                            self.server.info['PREFIX'][1].index(m)]
+                self.server.info['PREFIX'][0][
+                    self.server.info['PREFIX'][1].index(m)]
                             for m in context.rawsplit[8]
                             if m in self.server.info['PREFIX'][1]
-                            ]
+            ]
         elif context.code("315"):
             w = self.tmp[context.rawsplit[3]]
             if context.rawsplit[3] not in self.server.channels:

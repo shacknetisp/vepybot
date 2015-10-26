@@ -17,8 +17,8 @@ class Context(bot.Context):
         self.sender = split[0]
         try:
             self.user = [self.sender.split('!')[0],
-                self.sender.split('!')[1].split('@')[0],
-                self.sender.split('!')[1].split('@')[1]]
+                         self.sender.split('!')[1].split('@')[0],
+                         self.sender.split('!')[1].split('@')[1]]
         except IndexError:
             self.user = [None, None, None]
         self.displayname = self.user[0]
@@ -35,7 +35,7 @@ class Context(bot.Context):
                 if self.reciever.strip(':')[0] in server.info['CHANTYPES']
                 else
                 None
-                ) if 'CHANTYPES' in server.info else None
+            ) if 'CHANTYPES' in server.info else None
         except IndexError:
             self.channel = ""
         self.ctcp = ""
@@ -50,7 +50,7 @@ class Context(bot.Context):
                 self.user[1],
                 self.user[2],
                 self.whois.auth if hasattr(self, 'whois') else ''
-                )
+            )
         return "irc:" + ret
 
     def code(self, c):
@@ -86,7 +86,7 @@ class Context(bot.Context):
         return "irc#:%s" % self.channel
 
     def exceptchannelrights(self, rlist, m=None):
-        if type(rlist) is str:
+        if isinstance(rlist, str):
             rlist = [rlist]
         rlist = rlist + ['op']
         return self.exceptrights([("%s,%s" % (self.channel, r)) for r in rlist])
@@ -98,25 +98,32 @@ class Context(bot.Context):
         if self.channel:
             for r in self.server.getrights(self.channelidstring(), self):
                 if fnmatch.fnmatchcase("-%s.%s.%s" % (
-                    module.plugin, module.index, command['name']), r):
+                                       module.plugin,
+                                       module.index,
+                                       command['name']), r):
                         if not self.checkright(
-                            "%s,op" % self.channel):
+                                "%s,op" % self.channel):
                             raise bot.NoPerms(
                                 "The channel may not use %s" % "%s.%s.%s" % (
-                                module.plugin, module.index, command['name']))
+                                    module.plugin,
+                                    module.index,
+                                    command['name']))
                 if r == "ignore":
                     raise bot.NoPerms("")
 
         self._exceptcancommand(module, command)
 
         if self.channel and not self.checkright(
-            "%s,op" % self.channel):
+                "%s,op" % self.channel):
             for r in self.server.getrights(self.idstring(), self):
                 if fnmatch.fnmatchcase("%s,-%s.%s.%s" % (self.channel,
-                    module.plugin, module.index, command['name']), r):
+                                                         module.plugin,
+                                                         module.index,
+                                                         command['name']), r):
+                        name = "%s.%s.%s" % (
+                            module.plugin, module.index, command['name'])
                         raise bot.NoPerms(
-                        "You may not use %s on this channel." % "%s.%s.%s" % (
-                        module.plugin, module.index, command['name']))
+                            "You may not use %s on this channel." % name)
                 if r == "%s,ignore" % self.channel:
                     raise bot.NoPerms("")
 
@@ -153,33 +160,33 @@ class M_Dispatcher(bot.Module):
     def recv(self, context):
         if context.code('privmsg') or context.code('notice'):
             self.server.dohook('log', 'chat',
-                context.rawcode.upper(),
-                (
-                context.reciever.lower(),
-                context.user,
-                context.text))
+                               context.rawcode.upper(),
+                               (
+                               context.reciever.lower(),
+                               context.user,
+                               context.text))
         self.server.dohook("whois.fromcontext", context)
         if context.code("privmsg"):
             if context.ctcp:
                 split = context.ctcp.split()
                 if split[0]:
                     self.server.dohook('ctcp.%s' % split[0].lower(),
-                        context, split[1:])
+                                       context, split[1:])
             else:
                 responses = []
                 self.server.dohook("dispatcher.ignore", context, responses)
                 if responses:
                     return
-                #Find if prefixed
+                # Find if prefixed
                 for prefix in self.server.settings.getchannel(
                     "parser.prefixes", context) + (
                         [""] if not context.channel else []) + [
                             self.server.nick + ',',
                             self.server.nick + ':',
-                            ]:
+                ]:
                     if context.text.startswith(prefix):
                         command = context.text[len(prefix):].strip()
-                        #Schedule WHOIS if neccessary
+                        # Schedule WHOIS if neccessary
                         if context.user[0] not in self.buf:
                             self.buf[context.user[0]] = []
                         if context.user[0] not in self.whoistime:

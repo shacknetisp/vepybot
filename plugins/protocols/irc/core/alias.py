@@ -46,7 +46,7 @@ class M_Alias(lib.alias.Module):
             list(self.server.globalaliases.keys()))
         if args.getstr("channel"):
             l = list(self.server.settings.getchannel(
-                    "aliases", args.getstr("channel")).keys())
+                "aliases", args.getstr("channel")).keys())
         return ", ".join(l) or "No aliases."
 
     def get(self, context, args):
@@ -54,25 +54,27 @@ class M_Alias(lib.alias.Module):
         alias = args.getstr('alias')
         if args.getstr("channel"):
             return "[%s] %s" % (args.getstr("channel"),
-                self._get(self.server.settings.getchannel(
-                "aliases", args.getstr("channel")),
-                alias))
+                                self._get(self.server.settings.getchannel(
+                                          "aliases", args.getstr("channel")),
+                                          alias))
         else:
             return "%s" % (self._get(self.server.settings.get("server.aliases"),
-                alias))
+                                     alias))
 
     def command(self, context, text, responses, help):
         if context.channel:
             r = self._command(context, text,
-                self.server.settings.getchannel("server.aliases", context),
-                help)
+                              self.server.settings.getchannel(
+                              "server.aliases", context),
+                              help)
             if r[0] is not None or r[1] is not None:
                 responses.append(r)
                 return
+        aliases = self.server.settings.get("server.aliases")
         responses.append(self._command(context, text,
-            self.server.settings.get("server.aliases"), help))
+                                       aliases, help))
         responses.append(self._command(context, text,
-            self.server.globalaliases, help))
+                                       self.server.globalaliases, help))
 
     def add(self, context, args):
         args.default("channel", "")
@@ -82,15 +84,15 @@ class M_Alias(lib.alias.Module):
         if args.getstr("channel"):
             context.exceptchannelrights(['alias'])
             ret = "[%s] %s" % (args.getstr("channel"),
-                self._add(
+                               self._add(
                 self.server.settings.getchannel('server.aliases',
-                    args.getstr("channel")),
+                                                args.getstr("channel")),
                 alias, content))
             return ret
         else:
             context.exceptrights(["admin", "alias"])
             ret = "%s" % (self._add(self.server.settings.get("server.aliases"),
-                alias, content))
+                                    alias, content))
             self.server.settings.save()
             return ret
 
@@ -100,9 +102,9 @@ class M_Alias(lib.alias.Module):
         if args.getstr("channel"):
             context.exceptchannelrights(['op', 'alias'])
             ret = "[%s] %s" % (args.getstr("channel"),
-                self._remove(
+                               self._remove(
                 self.server.settings.getchannel("server.aliases",
-                    args.getstr("channel")),
+                                                args.getstr("channel")),
                 alias))
             self.server.settings.save()
             return ret

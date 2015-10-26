@@ -12,7 +12,7 @@ class Module(bot.Module):
     def register(self):
         self.db = self.getdb("seen", {"chat": {}, "all": {}})
         self.addcommand(self.seen, "seen", "Get when a nick was last seen.",
-            ["[-chat]", "nick"])
+                        ["[-chat]", "nick"])
         self.addhook('recv', 'recv', self.recv)
 
     def recv(self, context):
@@ -23,27 +23,27 @@ class Module(bot.Module):
         if context.code('privmsg') or context.code('notice'):
             if context.channel:
                 self.db.d['chat'][context.user[0]] = (time.time(),
-                    "<%s in %s> %s" % (
-                        context.user[0], context.channel, context.text),
-                            context.channel)
+                                                      "<%s in %s> %s" % (
+                    context.user[0], context.channel, context.text),
+                    context.channel)
                 self.db.d['all'][context.user[0]] = (time.time(),
-                    "<%s in %s> %s" % (
-                        context.user[0], context.channel, context.text),
-                            context.channel)
+                                                     "<%s in %s> %s" % (
+                    context.user[0], context.channel, context.text),
+                    context.channel)
                 self.db.save()
             else:
                 self.db.d['all'][context.user[0]] = (time.time(),
-                    "<PMing me>")
+                                                     "<PMing me>")
                 self.db.save()
         elif context.code('JOIN') or context.code('PART'):
             self.db.d['all'][context.user[0]] = (time.time(),
-                "%s %s" % (
-                    context.rawcode, context.channel),
-                        context.channel)
+                                                 "%s %s" % (
+                context.rawcode, context.channel),
+                context.channel)
             self.db.save()
         elif context.code('QUIT'):
             self.db.d['all'][context.user[0]] = (time.time(),
-                "Quitting IRC")
+                                                 "Quitting IRC")
             self.db.save()
 
     def seen(self, context, args):
@@ -72,6 +72,6 @@ class Module(bot.Module):
                         args.getstr('nick'), durstr, e[1])
                 else:
                     return "%s was seen at %s in a channel you aren't in." % (
-                    args.getstr('nick'), durstr)
+                        args.getstr('nick'), durstr)
 
 bot.register.module(Module)

@@ -35,12 +35,12 @@ class M_Whois(bot.Module):
         self.tmp = {}
 
         self.addcommand(self.getwhois, "whois",
-            "Get information about a nick. Space-delimited values."
-            " Values can be: nick, ident, host, or auth.",
-            ["nick", "[values...]"])
+                        "Get information about a nick. Space-delimited values."
+                        " Values can be: nick, ident, host, or auth.",
+                        ["nick", "[values...]"])
 
         self.addcommand(self.runwhois, "authme",
-            "Auth via WHOIS.", [])
+                        "Auth via WHOIS.", [])
 
         self.serverset('whois.updatechannels', self.updatechannels)
 
@@ -139,7 +139,7 @@ class M_Whois(bot.Module):
             self.whois[context.rawsplit[3]] = self.tmp[context.rawsplit[3]]
             self.server.dohook("whois", context.rawsplit[3])
         elif context.code("330"):
-            #Freenode
+            # Freenode
             w = self.tmp[context.rawsplit[3]]
             w.auth = context.rawsplit[4]
         elif context.code("JOIN"):
@@ -150,7 +150,7 @@ class M_Whois(bot.Module):
                 w.channels[channel] = []
             self.server.dohook('join', channel, context.user[0])
             self.server.dohook('log', 'join', context.user,
-                channel)
+                               channel)
         elif context.code("PART"):
             self.fromcontext(context)
             w = self.whois[context.user[0]]
@@ -158,13 +158,13 @@ class M_Whois(bot.Module):
             if channel in w.channels:
                 w.channels.pop(channel)
             self.server.dohook('log', 'part', context.user,
-                (channel, context.text))
+                               (channel, context.text))
         elif context.code("QUIT"):
             self.fromcontext(context)
             w = self.whois[context.user[0]]
             self.server.dohook('log', 'quit', (context.rawsplit[0],
-                context.user),
-                (list(w.channels.keys()), context.text))
+                                               context.user),
+                               (list(w.channels.keys()), context.text))
         elif context.code("MODE"):
             channel = context.rawsplit[2]
             modes = context.rawsplit[3]
@@ -181,7 +181,7 @@ class M_Whois(bot.Module):
                     final[nicks[idx]].append(now + cchar)
             self.server.dohook('chanmodes', channel, final)
             self.server.dohook('log', 'mode', context.rawsplit[0],
-                (channel, modes, ' '.join(nicks)))
+                               (channel, modes, ' '.join(nicks)))
 
     def chanmodes(self, channel, modes):
         for target in modes:

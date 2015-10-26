@@ -4,7 +4,7 @@ import string
 
 
 def intorrand(t):
-    if type(t) is not int:
+    if not isinstance(t, int):
         return random.randrange(t[0], t[1])
     else:
         return t
@@ -17,7 +17,7 @@ class AI:
         self.lastphrase = None
 
         def makeentry(n, t={}):
-            if n not in self.db or type(self.db[n]) is not type(t):
+            if n not in self.db or not isinstance(self.db[n], type(t)):
                 self.db[n] = t
         makeentry('phrases', [])
 

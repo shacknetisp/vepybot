@@ -15,7 +15,10 @@ class M_CTCP(bot.Module):
         self.addhook("ctcp.time", "ctcp.time", self.ctcp_time)
         self.addhook("ctcp.errmsg", "ctcp.errmsg", self.ctcp_errmsg)
         self.addhook("ctcp.userinfo", "ctcp.userinfo", self.ctcp_userinfo)
-        self.addhook("ctcp.clientinfo", "ctcp.clientinfo", self.ctcp_clientinfo)
+        self.addhook(
+            "ctcp.clientinfo",
+            "ctcp.clientinfo",
+            self.ctcp_clientinfo)
         self.addhook("ctcp.source", "ctcp.source", self.ctcp_source)
 
     def ctcp_version(self, context, args):

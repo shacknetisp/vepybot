@@ -10,11 +10,11 @@ class Module(bot.Module):
 
     def register(self):
         self.addcommand(self.main, 'get',
-            'Query a statsdb-interface API.'
-            ' Actions: toprace <map>, game <id>, totals',
-            ['url', 'action', '[query...]'])
+                        'Query a statsdb-interface API.'
+                        ' Actions: toprace <map>, game <id>, totals',
+                        ['url', 'action', '[query...]'])
         self.addcommand(self.alias, 'alias',
-            'Return the text for a restatsdb alias.', ["url"])
+                        'Return the text for a restatsdb alias.', ["url"])
 
     def alias(self, context, args):
         return "restatsdb get %s $*" % (args.getstr('url'))
@@ -46,7 +46,7 @@ class Module(bot.Module):
                 len(jmaps),
                 len(jservers),
                 len(jplayers),
-                )
+            )
         else:
             return "Invalid action."
         try:
@@ -62,7 +62,7 @@ class Module(bot.Module):
                 return 'No top race results for %s.' % args.getstr('query')
             return "%s by %s" % (
                 timeutils.durstr(json['toprace']['time'] / 1000,
-                    dec=True, full=True).strip(),
+                                 dec=True, full=True).strip(),
                 ("%s playing as %s" % (
                     json['toprace']['gameplayer']['handle'],
                     json['toprace']['gameplayer']['name'])
@@ -70,14 +70,15 @@ class Module(bot.Module):
                     else
                     "<no auth> playing as %s" % (
                     json['toprace']['gameplayer']['name']))
-                )
+            )
         elif action == 'game':
+            f = {
+                'players': len(json['players']),
+                'mode': ['Demo', 'Editing', 'DM',
+                         'CTF', 'DAC', 'BB', 'Race'][json['mode']],
+            }
             return str("Game {g[id]}: {x[mode]} on {g[map]},"
-                " players: {x[players]},"
-                " server: {g[server]}").format(g=json, x={
-                    'players': len(json['players']),
-                    'mode': ['Demo', 'Editing', 'DM',
-                        'CTF', 'DAC', 'BB', 'Race'][json['mode']],
-                    })
+                       " players: {x[players]},"
+                       " server: {g[server]}").format(g=json, x=f)
 
 bot.register.module(Module)

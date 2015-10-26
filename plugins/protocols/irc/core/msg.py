@@ -9,10 +9,10 @@ class Module(bot.Module):
     def register(self):
 
         self.addcommand(self.say, "say", "Send a message to a channel.",
-            ["[-notice]", "channel", "message..."])
+                        ["[-notice]", "channel", "message..."])
 
         self.addcommand(self.do, "do", "Send a /me message to a channel.",
-            ["channel", "message..."])
+                        ["channel", "message..."])
 
     def say(self, context, args):
         if args.getstr("channel") not in self.server.channels:
@@ -20,13 +20,13 @@ class Module(bot.Module):
         context.exceptrights(["admin", "%s,op" % args.getstr("channel")])
         command = "NOTICE" if args.getbool('notice') else "PRIVMSG"
         self.server.sendto(command, args.getstr("channel"),
-            args.getstr("message"))
+                           args.getstr("message"))
 
     def do(self, context, args):
         if args.getstr("channel") not in self.server.channels:
             return "That channel has not been joined."
         context.exceptrights(["admin", "%s,op" % args.getstr("channel")])
         self.server.sendto("PRIVMSG", args.getstr("channel"),
-            "\1ACTION %s\1" % args.getstr("message"))
+                           "\1ACTION %s\1" % args.getstr("message"))
 
 bot.register.module(Module)

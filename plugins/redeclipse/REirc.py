@@ -39,10 +39,10 @@ class Module(bot.Module):
                 oldidstring = newcontext.idstring()
                 newcontext.idstring = lambda: "re:%s" % (
                     oldidstring.replace('irc:', ''),
-                    )
+                )
                 self.server.log('REIRC', newcontext.idstring() + " :" + text)
                 for prefix in self.server.settings.getchannel(
-                    "parser.prefixes", context):
+                        "parser.prefixes", context):
                     if text.startswith(prefix):
                         command = text[len(prefix):].strip()
                         if not command.strip(string.punctuation):

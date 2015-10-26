@@ -26,16 +26,16 @@ class Module(bot.Module):
             bot.userdata,
             self.server.name,
             path
-            )
+        )
         os.makedirs(os.path.dirname(fullpath), exist_ok=True)
         return open(fullpath, m)
 
     def writelog(self, f, text):
         t = (
-                time.localtime()
+            time.localtime()
                 if self.server.settings.get('logger.localtime')
                 else time.gmtime()
-            )
+        )
         timestr = time.strftime("%Y-%m-%d %H:%M:%S", t)
         f.write("[%s] %s\n" % (timestr, text.strip()))
 

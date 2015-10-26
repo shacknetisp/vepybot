@@ -23,14 +23,14 @@ class M_List(bot.Module):
                 x = []
                 for m in self.server.modules:
                     x += [(("%s %s" % (m, x))
-                        if len(self.server.numcommands[x]) > 1 else x)
-                        for x in self.server.modules[m].commands]
+                           if len(self.server.numcommands[x]) > 1 else x)
+                          for x in self.server.modules[m].commands]
                 return "%s" % (', '.join(sorted(x)))
             if m not in self.server.modules:
                 return "'%s' is not a loaded module." % m
             return ("%s" % (', '.join(
                 self.server.modules[m].commands)) or
-                    "This module has no commands.")
+                "This module has no commands.")
         else:
             mkeys = sorted(list(self.server.modules.keys()))
             n = []

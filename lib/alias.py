@@ -119,7 +119,7 @@ class Module(bot.Module):
                     if help:
                         return "An alias: " + v
                     r = self.getalias(context, v, argtext)
-                    if type(r) is str:
+                    if isinstance(r, str):
                         return None, r
                     return self.server.runcommand(context, r[0])
         return None, None

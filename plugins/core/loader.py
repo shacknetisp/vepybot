@@ -45,11 +45,11 @@ class M_Loader(bot.Module):
             if name in self.server.settings.get("server.noautoload"):
                 return False
             if name.split('/')[0] in self.server.settings.get(
-                "server.noautoload"):
+                    "server.noautoload"):
                     return False
         conglomerate = (self.server.requiredplugins +
-            self.server.dautoload + self.server.autoload +
-            self.server.settings.get('server.autoload'))
+                        self.server.dautoload + self.server.autoload +
+                        self.server.settings.get('server.autoload'))
         for c in conglomerate:
             p = c.split('/')[0]
             if len(c.split('/')) > 1:
@@ -95,8 +95,8 @@ class M_Loader(bot.Module):
         if cname not in nl and cname.split('/')[0] not in nl:
             nl.append(cname)
         self.server.settings.set("server.noautoload", nl)
-        return "Unloaded plugin: %s (%s autoload)" % (aname,
-            utils.ynstr(self.willautoload(aname), "will", "won't"))
+        ynstr = utils.ynstr(self.willautoload(aname), "will", "won't")
+        return "Unloaded plugin: %s (%s autoload)" % (aname, ynstr)
 
     def load(self, context, args):
         context.exceptrights('admin')
@@ -115,7 +115,9 @@ class M_Loader(bot.Module):
             nl = self.server.settings.get("server.noautoload")
             for n in nl:
                 for p in [plugin, plugin.split('/')[0]] + [
-                    (plugin.split('/')[0] + '/' + x) for x in bot.newmodules]:
+                        (plugin.split('/')[0] + '/' + x)
+                        for x in bot.newmodules
+                ]:
                         if n == p or n == p.split('/')[0]:
                             tod.append(n)
             for n in tod:
@@ -124,8 +126,8 @@ class M_Loader(bot.Module):
             if not self.willautoload(plugin, True):
                 plist.append(plugin)
             self.server.settings.set("server.autoload", plist)
-        return "Loaded plugin: %s (%s autoload)" % (plugin,
-            utils.ynstr(self.willautoload(plugin), "will", "won't"))
+        ynstr = utils.ynstr(self.willautoload(plugin), "will", "won't")
+        return "Loaded plugin: %s (%s autoload)" % (plugin, ynstr)
 
     def reload(self, context, args):
         context.exceptrights('admin')

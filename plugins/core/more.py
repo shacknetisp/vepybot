@@ -27,8 +27,10 @@ class M_More(bot.Module):
                 if self.server.more[context.idstring()]:
                     l = len(self.server.more[context.idstring()])
                     m += (' ' +
-                    context.moretemplate.format(n=l,
-                    s=('s' if l != 1 else '')))
+                          context.moretemplate.format(n=l,
+                                                      s=('s'
+                                                         if l != 1
+                                                         else '')))
                 context.reply(m, more=False)
                 return ''
             except IndexError:

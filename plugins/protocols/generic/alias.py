@@ -40,11 +40,11 @@ class M_Alias(lib.alias.Module):
     def get(self, context, args):
         alias = args.getstr('alias')
         return "%s" % (self._get(self.server.settings.get("server.aliases"),
-            alias))
+                                 alias))
 
     def command(self, context, text, responses, help):
-        responses.append(self._command(context, text,
-            self.server.settings.get("server.aliases"), help))
+        aliases = self.server.settings.get("server.aliases")
+        responses.append(self._command(context, text, aliases, help))
 
     def add(self, context, args):
         args.default("content", "")
@@ -52,7 +52,7 @@ class M_Alias(lib.alias.Module):
         content = args.getstr('content')
         context.exceptrights(["admin", "alias"])
         ret = "%s" % (self._add(self.server.settings.get("server.aliases"),
-            alias, content))
+                                alias, content))
         self.server.settings.save()
         return ret
 

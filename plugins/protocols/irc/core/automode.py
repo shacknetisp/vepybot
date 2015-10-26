@@ -13,7 +13,7 @@ class Module(bot.Module):
         self.modes = {
             "op": "o",
             "voice": "v",
-            }
+        }
         for mode in self.modes:
             self.addsetting("~#%slist" % mode, [])
         self.addtimer(self.timer, "timer", 20 * 1000)
@@ -34,13 +34,13 @@ class Module(bot.Module):
                 if self.modes[mode] in w.channels[channel]:
                     continue
                 for i in self.getchannelsetting("%slist" % mode,
-                    channel):
+                                                channel):
                         if fnmatch.fnmatch(idstring, i):
                             self.server.send("MODE %s +%s %s" % (
                                 channel,
                                 self.modes[mode],
                                 nick
-                                ))
+                            ))
                             break
 
     def timer(self):

@@ -21,7 +21,7 @@ class Context(bot.Context):
         sendf = lambda message: self.socket.send(message.encode() + b'\n')
         self.replydriver(sendf, m, more)
         self.server.log('OUT', '%s: %s' % (self.socket.getpeername()[0],
-            m.strip()))
+                                           m.strip()))
 
 
 class M_Dispatcher(bot.Module):

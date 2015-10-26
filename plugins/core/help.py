@@ -50,7 +50,7 @@ class M_Help(bot.Module):
                                 splitc[0], splitc[0]) +
                             " is provided by multiple modules: %s" % (
                                 ', '.join(self.server.numcommands[splitc[0]])
-                                ))
+                            ))
                 if self.server.gethelp(v[1])[0]:
                     return "%s %s: %s" % (
                         ' '.join(splitc),
@@ -62,9 +62,9 @@ class M_Help(bot.Module):
                         self.server.gethelp(v[1])[1])
         responses = []
         self.server.dohook('command', context, args.getstr("command"),
-            responses, True)
+                           responses, True)
         for r in responses:
-            if r and type(r) is str:
+            if r and isinstance(r, str):
                 return r
         return "That command doesn't exist."
 

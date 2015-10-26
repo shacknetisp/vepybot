@@ -20,7 +20,7 @@ def createuserdata():
             'servers',
             'shared',
             'plugins',
-        ]:
+    ]:
             os.makedirs(userdata + '/' + d, exist_ok=True)
     open('%s/plugins/__init__.py' % userdata, 'w')
 
@@ -87,7 +87,7 @@ def loadnamedmodule(n, p=""):
     for directory in d:
         sys.path = sys.path + [directory]
         if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
-            os.path.exists("%s/%s.py" % (directory, n))):
+                os.path.exists("%s/%s.py" % (directory, n))):
                 currentplugin = p or n
                 if currentplugin not in plugins:
                     plugins[currentplugin] = {}
@@ -167,6 +167,7 @@ class ModuleError(Exception):
 
 
 class Server:
+
     """The Server Plugin."""
 
     """Override with plugins that are required to run the server."""
@@ -175,7 +176,7 @@ class Server:
     """Default Options."""
     options = {
         'charlimit': 0,
-        }
+    }
 
     """Optionally loaded plugins."""
     autoload = []
@@ -194,9 +195,9 @@ class Server:
 
         def __init__(self, server):
             os.makedirs("%s/servers/%s" % (userdata, server.name),
-                exist_ok=True)
+                        exist_ok=True)
             os.makedirs("%s/shared/%s" % (userdata, server.shared),
-                exist_ok=True)
+                        exist_ok=True)
             self.db = db.DB("servers/%s/settings.json" % server.name)
             self.d = self.db.d
             self.defaults = {}
@@ -307,14 +308,14 @@ class Server:
         self.registry = {}
         self.pluginpaths = []
         for k in ["core",
-            self.index] + self.requiredplugins:
+                  self.index] + self.requiredplugins:
                 self.loadplugin(k)
                 self.protected.append(k)
                 for x in newmodules:
                     self.protected.append(k.split('/')[0] + '/%s' % x)
         self.build_lists()
         for k in self.dautoload + self.autoload + self.settings.get(
-            "server.autoload"):
+                "server.autoload"):
                 self.loadplugin(k, auto=True)
         self.build_lists()
         self.addhook("server_ready", "sinit", self.ready)
@@ -335,14 +336,14 @@ class Server:
                 if index not in newmodules:
                     continue
                 if auto and (plugin + "/" + index
-                    ) in self.settings.get("server.noautoload"):
+                             ) in self.settings.get("server.noautoload"):
                         continue
                 v = modules[index]
                 if index in self.modules:
                     raise ModuleError(
                         "Module %s already registered from plugin: %s" % (
-                        index,
-                        self.modules[index].plugin
+                            index,
+                            self.modules[index].plugin
                         ))
                 v = self.modulesetup(v)
                 self.modules[index] = v(self)
@@ -378,7 +379,7 @@ class Server:
                     self.modules[m]._unload()
                     del self.modules[m]
             self.pluginpaths = [x for x in self.pluginpaths
-                if x.split('/')[0] != plugin]
+                                if x.split('/')[0] != plugin]
             del self.plugins[plugin]
             self.build = True
 
@@ -465,7 +466,7 @@ class Server:
                     self.numcommands[k] = []
                 self.numcommands[k].append(m.index)
         self.commands = sorted(list(self.commands.items()),
-            key=lambda x: -len(x[0][2].split()))
+                               key=lambda x: -len(x[0][2].split()))
         self.settings.user = []
         self.settings.defaults = {}
         self.settings.tree = {}
@@ -494,7 +495,7 @@ class Server:
             'function': f,
             'time': t,
             'last': 0,
-            }
+        }
 
     def callonce(self, f, t):
         """Call f after <t> ms."""
@@ -502,7 +503,7 @@ class Server:
             'start': time.time(),
             'function': f,
             'time': t,
-            })
+        })
 
     def dotimers(self):
         for timer in list(self.timers.values()):
@@ -659,7 +660,7 @@ class Server:
                     if arg['full']:
                         parsedargs[arg['name']] = ' '.join(
                             sections[sectioni:]
-                            )
+                        )
                         argi = len(args)
                     else:
                         parsedargs[arg['name']] = st
@@ -708,12 +709,12 @@ class Server:
                             "Use <module> %s, %s" % (splitc[0], splitc[0]) +
                             " is provided by multiple modules: %s" % (
                                 ', '.join(self.numcommands[splitc[0]])
-                                ))
+                            ))
                 argtext = ' '.join(split[len(splitc):])
                 try:
                     context.exceptcancommand(v[0], v[1])
                     return self.parsecommand(context,
-                        text, v, argtext), None
+                                             text, v, argtext), None
                 except ParserBadCommand as e:
                     return None, e
                 except NoPerms as e:
@@ -722,8 +723,8 @@ class Server:
                     return None, e
                 except NoArg as e:
                     return None, "%s, Usage: %s %s" % (e,
-                        ' '.join(splitc),
-                        self.gethelp(v[1])[0])
+                                                       ' '.join(splitc),
+                                                       self.gethelp(v[1])[0])
                 except Exception as e:
                     import traceback
                     traceback.print_exc()
@@ -742,6 +743,7 @@ class Server:
 
 
 class Module:
+
     """A Module Object."""
 
     """Display the module in lists?"""
@@ -761,7 +763,7 @@ class Module:
         self.serversettings.append((n, v))
 
     def addcommand(self, function, name, helptext, arguments,
-            recognizers=None):
+                   recognizers=None):
         """Add a command to the module."""
         if recognizers is None:
             recognizers = {}
@@ -771,12 +773,12 @@ class Module:
             'args': [],
             'function': function,
             'alias': None,
-            }
+        }
         for arg in arguments:
             a = {
                 'name': arg.strip('-.[]'),
                 'recognizer': lambda x: False,
-                }
+            }
             a['kv'] = (arg.strip('[')[0] == '-')
             a['optional'] = (arg.strip('-')[0] == '[')
             a['full'] = (arg.strip(']')[-1] == '.')
@@ -844,6 +846,7 @@ class Module:
 
 
 class Context:
+
     """Server Specific Context, implement the core functions at least."""
 
     moretemplate = "[{n} more message{s}]"
@@ -869,7 +872,7 @@ class Context:
     def exceptrights(self, rlist, m=None):
         """Raise NoPerms exception if this context has none of the
         rights in <r>, <m> is an optional exception message."""
-        if type(rlist) is str:
+        if isinstance(rlist, str):
             rlist = [rlist]
         rlist = rlist + ['owner']
         for r in rlist:
@@ -887,7 +890,8 @@ class Context:
         if not self.checkright("admin"):
             for r in self.server.getrights(self.idstring(), self):
                 if fnmatch.fnmatchcase("-%s.%s.%s" % (
-                    module.plugin, module.index, command['name']), r):
+                                       module.plugin,
+                                       module.index, command['name']), r):
                         raise NoPerms("You may not use %s" % "%s.%s.%s" % (
                             module.plugin, module.index, command['name']))
                 if r == "ignore":
@@ -898,7 +902,7 @@ class Context:
             return message
         messages = textwrap.wrap(message, self.server.opt('charlimit') - len(
             " " + self.moretemplate,
-            ))
+        ))
         message = messages[0]
         if len(messages) > 1:
             self.server.more[self.idstring()] = messages[1:]
@@ -906,8 +910,10 @@ class Context:
                 if self.server.more[self.idstring()]:
                     l = len(self.server.more[self.idstring()])
                     message += (' ' +
-                        self.moretemplate.format(n=l,
-                        s=('s' if l != 1 else '')))
+                                self.moretemplate.format(n=l,
+                                                         s=('s'
+                                                            if l != 1
+                                                            else '')))
             except KeyError:
                 pass
         return message
@@ -917,5 +923,5 @@ class Context:
             message = self.domore(message)
         for message in message.split('\n'):
             messages = textwrap.wrap(message, self.server.opt('charlimit')
-                - len('...'))
+                                     - len('...'))
             f(messages[0] + ('...' if len(messages) > 1 else ''))

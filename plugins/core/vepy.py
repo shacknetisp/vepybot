@@ -15,11 +15,11 @@ class Module(bot.Module):
             [])
 
         self.addcommand(self.reloadall, "reload servers",
-            "Reload all plugins.", [])
+                        "Reload all plugins.", [])
 
         self.server.addrights({
             "bot": ["owner"],
-            })
+        })
 
     def restart(self, context, args):
         context.exceptrights(["bot"])

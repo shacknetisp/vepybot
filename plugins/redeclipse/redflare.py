@@ -28,19 +28,21 @@ class RedFlare:
                 'description': server['description'],
                 'players': [],
                 'playerauths': [],
-                }
+            }
             index = 0
             for playerName in server['playerNames']:
                 serverdata['players'].append(playerName['plain'])
                 try:
+                    auth = server['authNames'][index]['plain']
                     serverdata['playerauths'].append([playerName['plain'],
-                        server['authNames'][index]['plain']])
+                                                      auth])
                 except KeyError:
                     pass
                 self.players.append(playerName['plain'])
                 try:
+                    auth = server['authNames'][index]['plain']
                     self.playerauths.append([playerName['plain'],
-                            server['authNames'][index]['plain']])
+                                             auth])
                 except KeyError:
                     pass
                 index += 1
@@ -58,18 +60,26 @@ class Module(bot.Module):
         self.addtimer(self.docache, 'cachetimer', 60 * 1000)
 
         self.addcommand(self.search, "search",
-            "See if a player is online.",
-            ["url", "[-auth]", "[-oneline]", "[-regex]", "[search...]"])
+                        "See if a player is online.",
+                        ["url",
+                            "[-auth]",
+                            "[-oneline]",
+                            "[-regex]",
+                            "[search...]"])
 
         self.addcommand(self.lastseen, "lastseen",
-            "See when a player was last on.",
-            ["url", "[-auth]", "[-regex]", "[-count]", "[search...]"])
+                        "See when a player was last on.",
+                        ["url",
+                            "[-auth]",
+                            "[-regex]",
+                            "[-count]",
+                            "[search...]"])
 
         self.addcommand(self.setup, "setup", "Easy redflare setup.",
-            ['url', 'isonalias', 'wasonalias'])
+                        ['url', 'isonalias', 'wasonalias'])
 
         self.addcommand(self.remove, "remove", "Easy redflare removal.",
-            ['url', 'isonalias', 'wasonalias'])
+                        ['url', 'isonalias', 'wasonalias'])
 
     def setup(self, context, args):
         context.exceptrights(["admin"])
@@ -102,10 +112,10 @@ class Module(bot.Module):
             return 'That URL is not registered.'
         aliases = self.server.settings.get('server.aliases')
         if ison not in aliases or (aliases[ison] !=
-            "redflare search %s $*" % (url)):
+                                   "redflare search %s $*" % (url)):
             return '%s is not the alias for this url.' % ison
         elif wason not in aliases or (aliases[ison] !=
-            "redflare search %s $*" % (url)):
+                                      "redflare search %s $*" % (url)):
             return '%s is not the alias for this url.' % wason
         self.getsetting('redflares').pop(
             self.getsetting('redflares').index(url))
@@ -126,7 +136,7 @@ class Module(bot.Module):
         self.server.log('REDFLARE', url)
         try:
             rf = RedFlare(url, self.server.rget('http.url'),
-                timeout=timeout if url in self.cache else 4)
+                          timeout=timeout if url in self.cache else 4)
             self.server.log('REDFLARE DONE', url)
         except self.server.rget('http.url').Error:
             return
@@ -136,7 +146,7 @@ class Module(bot.Module):
             self.lastseendb.d[url] = {
                 "names": {},
                 "auths": {},
-                }
+            }
         d = self.lastseendb.d[url]
         for player in rf.players:
             if player:
@@ -166,28 +176,28 @@ class Module(bot.Module):
         for server in rf.servers:
             s = []
             l = (server['playerauths']
-                if args.getbool('auth')
-                else server['players'])
+                 if args.getbool('auth')
+                 else server['players'])
             for p in l:
                 if type(p) in (tuple, list):
                     p = p[1]
                 if p:
                     if re.match(search, p,
-                        re.IGNORECASE) is not None or p == args.getstr(
+                                re.IGNORECASE) is not None or p == args.getstr(
                             "search"):
                                 s.append(p)
             if s:
                 d = server['description']
-                #d = d[:d.rindex(' [')]
+                # d = d[:d.rindex(' [')]
                 if args.getbool('oneline'):
                     ret += s
                 else:
                     ret.append(("%s: %s" % (d, '; '.join(s)),
-                        len(s)))
+                                len(s)))
         if args.getbool('oneline'):
             return '; '.join(sorted(ret))
         ret = '\n'.join([r[0] for r in sorted(ret,
-            key=lambda x: -x[1])])
+                                              key=lambda x: -x[1])])
         context.reply(ret or "No results.", more=True)
         return ""
 
@@ -205,7 +215,7 @@ class Module(bot.Module):
         for p in d:
             v = d[p]
             if re.match(search, p,
-                re.IGNORECASE) is not None or p == args.getstr(
+                        re.IGNORECASE) is not None or p == args.getstr(
                     "search"):
                         s[p] = v
         if not s:
@@ -214,6 +224,8 @@ class Module(bot.Module):
             return "The number of entries: %d" % len(s)
         p = sorted(s, key=lambda x: -s[x])[0]
         return "%s: %s -- %s ago." % (p,
-            time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(s[p])),
-            timeutils.agostr(s[p]))
+                                      time.strftime(
+                                      "%Y-%m-%d %H:%M:%S UTC",
+                                      time.gmtime(s[p])),
+                                      timeutils.agostr(s[p]))
 bot.register.module(Module)

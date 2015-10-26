@@ -23,7 +23,7 @@ def durstr(dur, skip="", dec=False, full=False, skiplow=True):
             amount = dur // style[0]
             extra = dur % style[0]
             if (style[2] and firstdur / style[0] > style[2]
-                and not dec and skiplow):
+                    and not dec and skiplow):
                 break
             if dec and style[0] == 1:
                 amount = dur

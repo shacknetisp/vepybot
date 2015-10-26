@@ -37,7 +37,7 @@ class HTTPURL:
             return None
 
     def request(self, url, code="GET", params={},
-        body=None, headers={}, timeout=None):
+                body=None, headers={}, timeout=None):
             if params:
                 if code == "GET":
                     url += '?' + urllib.parse.urlencode(params)
@@ -55,9 +55,9 @@ class HTTPURL:
                     if self.socks():
                         o = urllib.request.build_opener(
                             SocksiPyHandler(socks.SOCKS5,
-                                self.socks()[0], self.socks()[1]))
+                                            self.socks()[0], self.socks()[1]))
                         return self.Response(o.open(req, data=body,
-                            timeout=timeout))
+                                                    timeout=timeout))
                     else:
                         return self.Response(urllib.request.urlopen(
                             req, data=body, timeout=timeout))

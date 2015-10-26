@@ -30,9 +30,9 @@ class Module(bot.Module):
     def display(self, v):
         if type(v) in [str, int, float]:
             return str(v)
-        elif type(v) is list:
+        elif isinstance(v, list):
             return ' '.join(v)
-        elif type(v) is bool:
+        elif isinstance(v, bool):
             return str(v)
         else:
             return str(v)
@@ -56,7 +56,7 @@ class Module(bot.Module):
             while split:
                 if split[0]:
                     try:
-                        if type(d[split[0]]) is not dict:
+                        if not isinstance(d[split[0]], dict):
                             return "'%s' is not a category." % vname
                         if d[split[0]]:
                             d = d[split[0]]
@@ -66,7 +66,7 @@ class Module(bot.Module):
             for k, v in sorted(list(d.items()), key=lambda x: x[0]):
                 if '=' in k:
                     continue
-                if type(v) is bool:
+                if isinstance(v, bool):
                     out.append('%s' % k)
                 else:
                     ok = False

@@ -66,7 +66,7 @@ class Server(bot.Server):
         'charlimit': 440,
         'proxy': None,
         'ssl': False,
-        }
+    }
 
     autoload = [
         "irc/moderator"
@@ -81,7 +81,7 @@ class Server(bot.Server):
         channeltree = {}
 
         def getchannel(self, v, context, pop=False):
-            channel = context if type(context) is str else context.channel
+            channel = context if isinstance(context, str) else context.channel
             setting = "channels.%s.%s" % (channel, v)
             if channel:
                 try:
@@ -218,7 +218,7 @@ class Server(bot.Server):
             self.connect()
             return
         if self.socketup and not self.socket and (
-            time.time() - self.lastconnectattempt > 15):
+                time.time() - self.lastconnectattempt > 15):
                 if self.settings.get('server.reconnect'):
                     self.reconnect()
                     return
@@ -250,7 +250,7 @@ class Server(bot.Server):
                     ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode()
                     self.inbuf = self.inbuf[self.inbuf.index(b'\n') + 1:]
                     regex = re.compile(
-                    "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
+                        "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
                     for ircmsg in ircmsg.strip().split('\n'):
                         ircmsg = ircmsg.strip('\r')
                         ircmsg = regex.sub("", ircmsg)
@@ -280,9 +280,9 @@ class Server(bot.Server):
         if self.socket:
             self.socket.close()
 
-    #References:
-    #http://stackoverflow.com/a/13382032
-    #https://www.codeux.com/textual/help/Text-Formatting.kb
+    # References:
+    # http://stackoverflow.com/a/13382032
+    # https://www.codeux.com/textual/help/Text-Formatting.kb
     class codes:
 
         reset = '\x0f'
@@ -336,7 +336,7 @@ class M_ServerInfo(bot.Module):
             t = {
                 'MAXCHANNELS': int,
                 'PREFIX': lambda x: (x.split(')')[0].strip('()'),
-                    x.split(')')[1].strip('()'))
+                                     x.split(')')[1].strip('()'))
             }
             s = ' '.join(context.rawsplit[3:])
             infos = s[:s.index(" :")].split()
@@ -349,7 +349,7 @@ class M_ServerInfo(bot.Module):
                         s[0]] = t[s[0]](s[1]) if s[0] in t else s[1]
         elif context.code(376):
             self.server.log('INFO',
-                'Now connected to: %s' % self.server.info['NETWORK'])
+                            'Now connected to: %s' % self.server.info['NETWORK'])
 
 
 bot.register.module(M_ServerInfo)
@@ -375,7 +375,7 @@ class M_Settings(bot.Module):
         for n in ['nick', 'mode']:
             self.server.settings.add("server.user.%s" % n, self.server.opt(n))
         self.server.settings.add("server.user.name",
-            "%s: %s" % (bot.version.name, bot.version.source))
+                                 "%s: %s" % (bot.version.name, bot.version.source))
         if 'ident' not in self.server.options:
             self.server.options['ident'] = self.server.settings.get(
                 'server.user.nick')
@@ -410,8 +410,8 @@ class M_Nick(bot.Module):
         ret = "Set nick to %s ({w} set at login)." % (args.getstr('nick'))
         self.npending = (lambda server: context.reply(ret.format(w=(
             utils.ynstr(args.getstr('nick')
-            == server.settings.get("server.user.nick"), "will", "won't")
-            ))),
+                        == server.settings.get("server.user.nick"), "will", "won't")
+        ))),
             lambda: context.reply(
                 "Cannot set nick to %s" % args.getstr('nick')),
                     args.getstr('nick') if not args.getbool('temp') else '')
@@ -431,7 +431,7 @@ class M_Nick(bot.Module):
                 if self.npending:
                     if self.npending[2]:
                         self.server.settings.set("server.user.nick",
-                            self.npending[2])
+                                                 self.npending[2])
                     self.npending[0](self.server)
 
     def poll(self):
