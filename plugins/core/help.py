@@ -24,6 +24,8 @@ class M_Help(bot.Module):
                 r += "..."
             if a['kv']:
                 r = '-' + r
+                if 'kvtext' in a:
+                    r += '=<' + a['kvtext'] + '>'
             else:
                 r = "<%s>" % r
             if a['optional']:

@@ -777,10 +777,15 @@ class Module:
         }
         for arg in arguments:
             a = {
-                'name': arg.strip('-.[]'),
+                'name': arg.strip('-.[]').split('=')[0],
                 'recognizer': lambda x: False,
+                'kv': False,
             }
             a['kv'] = (arg.strip('[')[0] == '-')
+            try:
+                a['kvtext'] = arg.strip('[-]').split('=')[1]
+            except IndexError:
+                pass
             a['optional'] = (arg.strip('-')[0] == '[')
             a['full'] = (arg.strip(']')[-1] == '.')
             if a['name'] in recognizers:
