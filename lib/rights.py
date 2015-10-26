@@ -35,12 +35,12 @@ class Module(bot.Module):
             "admin": ["owner"],
             "-": ["owner"],
             "ignore": ["owner"],
-            })
+        })
 
     def _getrights(self, idstring, context=None):
         rightlist = self.server.settings.get("server.rights")
         rights = (["owner"]
-        if fnmatch.fnmatch(idstring, self.server.opt('owner')) else [])
+                  if fnmatch.fnmatch(idstring, self.server.opt('owner')) else [])
         matches = []
         for r in rightlist:
             if fnmatch.fnmatch(idstring, r):
@@ -99,11 +99,11 @@ class Module(bot.Module):
         return "You do not have the rights to do that."
 
     def getrights_c(self, context, args):
-        gcontext = context if not "idstring" in args.d else None
+        gcontext = context if "idstring" not in args.d else None
         args.default("idstring", context.idstring())
         if args.getbool("matches"):
             return "%s (%s): %s" % (args.getstr("idstring"),
-            ' '.join(self._getrights(args.getstr("idstring"), gcontext)[1]),
-            ' '.join(self.server.getrights(args.getstr("idstring"), gcontext)))
+                                    ' '.join(self._getrights(args.getstr("idstring"), gcontext)[1]),
+                                    ' '.join(self.server.getrights(args.getstr("idstring"), gcontext)))
         return "%s: %s" % (args.getstr("idstring"), ' '.join(
             self.server.getrights(args.getstr("idstring"), gcontext)))

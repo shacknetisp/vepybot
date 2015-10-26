@@ -17,7 +17,7 @@ class Module(bot.Module):
 
         self.server.addrights({
             "alias": ["admin"],
-            })
+        })
 
     def _add(self, aliases, alias, content):
         if alias in aliases:
@@ -58,7 +58,7 @@ class Module(bot.Module):
                 escaped = True
             elif escaped:
                 if cchar in ["%s%s$" % (parser.escape,
-                    parser.quotes)]:
+                             parser.quotes)]:
                         fullalias += cchar
                         escaped = False
                 else:

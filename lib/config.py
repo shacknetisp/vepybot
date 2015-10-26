@@ -14,11 +14,12 @@ class Module(bot.Module):
             self.config,
             "config",
             ("Act on a config entry, requires admin." +
-            " (list, get, reset, set, add, remove)"),
+             " (list, get, reset, set, add, remove)"),
             ["action", "name", "value..."])
 
         self.addcommand(self.purge, "config purge",
-            "Purge a module from the config, requires admin.", ["module"])
+                                    "Purge a module from the config, \
+                                     requires admin.", ["module"])
 
     def purge(self, context, args):
         context.exceptrights(["admin"])
@@ -37,7 +38,7 @@ class Module(bot.Module):
             return str(v)
 
     def _core(self, action, name, vname, value,
-        get, ignore, toptree, checkuser=True):
+              get, ignore, toptree, checkuser=True):
         if action == "get":
             if name not in self.server.settings.user and checkuser:
                 return "You may not access '%s'" % vname
@@ -135,7 +136,7 @@ class Module(bot.Module):
                 if value not in get(vname):
                     return "Value not in %s." % vname
                 self.server.settings.set(name, [v for v in get(vname)
-                if v != value])
+                                                if v != value])
                 return "%s set to: %s" % (vname, self.display(get(vname)))
             except KeyError:
                 return "'%s' does not exist." % vname
@@ -153,6 +154,5 @@ class Module(bot.Module):
         context.exceptrights(["admin"])
 
         return self._core(action, name, name, value,
-            self.server.settings.get,
-            self.ignore, self.server.settings.tree)
-
+                          self.server.settings.get,
+                          self.ignore, self.server.settings.tree)

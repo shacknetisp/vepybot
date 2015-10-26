@@ -33,17 +33,17 @@ def literal_eval(node_or_string):
         elif isinstance(node, ast.NameConstant):
             return node.value
         elif isinstance(node, ast.UnaryOp) and \
-             isinstance(node.op, (ast.UAdd, ast.USub)) and \
-             isinstance(node.operand, (ast.Num, ast.UnaryOp, ast.BinOp)):
+            isinstance(node.op, (ast.UAdd, ast.USub)) and \
+            isinstance(node.operand, (ast.Num, ast.UnaryOp, ast.BinOp)):
             operand = _convert(node.operand)
             if isinstance(node.op, ast.UAdd):
                 return + operand
             else:
                 return - operand
         elif isinstance(node, ast.BinOp) and \
-             isinstance(node.op, (ast.Add, ast.Sub)) and \
-             isinstance(node.right, (ast.Num, ast.UnaryOp, ast.BinOp)) and \
-             isinstance(node.left, (ast.Num, ast.UnaryOp, ast.BinOp)):
+            isinstance(node.op, (ast.Add, ast.Sub)) and \
+            isinstance(node.right, (ast.Num, ast.UnaryOp, ast.BinOp)) and \
+            isinstance(node.left, (ast.Num, ast.UnaryOp, ast.BinOp)):
             left = _convert(node.left)
             right = _convert(node.right)
             if isinstance(node.op, ast.Add):

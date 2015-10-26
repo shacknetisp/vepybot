@@ -13,12 +13,12 @@ def durstr(dur, skip="", dec=False, full=False, skiplow=True):
         (60 * 60, 'h', 24),
         (60, 'm', 60),
         (1, 's', 60),
-        ]:
+    ]:
             if style[1] in skip:
                 continue
             if full:
                 style = (style[0], style[1].strip() + (' ' if full else ''),
-                    style[2])
+                         style[2])
             last = style
             amount = dur // style[0]
             extra = dur % style[0]
