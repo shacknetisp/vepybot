@@ -119,7 +119,8 @@ class M_Loader(bot.Module):
                         for x in bot.newmodules
                 ]:
                         if n == p or n == p.split('/')[0]:
-                            tod.append(n)
+                            if n not in tod:
+                                tod.append(n)
             for n in tod:
                 nl.pop(nl.index(n))
             self.server.settings.set("server.noautoload", nl)

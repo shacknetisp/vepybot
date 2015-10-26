@@ -184,6 +184,7 @@ class Server:
     dautoload = [
         "misc",
         "internet",
+        "games",
     ]
 
     class Settings:
