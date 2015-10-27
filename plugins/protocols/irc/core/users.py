@@ -143,22 +143,9 @@ class M_Whois(bot.Module):
             w = self.tmp[context.rawsplit[3]]
             w.auth = context.rawsplit[4]
         elif context.code("JOIN"):
-            self.fromcontext(context)
-            w = self.whois[context.user[0]]
-            channel = context.rawsplit[2].strip(':')
-            if channel not in w.channels:
-                w.channels[channel] = []
-            self.server.dohook('join', channel, context.user[0])
-            self.server.dohook('log', 'join', context.user,
-                               channel)
+            self.handlejoin(context)
         elif context.code("PART"):
-            self.fromcontext(context)
-            w = self.whois[context.user[0]]
-            channel = context.rawsplit[2]
-            if channel in w.channels:
-                w.channels.pop(channel)
-            self.server.dohook('log', 'part', context.user,
-                               (channel, context.text))
+            self.handlepart(context)
         elif context.code("QUIT"):
             self.fromcontext(context)
             w = self.whois[context.user[0]]
@@ -166,22 +153,44 @@ class M_Whois(bot.Module):
                                                context.user),
                                (list(w.channels.keys()), context.text))
         elif context.code("MODE"):
-            channel = context.rawsplit[2]
-            modes = context.rawsplit[3]
-            final = {}
-            nicks = context.rawsplit[4:]
-            for n in nicks:
-                final[n] = []
-            now = ''
-            idx = 0
-            for cchar in modes:
-                if cchar in '-+':
-                    now = cchar
-                elif now and idx in range(len(nicks)):
-                    final[nicks[idx]].append(now + cchar)
-            self.server.dohook('chanmodes', channel, final)
-            self.server.dohook('log', 'mode', context.rawsplit[0],
-                               (channel, modes, ' '.join(nicks)))
+            self.handlemode(context)
+
+    def handlejoin(self, context):
+        self.fromcontext(context)
+        w = self.whois[context.user[0]]
+        channel = context.rawsplit[2].strip(':')
+        if channel not in w.channels:
+            w.channels[channel] = []
+        self.server.dohook('join', channel, context.user[0])
+        self.server.dohook('log', 'join', context.user,
+                           channel)
+
+    def handlepart(self, context):
+        self.fromcontext(context)
+        w = self.whois[context.user[0]]
+        channel = context.rawsplit[2]
+        if channel in w.channels:
+            w.channels.pop(channel)
+        self.server.dohook('log', 'part', context.user,
+                           (channel, context.text))
+
+    def handlemode(self, context):
+        channel = context.rawsplit[2]
+        modes = context.rawsplit[3]
+        final = {}
+        nicks = context.rawsplit[4:]
+        for n in nicks:
+            final[n] = []
+        now = ''
+        idx = 0
+        for cchar in modes:
+            if cchar in '-+':
+                now = cchar
+            elif now and idx in range(len(nicks)):
+                final[nicks[idx]].append(now + cchar)
+        self.server.dohook('chanmodes', channel, final)
+        self.server.dohook('log', 'mode', context.rawsplit[0],
+                           (channel, modes, ' '.join(nicks)))
 
     def chanmodes(self, channel, modes):
         for target in modes:
@@ -191,17 +200,13 @@ class M_Whois(bot.Module):
             if channel not in w.channels:
                 w.channels[channel] = []
             for mode in modes[target]:
-                if mode == '+o':
-                    if 'o' not in w.channels[channel]:
-                        w.channels[channel].append('o')
-                elif mode == '-o':
-                    if 'o' in w.channels[channel]:
-                        w.channels[channel].pop(w.channels[channel].index('o'))
-                elif mode == '+v':
-                    if 'v' not in w.channels[channel]:
-                        w.channels[channel].append('v')
-                elif mode == '-v':
-                    if 'v' in w.channels[channel]:
-                        w.channels[channel].pop(w.channels[channel].index('v'))
+                for modes in 'ov':
+                    if mode == '+%s' % mode:
+                        if mode not in w.channels[channel]:
+                            w.channels[channel].append(mode)
+                    elif mode == '-%s' % mode:
+                        if mode in w.channels[channel]:
+                            i = w.channels[channel].index(mode)
+                            w.channels[channel].pop(i)
 
 bot.register.module(M_Whois)
