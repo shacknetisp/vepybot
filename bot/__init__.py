@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
 from threading import Lock
 from .loader import *
 from .args import *
@@ -9,6 +8,8 @@ from .module import *
 from .context import *
 from .settings import *
 from .running import runningservers
+from .parser import *
+from .hooks import *
 
 threads = True
 run = True
@@ -31,7 +32,7 @@ def load_server(*args):
     runningservers.append(server)
 
 
-class Server(LoaderBase):
+class Server(LoaderBase, ParserBase, HookBase):
 
     """The Server Plugin."""
 
@@ -124,75 +125,6 @@ class Server(LoaderBase):
             for k, v in m.serversettings:
                 self.settings.add(k, v)
 
-    def addhook(self, name, uname, function):
-        """Add a hook to <name> with the unique id <uname>
-        and the function <function>."""
-        if name not in self.hooks:
-            self.hooks[name] = {}
-        self.hooks[name][uname] = function
-
-    def dohook(self, name, *args):
-        """Call all functions registered to <name> with <*args>."""
-        if name in self.hooks:
-            for f in list(self.hooks[name].values()):
-                f(*args)
-
-    def addtimer(self, f, n, t):
-        """Add a timer with unique name <n>, function <f> and timeout <t>."""
-        self.timers[n] = {
-            'name': n,
-            'function': f,
-            'time': t,
-            'last': 0,
-        }
-
-    def callonce(self, f, t):
-        """Call f after <t> ms."""
-        self.otimers.append({
-            'start': time.time(),
-            'function': f,
-            'time': t,
-        })
-
-    def dotimers(self):
-        for timer in list(self.timers.values()):
-            if time.time() - timer['last'] > timer['time'] / 1000:
-                try:
-                    timer['function']()
-                except:
-                    import traceback
-                    traceback.print_exc()
-                timer['last'] = time.time()
-        self.dootimers()
-
-    def dootimers(self):
-        tod = []
-        i = 0
-        for timer in self.otimers:
-            if time.time() - timer['start'] > timer['time'] / 1000:
-                try:
-                    timer['function']()
-                except:
-                    import traceback
-                    traceback.print_exc()
-                tod.append(i)
-            i += 1
-        tod.reverse()
-        for i in tod:
-            del self.otimers[i]
-
-    def rset(self, n, v):
-        """Register a function or structure to be used by other modules."""
-        self.registry[n] = v
-
-    def rget(self, n):
-        """Get a value from the registry."""
-        return self.registry[n]
-
-    def rhas(self, n):
-        """Is a key in the registry?"""
-        return n in self.registry
-
     def corerun(self):
         if self.build:
             self.build = False
@@ -204,118 +136,6 @@ class Server(LoaderBase):
             traceback.print_exc()
             global run
             run = False
-
-    def splitparse(self, text, context=None):
-        sections = []
-        sectiond = {}
-        sectione = {}
-        idx = 0
-        try:
-            cchar = text[idx]
-        except IndexError:
-            return sections, sectiond
-        section = ""
-        escaped = False
-        quoted = None
-        running = False
-        runningsection = ""
-        rlevel = 0
-        while cchar is not None:
-            if not escaped and cchar == parser.escape:
-                escaped = True
-                if not section:
-                    sectiond[len(sections)] = "cooked"
-            elif escaped:
-                if cchar in ["%s%s" % (parser.escape, parser.quotes)]:
-                    section += cchar
-                    escaped = False
-                else:
-                    section += cchar
-                    escaped = False
-            elif not quoted and cchar == parser.run[0]:
-                if not running:
-                    runningsection = section
-                    section = ""
-                    running = True
-                else:
-                    section += cchar
-                rlevel += 1
-            elif not quoted and cchar == parser.run[1]:
-                rlevel -= 1
-                if running and rlevel == 0:
-                    c = section
-                    section = self.runcommand(context, section)[0]
-                    if section is None:
-                        raise ParserBadCommand("Failed running: {%s}" % c)
-                    section = runningsection + section
-                    running = False
-                else:
-                    section += cchar
-            elif not quoted and cchar in parser.quotes and not running:
-                quoted = cchar
-                if not section:
-                    sectiond[len(sections)] = "cooked"
-            elif quoted and not running:
-                if cchar == quoted:
-                    quoted = None
-                    if not section:
-                        sectione[len(sections)] = True
-                else:
-                    section += cchar
-            else:
-                if cchar == ' ' and not running:
-                    if section or len(sections) in sectione:
-                        sections.append(section)
-                    section = ""
-                else:
-                    section += cchar
-            idx += 1
-            cchar = text[idx] if idx in range(len(text)) else None
-        if section or len(sections) in sectione:
-            sections.append(section)
-        section = ""
-        return sections, sectiond
-
-    def makeargdict(self, argtext, context, v):
-        sections, sectiond = self.splitparse(argtext, context)
-        parsedargs = {}
-        args = [a for a in v[1]['args'] if not a['kv']]
-        kvargs = [a for a in v[1]['args'] if a['kv']]
-        argi = 0
-        sectioni = 0
-        while sectioni in range(len(sections)):
-            st = sections[sectioni]
-            sd = sectiond[sectioni] if sectioni in sectiond else ""
-            done = False
-            if sd != "cooked" and st.startswith('-'):
-                param = st.lstrip('-')
-                name = param.split('=')[0]
-                if name in [a['name'] for a in kvargs]:
-                    try:
-                        parsedargs[name] = param.split('=')[1]
-                    except IndexError:
-                        parsedargs[name] = ""
-                    done = True
-                break
-            if not done and argi in range(len(args)):
-                arg = args[argi]
-                if arg['optional']:
-                    if arg['recognizer'](st):
-                        parsedargs[arg['name']] = st
-                    else:
-                        argi += 1
-                        if argi in range(len(args)):
-                            arg = args[argi]
-                if arg['full']:
-                    parsedargs[arg['name']] = ' '.join(
-                        sections[sectioni:]
-                    )
-                    argi = len(args)
-                else:
-                    parsedargs[arg['name']] = st
-                argi += 1
-            sectioni += 1
-        return parsedargs
 
     def parsecommand(self, context, text, v, argtext):
         parsedargs = self.makeargdict(argtext, context, v)
