@@ -19,6 +19,52 @@ class Module(bot.Module):
     def alias(self, context, args):
         return "restatsdb get %s $*" % (args.getstr('url'))
 
+    def actiongame(self, json):
+        f = {
+                'players': len(json['players']),
+                'mode': ['Demo', 'Editing', 'DM',
+                         'CTF', 'DAC', 'BB', 'Race'][json['mode']],
+            }
+        return str("Game {g[id]}: {x[mode]} on {g[map]},"
+                   " players: {x[players]},"
+                   " server: {g[server]}").format(g=json, x=f)
+
+    def actiontoprace(self, json, args):
+        if 'toprace' not in json:
+            return 'No top race results for %s.' % args.getstr('query')
+        return "%s by %s" % (
+            timeutils.durstr(json['toprace']['time'] / 1000,
+                             dec=True, full=True).strip(),
+            ("%s playing as %s" % (
+                json['toprace']['gameplayer']['handle'],
+                json['toprace']['gameplayer']['name'])
+                if json['toprace']['gameplayer']['handle']
+                else
+                "<no auth> playing as %s" % (
+                json['toprace']['gameplayer']['name']))
+        )
+
+    def actiontotals(self, http, args):
+        try:
+            jgames = http.request(
+                args.getstr('url') + '/get/games').json()
+            jservers = http.request(
+                args.getstr('url') + '/get/servers').json()
+            jmaps = http.request(
+                args.getstr('url') + '/get/maps').json()
+            jplayers = http.request(
+                args.getstr('url') + '/get/players').json()
+        except http.Error:
+            return "Unable to contact API."
+        except ValueError:
+            return "Invalid API response."
+        return "Games: %d, Maps: %d, Servers: %d, Players: %d" % (
+            len(jgames),
+            len(jmaps),
+            len(jservers),
+            len(jplayers),
+        )
+
     def main(self, context, args):
         action = args.getstr('action')
         http = self.server.rget('http.url')
@@ -28,25 +74,7 @@ class Module(bot.Module):
         elif action == "game":
             actionurl = "/games/%s" % args.getstr('query')
         elif action == "totals":
-            try:
-                jgames = http.request(
-                    args.getstr('url') + '/get/games').json()
-                jservers = http.request(
-                    args.getstr('url') + '/get/servers').json()
-                jmaps = http.request(
-                    args.getstr('url') + '/get/maps').json()
-                jplayers = http.request(
-                    args.getstr('url') + '/get/players').json()
-            except http.Error:
-                return "Unable to contact API."
-            except ValueError:
-                return "Invalid API response."
-            return "Games: %d, Maps: %d, Servers: %d, Players: %d" % (
-                len(jgames),
-                len(jmaps),
-                len(jservers),
-                len(jplayers),
-            )
+            return self.actiontotals(http, args)
         else:
             return "Invalid action."
         try:
@@ -58,27 +86,8 @@ class Module(bot.Module):
         if 'error' in json:
             return json['error']
         if action == 'toprace':
-            if 'toprace' not in json:
-                return 'No top race results for %s.' % args.getstr('query')
-            return "%s by %s" % (
-                timeutils.durstr(json['toprace']['time'] / 1000,
-                                 dec=True, full=True).strip(),
-                ("%s playing as %s" % (
-                    json['toprace']['gameplayer']['handle'],
-                    json['toprace']['gameplayer']['name'])
-                    if json['toprace']['gameplayer']['handle']
-                    else
-                    "<no auth> playing as %s" % (
-                    json['toprace']['gameplayer']['name']))
-            )
+            return self.actiontoprace(json, args)
         elif action == 'game':
-            f = {
-                'players': len(json['players']),
-                'mode': ['Demo', 'Editing', 'DM',
-                         'CTF', 'DAC', 'BB', 'Race'][json['mode']],
-            }
-            return str("Game {g[id]}: {x[mode]} on {g[map]},"
-                       " players: {x[players]},"
-                       " server: {g[server]}").format(g=json, x=f)
+            return self.actiongame(json)
 
 bot.register.module(Module)
