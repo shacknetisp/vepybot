@@ -8,6 +8,7 @@ import os
 import sys
 from .userdata import userdata
 from .running import runningservers
+from .exceptions import *
 
 
 def reload(m):
