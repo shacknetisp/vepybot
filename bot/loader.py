@@ -50,10 +50,7 @@ def reloadall():
         server.reloadall()
 
 
-def loadnamedmodule(n, p=""):
-    global currentplugin
-    global newmodules
-    newmodules = []
+def getdirectories():
     paths = [
         "",
         "protocols",
@@ -62,6 +59,14 @@ def loadnamedmodule(n, p=""):
     for f in paths:
         d.append("plugins/" + f)
         d.append(userdata + "/plugins/" + f)
+    return d
+
+
+def loadnamedmodule(n, p=""):
+    global currentplugin
+    global newmodules
+    newmodules = []
+    d = getdirectories()
     for directory in d:
         sys.path = sys.path + [directory]
         if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
