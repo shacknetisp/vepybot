@@ -1,32 +1,27 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
-import importlib
 import time
 import fnmatch
 import copy
-import textwrap
+import importlib
 import version
+import sys
 from threading import Lock
+from .loader import *
+from .args import *
+from .userdata import *
+from .exceptions import *
+from .module import *
+from .context import *
 
 threads = True
 run = True
-
-userdata = 'userdata'
-
-
-def createuserdata():
-    for d in [
-            'servers',
-            'shared',
-            'plugins',
-    ]:
-            os.makedirs(userdata + '/' + d, exist_ok=True)
-    open('%s/plugins/__init__.py' % userdata, 'w')
+runningservers = []
 
 
 def reload(m):
     importlib.reload(m)
+
 
 from lib import db, utils, parser
 [reload(x) for x in [utils, parser]]
@@ -41,14 +36,13 @@ def importmodule(path, r=False):
     sys.path.pop(0)
     return module
 
+
 modlock = Lock()
-servers = {}
-runningservers = []
 plugins = {}
 pluginfiles = {}
 currentplugin = ""
 newmodules = []
-registry = {}
+servers = {}
 
 
 class register:
@@ -60,10 +54,6 @@ class register:
         plugins[currentplugin][c.index] = c
         if c.index not in newmodules:
             newmodules.append(c.index)
-
-    def value(c, v):
-        if c not in registry:
-            registry[c] = v
 
 
 def reloadall():
@@ -110,65 +100,6 @@ def make_server(module, kind, name, shared, options):
 def load_server(*args):
     server = make_server(*args)
     runningservers.append(server)
-
-
-class NoArg(Exception):
-
-    def __init__(self, m):
-        Exception.__init__(self, m)
-        self.msg = m
-
-
-class Args:
-
-    def __init__(self, d):
-        self.d = d
-        self.defaults = {}
-
-    def default(self, n, d):
-        """Set the default value of arg <n> to <d>"""
-        self.defaults[n] = d
-
-    def __contains__(self, n):
-        return n in self.d
-
-    def getstr(self, n):
-        """Get the arg <n> as a str."""
-        try:
-            if n not in self.d and n in self.defaults:
-                return str(self.defaults[n])
-            return str(self.d[n])
-        except KeyError:
-            raise NoArg("Argument not found: %s" % n)
-
-    def getbool(self, n):
-        """Get the arg <n> as a bool. For -kv args."""
-        if n not in self.d:
-            return False
-        elif self.d[n] == "":
-            return True
-        return utils.boolstr(self.d[n])
-
-
-class ParserBadCommand(Exception):
-
-    def __init__(self, m):
-        Exception.__init__(self, m)
-        self.msg = m
-
-
-class NoPerms(Exception):
-
-    def __init__(self, m):
-        Exception.__init__(self, m)
-        self.msg = m
-
-
-class ModuleError(Exception):
-
-    def __init__(self, m):
-        Exception.__init__(self, m)
-        self.msg = m
 
 
 class Server:
@@ -696,16 +627,21 @@ class Server:
         """Called on bot restart."""
         pass
 
-    def runcommand(self, context, text):
-        """Run <text> as <context>."""
+    def commandlist(self):
+        """List of commands and names."""
         commands = []
-        split = text.split()
         for k, v in self.commands:
             for splitc in [
                     [v[0].plugin] + [v[0].index] + v[1]['name'].split(),
                     [v[0].index] + v[1]['name'].split(),
                     v[1]['name'].split()]:
                         commands.append((splitc, v))
+        return commands
+
+    def runcommand(self, context, text):
+        """Run <text> as <context>."""
+        commands = self.commandlist()
+        split = text.split()
         commands.sort(key=lambda x: -len(x[0]))
         for splitc, v in commands:
             if splitc == split[:len(splitc)]:
@@ -746,193 +682,3 @@ class Server:
                 continue
 
         return None, self.settings.get('messages.notfound')
-
-
-class Module:
-
-    """A Module Object."""
-
-    """Display the module in lists?"""
-    hidden = False
-
-    def __init__(self, server):
-        self.server = server
-        self.commands = {}
-        self.serversettings = []
-        self.timers = []
-        self.hooks = []
-        self.ssets = []
-        self.register()
-
-    def addserversetting(self, n, v):
-        """Add setting <n> with default value <v>."""
-        self.serversettings.append((n, v))
-
-    def addcommand(self, function, name, helptext, arguments,
-                   recognizers=None):
-        """Add a command to the module."""
-        if recognizers is None:
-            recognizers = {}
-        c = {
-            'name': name,
-            'help': helptext,
-            'args': [],
-            'function': function,
-            'alias': None,
-        }
-        for arg in arguments:
-            a = {
-                'name': arg.strip('-.[]').split('=')[0],
-                'recognizer': lambda x: False,
-                'kv': False,
-            }
-            a['kv'] = (arg.strip('[')[0] == '-')
-            try:
-                a['kvtext'] = arg.strip('[-]').split('=')[1]
-            except IndexError:
-                pass
-            a['optional'] = (arg.strip('-')[0] == '[')
-            a['full'] = (arg.strip(']')[-1] == '.')
-            if a['name'] in recognizers:
-                a['recognizer'] = recognizers[a['name']]
-            c['args'].append(a)
-        self.commands[c['name']] = c
-
-    def addcommandalias(self, name, newname):
-        self.commands[newname] = self.commands[name].copy()
-        self.commands[newname]['name'] = newname
-        self.commands[newname]['alias'] = name
-
-    def addhook(self, name, uname, function):
-        """Add a server hook, prefixing the name with the module index."""
-        self.server.addhook(name, "%s:%s" % (self.index, uname), function)
-        self.hooks.append((name, "%s:%s" % (self.index, uname)))
-
-    def addtimer(self, function, name, timeout):
-        """Add a timer hook, prefixing the name with the module index."""
-        self.server.addtimer(function, "%s:%s" % (self.index, name), timeout)
-        self.timers.append("%s:%s" % (self.index, name))
-
-    def addsetting(self, setting, value):
-        """Add a module-specific <setting> with a default value of <value>."""
-        self.addserversetting("modules.%s.%s" % (self.index, setting), value)
-
-    def getsetting(self, setting):
-        """Get a module-specific <setting>."""
-        return self.server.settings.get("modules.%s.%s" % (self.index, setting))
-
-    def setsetting(self, setting, value):
-        """Set a module-specific <setting>."""
-        return self.server.settings.set(
-            "modules.%s.%s" % (self.index, setting), value)
-
-    def serverset(self, name, value):
-        """Add <name> as <value> to the server registry."""
-        self.server.rset(name, value)
-        self.ssets.append(name)
-
-    def getdb(self, name, d=None):
-        """Get a database <name> with default <d>."""
-        os.makedirs("%s/servers/%s/%s" % (
-            userdata, self.server.name, self.index), exist_ok=True)
-        return db.DB("servers/%s/%s/%s.json" % (
-            self.server.name,
-            self.index, name), d)
-
-    def getshareddb(self, index, name, d=None):
-        """Get a shared database <name> with default <d>."""
-        os.makedirs("%s/shared/%s/%s" % (
-            userdata, self.server.shared, index), exist_ok=True)
-        return db.DB("shared/%s/%s/%s.json" % (
-            self.server.shared,
-            index, name), d)
-
-    def _unload(self):
-        for timer in self.timers:
-            self.server.timers.pop(timer)
-        for hook in self.hooks:
-            self.server.hooks[hook[0]].pop(hook[1])
-        for sset in self.ssets:
-            self.server.registry.pop(sset)
-
-
-class Context:
-
-    """Server Specific Context, implement the core functions at least."""
-
-    moretemplate = "[{n} more message{s}]"
-
-    def __init__(self, server):
-        self.server = server
-
-    def reply(self, m):
-        """Reply with <m>."""
-
-    def replypriv(self, m):
-        """Reply privately with <m>."""
-        self.reply(m)
-
-    def idstring(self):
-        """Return the idstring of the context."""
-        return self.server.idstring(self)
-
-    def checkright(self, r):
-        """Check if the context has the right <r>."""
-        return r in self.server.getrights(self.idstring(), self)
-
-    def exceptrights(self, rlist, m=None):
-        """Raise NoPerms exception if this context has none of the
-        rights in <r>, <m> is an optional exception message."""
-        if isinstance(rlist, str):
-            rlist = [rlist]
-        rlist = rlist + ['owner']
-        for r in rlist:
-            if r in self.server.getrights(self.idstring(), self):
-                return True
-        raise NoPerms(m or "You must have %s: %s" % (
-            "this right" if len(rlist) == 1 else "one of these rights",
-            '; '.join(rlist)))
-
-    def exceptcancommand(self, module, command):
-        """Call _exceptcancommand, raise NoPerms if cannot execute <command>."""
-        self._exceptcancommand(module, command)
-
-    def _exceptcancommand(self, module, command):
-        if not self.checkright("admin"):
-            for r in self.server.getrights(self.idstring(), self):
-                if fnmatch.fnmatchcase("-%s.%s.%s" % (
-                                       module.plugin,
-                                       module.index, command['name']), r):
-                        raise NoPerms("You may not use %s" % "%s.%s.%s" % (
-                            module.plugin, module.index, command['name']))
-                if r == "ignore":
-                    raise NoPerms("")
-
-    def domore(self, message):
-        if not self.server.opt('charlimit'):
-            return message
-        messages = textwrap.wrap(message, self.server.opt('charlimit') - len(
-            " " + self.moretemplate,
-        ))
-        message = messages[0]
-        if len(messages) > 1:
-            self.server.more[self.idstring()] = messages[1:]
-            try:
-                if self.server.more[self.idstring()]:
-                    l = len(self.server.more[self.idstring()])
-                    message += (' ' +
-                                self.moretemplate.format(n=l,
-                                                         s=('s'
-                                                            if l != 1
-                                                            else '')))
-            except KeyError:
-                pass
-        return message
-
-    def replydriver(self, f, message, more):
-        if more and message.count('\n') == 0:
-            message = self.domore(message)
-        for message in message.split('\n'):
-            messages = textwrap.wrap(message, self.server.opt('charlimit')
-                                     - len('...'))
-            f(messages[0] + ('...' if len(messages) > 1 else ''))

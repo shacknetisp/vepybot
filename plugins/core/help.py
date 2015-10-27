@@ -35,13 +35,7 @@ class M_Help(bot.Module):
 
     def help(self, context, args):
         split = args.getstr("command").split()
-        commands = []
-        for k, v in self.server.commands:
-            for splitc in [
-                    [v[0].plugin] + [v[0].index] + v[1]['name'].split(),
-                    [v[0].index] + v[1]['name'].split(),
-                    v[1]['name'].split()]:
-                        commands.append((splitc, v))
+        commands = self.server.commandlist()
         commands.sort(key=lambda x: -len(x[0]))
         for splitc, v in commands:
             if splitc == split[:len(splitc)]:
