@@ -163,6 +163,9 @@ class Server(LoaderBase):
                     import traceback
                     traceback.print_exc()
                 timer['last'] = time.time()
+        self.dootimers()
+
+    def dootimers(self):
         tod = []
         i = 0
         for timer in self.otimers:
