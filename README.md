@@ -1,4 +1,4 @@
-[![Code Climate](https://img.shields.io/codeclimate/github/shacknetisp/vepybot.svg)](https://codeclimate.com/github/shacknetisp/vepybot)
+[![Code Climate](https://img.shields.io/codeclimate/github/shacknetisp/vepybot.svg)](https://codeclimate.com/github/shacknetisp/vepybot)  
 Vepybot is independent of protocol, with most functionality added by plugins.
 By default it includes an IRC plugin, as well as a minimal `plainsocket` plugin for basing other protocol plugins on.
 
