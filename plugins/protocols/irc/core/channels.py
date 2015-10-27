@@ -99,13 +99,16 @@ class M_Channels(bot.Module):
         for channel in self.server.settings.get("server.channels"):
             self.join(channel)
 
+    def checkpart(self, channel, reason):
+        if channel in self.server.channels:
+            self.server.channels.pop(channel)
+            self.server.log("KICK PARTED", channel)
+
     def handlekick(self, context):
         self.server.dohook('log', 'kick', context.rawsplit[0],
                            (context.rawsplit[2], context.rawsplit[3]))
         if context.rawsplit[3] == self.server.nick:
-            if context.rawsplit[2] in self.server.channels:
-                self.server.channels.pop(context.rawsplit[2])
-                self.server.log("KICK PARTED", context.rawsplit[2])
+            self.checkpart(context.rawsplit[2], 'KICK PARTED')
             if self.getchannelsetting("kickrejoin", context.reciever):
                 self.join(context.reciever)
 
@@ -118,9 +121,7 @@ class M_Channels(bot.Module):
 
     def handlepart(self, context):
         if context.user[0] == self.server.nick:
-            if context.rawsplit[2] in self.server.channels:
-                self.server.channels.pop(context.rawsplit[2])
-                self.server.log("PARTED", context.rawsplit[2])
+            self.checkpart(context.rawsplit[2], 'PARTED')
 
     def handle352(self, context):
         self.server.dohook('whois.fromtuple', (context.rawsplit[7],
