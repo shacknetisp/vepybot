@@ -287,36 +287,33 @@ class Server(LoaderBase):
             st = sections[sectioni]
             sd = sectiond[sectioni] if sectioni in sectiond else ""
             done = False
-            if sd != "cooked":
-                for prefix in ['--', '-']:
-                    if st.startswith(prefix):
-                        param = st[len(prefix):]
-                        name = param.split('=')[0]
-                        if name in [a['name'] for a in kvargs]:
-                            try:
-                                parsedargs[name] = param.split('=')[1]
-                            except IndexError:
-                                parsedargs[name] = ""
-                            done = True
-                        break
-            if not done:
-                if argi in range(len(args)):
-                    arg = args[argi]
-                    if arg['optional']:
-                        if arg['recognizer'](st):
-                            parsedargs[arg['name']] = st
-                        else:
-                            argi += 1
-                            if argi in range(len(args)):
-                                arg = args[argi]
-                    if arg['full']:
-                        parsedargs[arg['name']] = ' '.join(
-                            sections[sectioni:]
-                        )
-                        argi = len(args)
-                    else:
+            if sd != "cooked" and st.startswith('-'):
+                param = st.lstrip('-')
+                name = param.split('=')[0]
+                if name in [a['name'] for a in kvargs]:
+                    try:
+                        parsedargs[name] = param.split('=')[1]
+                    except IndexError:
+                        parsedargs[name] = ""
+                    done = True
+                break
+            if not done and argi in range(len(args)):
+                arg = args[argi]
+                if arg['optional']:
+                    if arg['recognizer'](st):
                         parsedargs[arg['name']] = st
-                    argi += 1
+                    else:
+                        argi += 1
+                        if argi in range(len(args)):
+                            arg = args[argi]
+                if arg['full']:
+                    parsedargs[arg['name']] = ' '.join(
+                        sections[sectioni:]
+                    )
+                    argi = len(args)
+                else:
+                    parsedargs[arg['name']] = st
+                argi += 1
             sectioni += 1
         return parsedargs
 
