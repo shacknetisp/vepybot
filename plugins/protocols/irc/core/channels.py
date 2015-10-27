@@ -64,15 +64,18 @@ class M_Channels(bot.Module):
             clist.pop(clist.index(c))
         self.server.settings.set("server.channels", clist)
 
+    def ynchannelauto(self, channel):
+        return utils.ynstr(channel
+                             in self.server.settings.get("server.channels"),
+                             "will",
+                             "won't")
+
     def join_c(self, context, args):
         if args.getstr('channel') in self.server.channels:
             return "Already joined %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.join(args.getstr('channel'), args.getbool('temp'))
-        ynstr = utils.ynstr((args.getstr('channel')
-                             in self.server.settings.get("server.channels"),
-                             "will",
-                             "won't"))
+        ynstr = self.ynchannelauto(args.getstr('channel'))
         return "Attempted to join %s (%s autojoin)." % (args.getstr('channel'),
                                                         ynstr)
 
@@ -83,10 +86,7 @@ class M_Channels(bot.Module):
             return "Not joined in %s." % args.getstr('channel')
         context.exceptrights(['admin', args.getstr('channel') + ',op'])
         self.part(args.getstr('channel'), args.getbool('temp'))
-        ynstr = utils.ynstr((args.getstr('channel')
-                             in self.server.settings.get("server.channels"),
-                             "will",
-                             "won't"))
+        ynstr = self.ynchannelauto(args.getstr('channel'))
         ret = "Parted %s (%s autojoin)." % (args.getstr('channel'),
                                             ynstr)
         if context.channel == args.getstr('channel'):
