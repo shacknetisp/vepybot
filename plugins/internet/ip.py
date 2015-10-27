@@ -87,7 +87,7 @@ def hostinfo(http, inhost, l='en', rdns=False):
         add('postalcode', ['postal', 'code'])
 
         add('country', ['country', 'names', l])
-        add('country', ['country', 'iso_code'])
+        add('countrycode', ['country', 'iso_code'])
 
         add('continent', ['continent', 'names', l])
         add('continentcode', ['continent', 'code'])
@@ -110,25 +110,25 @@ class M_IP(bot.Module):
             self.ip,
             "ip",
             "Get information about an IP or Hostname. Space-delimited values."
-            "Values: ip, host, city, region[code], "
+            "Lookup Values: ip, host, city, region[code], "
             "country[code], continent[code]",
-            ["ip", "[values]..."])
+            ["ip", "[lookups]..."])
         self.addcommandalias("ip", "geoip")
 
     def ip(self, context, args):
-        args.default("values", "ip city region country")
+        args.default("lookups", "ip city region country")
         info = hostinfo(self.server.rget("http.url"), args.getstr("ip"),
-                        rdns='host' in args.getstr("values").split())
+                        rdns='host' in args.getstr("lookups").split())
         if info is None:
             return "Unable to resolve that host."
         out = []
-        values = args.getstr("values").split()
-        for v in values:
-            if v in info and type(info[v]) in [str, int]:
-                if len(values) == 1:
-                    out.append(str(info[v]))
+        lookups = args.getstr("lookups").split()
+        for l in lookups:
+            if l in info and type(info[l]) in [str, int]:
+                if len(lookups) == 1:
+                    out.append(str(info[l]))
                 else:
-                    out.append("%s: %s" % (v, str(info[v])))
+                    out.append("%s: %s" % (l, str(info[l])))
         return ', '.join(out) or "No results."
 
 
