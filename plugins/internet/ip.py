@@ -26,7 +26,7 @@ def is_valid_ipv6_address(address):
     return True
 
 
-def hostinfo(http, inhost, l='en', rdns=False):
+def getiphost(http, inhost, rdns=False):
     ip = inhost
     host = inhost
     try:
@@ -46,6 +46,11 @@ def hostinfo(http, inhost, l='en', rdns=False):
         pass
     except http.Error:
         pass
+    return ip, host
+
+
+def hostinfo(http, inhost, l='en', rdns=False):
+    ip, host = getiphost(http, inhost, rdns)
     if not ip:
         return {}
     try:
