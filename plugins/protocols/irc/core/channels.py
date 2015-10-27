@@ -12,29 +12,20 @@ class M_Channels(bot.Module):
         self.addhook("loggedin", "loggedin", self.loggedin)
         self.addhook("recv", "recv", self.recv)
         self.addtimer(self.timer, "timer", 60 * 1000)
-
         self.addcommand(
-            self.join_c,
-            "join",
+            self.join_c, "join",
             "Join a channel, specify -temp to not autojoin.",
             ["-[temp]", "channel"])
-
         self.addcommand(
-            self.part_c,
-            "part",
+            self.part_c, "part",
             "Part a channel, specify -temp to not forget the channel.",
             ["-[temp]", "[channel]"])
-
         self.addcommand(
-            self.hop_c,
-            "cycle",
+            self.hop_c, "cycle",
             "Cycle on a channel.",
             ["[channel]"])
-
         self.addcommandalias('cycle', 'hop')
-
         self.addcommand(self.get, "channels", "List channels.", [])
-
         self.addsetting("#kickrejoin", True)
         self.tmp = {}
 
@@ -108,42 +99,63 @@ class M_Channels(bot.Module):
         for channel in self.server.settings.get("server.channels"):
             self.join(channel)
 
-    def recv(self, context):
-        if context.code("kick"):
-            self.server.dohook('log', 'kick', context.rawsplit[0],
-                               (context.rawsplit[2], context.rawsplit[3]))
-            if context.rawsplit[3] == self.server.nick:
-                if context.rawsplit[2] in self.server.channels:
-                    self.server.channels.pop(context.rawsplit[2])
-                    self.server.log("KICK PARTED", context.rawsplit[2])
-                if self.getchannelsetting("kickrejoin", context.reciever):
-                    self.join(context.reciever)
-        elif context.code("join"):
-            if context.user[0] == self.server.nick:
-                c = context.rawsplit[2].strip(':')
-                self.server.channels[c] = self.server.Channel(self.server, c)
-                self.server.send("WHO %s" % c)
-                self.server.log("JOINED", c)
-        elif context.code("part"):
-            if context.user[0] == self.server.nick:
-                if context.rawsplit[2] in self.server.channels:
-                    self.server.channels.pop(context.rawsplit[2])
-                    self.server.log("PARTED", context.rawsplit[2])
-        elif context.code("352"):
-            self.server.dohook('whois.fromtuple', (context.rawsplit[7],
+    def handlekick(self, context):
+        self.server.dohook('log', 'kick', context.rawsplit[0],
+                           (context.rawsplit[2], context.rawsplit[3]))
+        if context.rawsplit[3] == self.server.nick:
+            if context.rawsplit[2] in self.server.channels:
+                self.server.channels.pop(context.rawsplit[2])
+                self.server.log("KICK PARTED", context.rawsplit[2])
+            if self.getchannelsetting("kickrejoin", context.reciever):
+                self.join(context.reciever)
+
+    def handlejoin(self, context):
+        if context.user[0] == self.server.nick:
+            c = context.rawsplit[2].strip(':')
+            self.server.channels[c] = self.server.Channel(self.server, c)
+            self.server.send("WHO %s" % c)
+            self.server.log("JOINED", c)
+
+    def handlepart(self, context):
+        if context.user[0] == self.server.nick:
+            if context.rawsplit[2] in self.server.channels:
+                self.server.channels.pop(context.rawsplit[2])
+                self.server.log("PARTED", context.rawsplit[2])
+
+    def handle352(self, context):
+        self.server.dohook('whois.fromtuple', (context.rawsplit[7],
                                                    context.rawsplit[4],
                                                    context.rawsplit[5]))
-            if context.rawsplit[3] not in self.tmp:
-                self.tmp[context.rawsplit[3]] = {
-                    'names': {},
-                }
-            w = self.tmp[context.rawsplit[3]]
-            w['names'][context.rawsplit[7]] = [
-                self.server.info['PREFIX'][0][
-                    self.server.info['PREFIX'][1].index(m)]
-                            for m in context.rawsplit[8]
-                            if m in self.server.info['PREFIX'][1]
-            ]
+        if context.rawsplit[3] not in self.tmp:
+            self.tmp[context.rawsplit[3]] = {
+                'names': {},
+            }
+        w = self.tmp[context.rawsplit[3]]
+        w['names'][context.rawsplit[7]] = [
+            self.server.info['PREFIX'][0][
+                self.server.info['PREFIX'][1].index(m)]
+                        for m in context.rawsplit[8]
+                        if m in self.server.info['PREFIX'][1]
+        ]
+
+    def handle315(self, context):
+        w = self.tmp[context.rawsplit[3]]
+        if context.rawsplit[3] not in self.server.channels:
+            self.server.channels[context.rawsplit[3]] = self.server.Channel(
+                self.server, context.rawsplit[3])
+        c = self.server.channels[context.rawsplit[3]]
+        c.names = w['names']
+        self.server.rget('whois.updatechannels')(list(c.names.keys()))
+
+    def recv(self, context):
+        if context.code("kick"):
+            self.handlekick(context)
+        elif context.code("join"):
+            self.handlejoin(context)
+        elif context.code("part"):
+            self.handlepart(context)
+        elif context.code("352"):
+            self.handle352(context)
         elif context.code("315"):
             w = self.tmp[context.rawsplit[3]]
             if context.rawsplit[3] not in self.server.channels:
