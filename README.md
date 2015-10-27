@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/shacknetisp/vepybot/badges/gpa.svg)](https://codeclimate.com/github/shacknetisp/vepybot) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Code Climate](https://codeclimate.com/github/shacknetisp/vepybot/badges/gpa.svg)](https://codeclimate.com/github/shacknetisp/vepybot) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
 ## Vepybot
 
