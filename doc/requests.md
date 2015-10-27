@@ -35,4 +35,5 @@ To request the class from within a module:
 | `http.Error` | Base exception. |
 | `http.TimeoutError` | Timeout happened. |
 | `http.ResolveError` | Unable to resolve hostname. |
+| `http.HTTPError` | HTTP Error, same as urllib.errors.HTTPError. The `code` attribute contains the error.|
 

@@ -66,6 +66,9 @@ class HTTPURL:
                             req, data=body, timeout=timeout))
                 except socket.timeout:
                     raise self.TimeoutError()
+                except urllib.error.HTTPError as e:
+                    raise self.HTTPError(
+                        url, e.code, e.msg, e.hdrs, e.fp)
                 except urllib.error.URLError:
                     raise self.ResolveError()
             try:
@@ -81,6 +84,9 @@ class HTTPURL:
         pass
 
     class ResolveError(Error):
+        pass
+
+    class HTTPError(Error, urllib.error.HTTPError):
         pass
 
 
