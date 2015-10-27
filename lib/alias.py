@@ -39,6 +39,10 @@ class Module(bot.Module):
         else:
             return "That alias does not exist in the config."
 
+    def serveraliases(self):
+        return list(self.server.settings.get("server.aliases").keys()) + (
+                    list(self.server.globalaliases.keys()))
+
     def getalias(self, context, alias, argtext=None):
         if argtext is not None:
             sections, sectiond = self.server.splitparse(argtext, context)

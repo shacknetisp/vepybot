@@ -16,6 +16,12 @@ class Module(bot.Module):
     def log(self, cat, subcat, text):
         if not self.server.settings.get('logger.enabled'):
             return
+
+        def dualcommand():
+            return (("channels/%s" % text[0])
+                 if self.server.ischannel(text[0]) else
+                 ("users/%s" % text[0]))
+
         if cat == "join":
             with self.openlog("channels/%s" % text) as f:
                 self.writelog(f, "--> %s!%s@%s has joined %s" % (
@@ -29,9 +35,7 @@ class Module(bot.Module):
                     text[0], (": " + text[1]) if text[1] else ''
                 ))
         elif cat == "mode":
-            p = (("channels/%s" % text[0])
-                 if self.server.ischannel(text[0]) else
-                 ("users/%s" % text[0]))
+            p = dualcommand()
             with self.openlog(p) as f:
                 self.writelog(f, "-- %s MODE %s %s %s" % (
                     subcat,
@@ -59,9 +63,7 @@ class Module(bot.Module):
                         text[1]
                     ))
         elif cat == "sendto":
-            p = (("channels/%s" % text[0])
-                 if self.server.ischannel(text[0]) else
-                 ("users/%s" % text[0]))
+            p = dualcommand()
             r = "<>" if subcat == "PRIVMSG" else "--"
             with self.openlog(p) as f:
                 self.writelog(f, "%s%s%s %s" % (

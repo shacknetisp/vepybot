@@ -42,8 +42,7 @@ class M_Alias(lib.alias.Module):
 
     def show(self, context, args):
         args.default("channel", "")
-        l = list(self.server.settings.get("server.aliases").keys()) + (
-            list(self.server.globalaliases.keys()))
+        l = self.serveraliases()
         if args.getstr("channel"):
             l = list(self.server.settings.getchannel(
                 "aliases", args.getstr("channel")).keys())

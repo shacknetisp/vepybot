@@ -103,13 +103,8 @@ class Server(bot.Server):
                     self, copy.deepcopy(ss), n, rm=True)
             n = n.replace('~', '')
             if '#' in n:
-                s = None
                 d = self.channeltree
-                while ss:
-                    s = ss.pop(0)
-                    if s not in d:
-                        d[s] = {}
-                    d = d[s]
+                self.branchdict(d, ss)
                 d[n] = True
 
         def isdefault(self, n, v):

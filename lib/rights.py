@@ -57,6 +57,14 @@ class Module(bot.Module):
     def getrights(self, *args):
         return self._getrights(*args)[0]
 
+    def getrequired(self, r):
+        required = []
+        if r.startswith('-'):
+            required = self.server.righttypes['-'] + ['owner']
+        else:
+            required = self.server.righttypes[r] + ['owner']
+        return required
+
     def setright(self, context, args):
         ids = args.getstr("idstring")
         r = args.getstr("right")
@@ -67,10 +75,7 @@ class Module(bot.Module):
             return "%s already has %s." % (ids, r)
         if r not in self.server.righttypes and not r.startswith('-'):
             return "%s is not a valid right." % r
-        if r.startswith('-'):
-            required = self.server.righttypes['-'] + ['owner']
-        else:
-            required = self.server.righttypes[r] + ['owner']
+        required = self.getrequired(r)
         for required in required:
             if context.checkright(required):
                 rightlist[ids].append(r)
@@ -86,10 +91,7 @@ class Module(bot.Module):
             rightlist[ids] = []
         if r not in rightlist[ids]:
             return "%s does not have that right." % (ids)
-        if r.startswith('-'):
-            required = self.server.righttypes['-'] + ['owner']
-        else:
-            required = self.server.righttypes[r] + ['owner']
+        required = self.getrequired(r)
         for required in required:
             if context.checkright(required):
                 rightlist[ids] = [x for x in rightlist[ids] if x != r]

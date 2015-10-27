@@ -57,6 +57,14 @@ class M_Rights(lib.rights.Module):
                 rights += [c + ',' + 'v']
         return rights, matches
 
+    def channelgetrequired(self, r):
+        required = []
+        if r.startswith('-'):
+            required = self.righttypes['-'] + ['op']
+        else:
+            required = self.righttypes[r] + ['op']
+        return required
+
     def setcright(self, context, args):
         args.default("channel", context.channel)
         channel = args.getstr("channel")
@@ -71,10 +79,7 @@ class M_Rights(lib.rights.Module):
             return "%s already has %s." % (ids, r)
         if r not in self.righttypes and not r.startswith('-'):
             return "%s is not a valid right." % r
-        if r.startswith('-'):
-            required = self.righttypes['-'] + ['op']
-        else:
-            required = self.righttypes[r] + ['op']
+        required = self.channelgetrequired(r)
         for required in required:
             required = channel + ',' + required
             if context.checkright(required) or context.checkright("owner"):
@@ -95,10 +100,7 @@ class M_Rights(lib.rights.Module):
             rightlist[ids] = []
         if r not in rightlist[ids]:
             return "%s does not have that right." % (ids)
-        if r.startswith('-'):
-            required = self.righttypes['-'] + ['op']
-        else:
-            required = self.righttypes[r] + ['op']
+        required = self.channelgetrequired(r)
         for required in required:
             required = channel + ',' + required
             if context.checkright(required) or context.checkright("owner"):
