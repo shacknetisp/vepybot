@@ -2,8 +2,9 @@
 import bot
 import time
 import re
-from lib import timeutils
+from lib import timeutils, utils
 bot.reload(timeutils)
+bot.reload(utils)
 
 
 class RedFlare:
@@ -182,10 +183,8 @@ class Module(bot.Module):
                 if type(p) in (tuple, list):
                     p = p[1]
                 if p:
-                    if re.match(search, p,
-                                re.IGNORECASE) is not None or p == args.getstr(
-                            "search"):
-                                s.append(p)
+                    if utils.imatch(p, search):
+                        s.append(p)
             if s:
                 d = server['description']
                 # d = d[:d.rindex(' [')]
@@ -214,10 +213,8 @@ class Module(bot.Module):
         d = d['auths'] if args.getbool('auth') else d['names']
         for p in d:
             v = d[p]
-            if re.match(search, p,
-                        re.IGNORECASE) is not None or p == args.getstr(
-                    "search"):
-                        s[p] = v
+            if utils.imatch(p, search):
+                s[p] = v
         if not s:
             return "No results."
         if args.getbool('count'):

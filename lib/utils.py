@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 
 
 def boolstr(s):
@@ -9,3 +10,11 @@ def boolstr(s):
 
 def ynstr(b, y="yes", n="no"):
     return y if b else n
+
+
+def match(t, r):
+    return (t == r) or re.match(r, t)
+
+
+def imatch(t, r):
+    return (t == r) or re.match(r, t, re.IGNORECASE)
