@@ -2,4 +2,4 @@
 escape = "\\"
 run = '{}'
 quotes = "\"'"
-prefixes = ['--', '-']
+paramprefixes = ['--', '-']

@@ -88,7 +88,7 @@ class ParserBase:
             sd = sectiond[sectioni] if sectioni in sectiond else ""
             done = False
             if sd != "cooked":
-                for prefix in parser.prefixes:
+                for prefix in parser.paramprefixes:
                     if st.startswith(prefix):
                         param = st[len(prefix):]
                         name = param.split('=')[0]
