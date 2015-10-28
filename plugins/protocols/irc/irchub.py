@@ -9,9 +9,6 @@ class Module(bot.Module):
     index = "irchub"
 
     def register(self):
-        if self.server.index not in ['irc']:
-            self.hidden = True
-            return
         self.addsetting('#hubs', [])
         self.addhook('dispatcher.ignore', 'dr', self.dr)
         self.addhook('recv', 'recv', self.recv)
