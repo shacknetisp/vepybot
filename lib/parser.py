@@ -2,3 +2,4 @@
 escape = "\\"
 run = '{}'
 quotes = "\"'"
+prefixes = ['--', '-']
