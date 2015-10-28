@@ -1,6 +1,7 @@
-[![Code Climate](https://codeclimate.com/github/shacknetisp/vepybot/badges/gpa.svg)](https://codeclimate.com/github/shacknetisp/vepybot)
+[![Code Climate](https://codeclimate.com/github/shacknetisp/vepybot/badges/gpa.svg)](https://codeclimate.com/github/shacknetisp/vepybot) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md) ![](https://img.shields.io/badge/version-0.2.13-brightgreen.svg)
 
-## Vepybot
+Vepybot
+======
 
 Vepybot is a general purpose command bot independent of protocol, with most functionality added by plugins.
 By default it includes an IRC plugin, as well as a minimal `plainsocket` plugin for basing other protocol plugins on.
