@@ -87,16 +87,18 @@ class ParserBase:
             st = sections[sectioni]
             sd = sectiond[sectioni] if sectioni in sectiond else ""
             done = False
-            if sd != "cooked" and st.startswith('-'):
-                param = st.lstrip('-')
-                name = param.split('=')[0]
-                if name in [a['name'] for a in kvargs]:
-                    try:
-                        parsedargs[name] = param.split('=')[1]
-                    except IndexError:
-                        parsedargs[name] = ""
-                    done = True
-                break
+            if sd != "cooked":
+                for prefix in ['--', '-']:
+                    if st.startswith(prefix):
+                        param = st[len(prefix):]
+                        name = param.split('=')[0]
+                        if name in [a['name'] for a in kvargs]:
+                            try:
+                                parsedargs[name] = param.split('=')[1]
+                            except IndexError:
+                                parsedargs[name] = ""
+                            done = True
+                        break
             if not done and argi in range(len(args)):
                 arg = args[argi]
                 if arg['optional']:

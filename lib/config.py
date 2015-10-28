@@ -28,12 +28,10 @@ class Module(bot.Module):
         return "Purged %s (%d entries.)" % (module, c)
 
     def display(self, v):
-        if type(v) in [str, int, float]:
+        if type(v) in [str, int, float, bool]:
             return str(v)
         elif isinstance(v, list):
             return ' '.join(v)
-        elif isinstance(v, bool):
-            return str(v)
         else:
             return str(v)
 
