@@ -67,12 +67,13 @@ class Settings:
                 if s not in d:
                     d[s] = {}
                 d = d[s]
+            return d
 
         def addbranch(self, ss, n, rm=False):
             """Add <ss> to the tree with name <n>."""
             ss = copy.deepcopy(ss)
             d = self.tree
-            self.branchdict(d, ss)
+            d = self.branchdict(d, ss)
             if n.strip(self.idents) in d and rm:
                 d.pop(n.strip(self.idents))
             d[n] = True

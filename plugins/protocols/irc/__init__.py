@@ -104,7 +104,7 @@ class Server(bot.Server):
             n = n.replace('~', '')
             if '#' in n:
                 d = self.channeltree
-                self.branchdict(d, ss)
+                d = self.branchdict(d, ss)
                 d[n] = True
 
         def isdefault(self, n, v):
