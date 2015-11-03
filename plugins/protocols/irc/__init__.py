@@ -345,6 +345,7 @@ class M_ServerInfo(bot.Module):
         elif context.code(376):
             self.server.log('INFO',
                             'Now connected to: %s' % self.server.info['NETWORK'])
+            self.server.dohook('connected')
 
 
 bot.register.module(M_ServerInfo)
