@@ -158,6 +158,7 @@ class Server(bot.Server):
         self.socketup = True
         self.log("SOCK CONN", "Done.")
         self.initialnick()
+        self.server.dohook('connected')
 
     def initialnick(self):
         self.wantnick = self.settings.get("server.user.nick")
@@ -345,7 +346,6 @@ class M_ServerInfo(bot.Module):
         elif context.code(376):
             self.server.log('INFO',
                             'Now connected to: %s' % self.server.info['NETWORK'])
-            self.server.dohook('connected')
 
 
 bot.register.module(M_ServerInfo)
