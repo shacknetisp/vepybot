@@ -158,7 +158,7 @@ class Server(bot.Server):
         self.socketup = True
         self.log("SOCK CONN", "Done.")
         self.initialnick()
-        self.server.dohook('connected')
+        self.dohook('connected')
 
     def initialnick(self):
         self.wantnick = self.settings.get("server.user.nick")
