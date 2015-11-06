@@ -69,7 +69,8 @@ class Server(bot.Server):
     }
 
     autoload = [
-        "irc/moderator"
+        "irc/moderator",
+        "irc/memo"
     ]
 
     class Settings(bot.Server.Settings):

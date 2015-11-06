@@ -117,6 +117,9 @@ class M_Whois(bot.Module):
             w = self.whois[nick]
             w.ident = t[1]
             w.host = t[2]
+            self.server.dohook('whois.found', nick,
+                "%s!%s@%s!%s" % (nick, w.ident, w.host, w.auth),
+                w)
 
     def recv(self, context):
         if context.code("311"):
@@ -138,6 +141,10 @@ class M_Whois(bot.Module):
                     context.rawsplit[3]].channels
             self.whois[context.rawsplit[3]] = self.tmp[context.rawsplit[3]]
             self.server.dohook("whois", context.rawsplit[3])
+            w = self.whois[context.rawsplit[3]]
+            self.server.dohook('whois.found', context.rawsplit[3],
+                "%s!%s@%s!%s" % (context.rawsplit[3], w.ident, w.host, w.auth),
+                w)
         elif context.code("330"):
             # Freenode
             w = self.tmp[context.rawsplit[3]]

@@ -35,6 +35,7 @@ class M_Rights(lib.rights.Module):
         self.serverset('addchannelrights',
                        lambda r: self.righttypes.update(r))
         self.server.globalaliases.update({
+            'idnick': 'echo irc:$*@*',
             'idhost': 'echo irc:*@$*!*',
             'idauth': 'echo irc:*!$*',
         })
