@@ -33,7 +33,8 @@ class M_NickServ(bot.Module):
         self.ghosting = True
 
         self.addcommand(self.register_c, "register",
-                        "Register with NickServ.", ["[-name]", "email"])
+                        "Register with NickServ.",
+                        ["[-name=account name]", "email"])
 
         self.addcommand(self.verify_c, "verify register",
                         "Verify with NickServ.", ["account", "code"])
