@@ -48,8 +48,10 @@ class Module(bot.Module):
                         'irc.notice', memo['channel']) else 'PRIVMSG'
                 ch = self.getchannelsetting(
                         'inchannel', memo['channel'])
-                text = "From %s: %s" % (memo['from'], memo['message'])
+                text = "From %s to you: %s" % (memo['from'], memo['message'])
                 if memo['channel'] in whois.channels and ch:
+                    text = "From %s to %s: %s" % (
+                        memo['from'], nick, memo['message'])
                     self.server.sendto(command, memo['channel'], text)
                 else:
                     self.server.sendto(command, nick, text)
