@@ -125,10 +125,13 @@ class Server(LoaderBase, ParserBase, HookBase):
             for k, v in m.serversettings:
                 self.settings.add(k, v)
 
-    def corerun(self):
+    def checkbuild(self):
         if self.build:
             self.build = False
             self.build_lists()
+
+    def corerun(self):
+        self.checkbuild()
         try:
             self.run()
         except:

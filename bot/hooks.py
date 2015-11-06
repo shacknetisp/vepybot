@@ -35,6 +35,7 @@ class HookBase:
         })
 
     def dotimers(self):
+        self.checkbuild()
         for timer in list(self.timers.values()):
             if time.time() - timer['last'] > timer['time'] / 1000:
                 try:

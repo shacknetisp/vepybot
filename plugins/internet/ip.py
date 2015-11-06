@@ -114,6 +114,7 @@ class M_IP(bot.Module):
             "country[code], continent[code]",
             ["ip", "[lookups]..."])
         self.addcommandalias("ip", "geoip")
+        self.serverset('ip.lookup', hostinfo)
 
     def ip(self, context, args):
         args.default("lookups", "ip city region country")

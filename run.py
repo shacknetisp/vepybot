@@ -33,10 +33,10 @@ def runserver(server):
             time.sleep(0.01)
             with server.runlock:
                 with db.lock:
-                    server.dotimers()
+                    server.corerun()
             with server.runlock:
                 with db.lock:
-                    server.corerun()
+                    server.dotimers()
         except:
             print("Fatal Exception!")
             import traceback
@@ -84,8 +84,8 @@ if __name__ == "__main__":
             print("Running unthreaded...")
             while bot.run:
                 for server in bot.runningservers:
-                    server.dotimers()
                     server.corerun()
+                    server.dotimers()
                 db.saveall()
                 time.sleep(0.01)
             for server in bot.runningservers:

@@ -3,6 +3,7 @@ import bot
 import fnmatch
 import copy
 import string
+import re
 
 
 class Module(bot.Module):
@@ -14,6 +15,7 @@ class Module(bot.Module):
             self.hidden = True
             return
         self.addsetting('#servers', [])
+        self.addsetting('#geoip', False)
         self.addhook('dispatcher.ignore', 'dr', self.dr)
         self.addhook('recv', 'recv', self.recv)
 
@@ -27,6 +29,19 @@ class Module(bot.Module):
     def recv(self, context):
         for idstring in self.getchannelsetting('servers', context, True):
             if fnmatch.fnmatch(context.idstring(), idstring):
+                if context.channel and self.getchannelsetting('geoip', context):
+                    joinregex = (r".* \((\d*\.\d*\.\d*\.\d*)\) has joined " +
+                        r"the game \[\d*\.\d*\.\d*-.*\] \(\d* player.\)")
+                    if re.match(joinregex, context.text):
+                        ip = re.sub(joinregex, r'\1', context.text)
+                        info = self.server.rget('ip.lookup')(
+                            self.server.rget("http.url"),
+                            ip
+                            )
+                        if info and 'country' in info:
+                            context.reply('%s' % (info['country']))
+                        else:
+                            context.reply('Country not found.')
                 s = context.text
                 try:
                     name = s[s.index('<') + 1:s.index('> ')]
@@ -52,6 +67,7 @@ class Module(bot.Module):
                                 newcontext, command)
                             if out or errout:
                                 newcontext.reply(out if out else errout)
+                                return
                 return
 
 bot.register.module(Module)
