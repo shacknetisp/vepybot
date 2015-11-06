@@ -69,7 +69,6 @@ class M_NickServ(bot.Module):
                     if self.lastns and time.time() - self.lastnstime < 30:
                         self.server.sendto("NOTICE", self.lastns,
                                            "NickServ -- %s" % (
-                                               self.lastns,
                                                context.text,
                                            ))
                     if self.ghosting:
