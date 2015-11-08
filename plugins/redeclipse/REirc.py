@@ -30,8 +30,9 @@ class Module(bot.Module):
         for idstring in self.getchannelsetting('servers', context, True):
             if fnmatch.fnmatch(context.idstring(), idstring):
                 if context.channel and self.getchannelsetting('geoip', context):
-                    joinregex = (r".* \((\d*\.\d*\.\d*\.\d*)\) has joined " +
-                        r"the game \[\d*\.\d*\.\d*-.*\] \(\d* player.\)")
+                    joinregex = (r".* \((\d*\.\d*\.\d*\.\d*)\) has joined the "
+                        "game( \(.*\)|) \[\d*\.\d*\.\d*-.*\] "
+                        "\(\d* player(.|)\)")
                     if re.match(joinregex, context.text):
                         ip = re.sub(joinregex, r'\1', context.text)
                         info = self.server.rget('ip.lookup')(
