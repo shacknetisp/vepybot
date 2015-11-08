@@ -15,7 +15,8 @@ class Module(bot.Module):
             self.hidden = True
             return
         self.addsetting('#servers', [])
-        self.addsetting('#geoip', False)
+        self.addsetting('#geoip', [])
+        self.addsetting('#geoipnotfoundmessage', 'Nowhere')
         self.addhook('dispatcher.ignore', 'dr', self.dr)
         self.addhook('recv', 'recv', self.recv)
 
@@ -29,7 +30,8 @@ class Module(bot.Module):
     def recv(self, context):
         for idstring in self.getchannelsetting('servers', context, True):
             if fnmatch.fnmatch(context.idstring(), idstring):
-                if context.channel and self.getchannelsetting('geoip', context):
+                geoips = self.getchannelsetting('geoip', context)
+                if context.channel and geoips:
                     joinregex = (r".* \((\d*\.\d*\.\d*\.\d*)\) has joined the "
                         "game( \(.*\)|) \[\d*\.\d*\.\d*-.*\] "
                         "\(\d* player(.|)\)")
@@ -39,10 +41,17 @@ class Module(bot.Module):
                             self.server.rget("http.url"),
                             ip
                             )
-                        if info and 'country' in info:
-                            context.reply('%s' % (info['country']))
+                        out = []
+                        for i in geoips:
+                            if info and i in info:
+                                out.append(info[i])
+                        if out:
+                            context.reply('%s' % ', '.join(out))
                         else:
-                            context.reply('Country not found.')
+                            if self.getchannelsetting(
+                                'geoipnotfoundmessage', context):
+                                context.reply(self.getchannelsetting(
+                                    'geoipnotfoundmessage', context))
                 s = context.text
                 try:
                     name = s[s.index('<') + 1:s.index('> ')]
