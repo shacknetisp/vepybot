@@ -2,6 +2,7 @@
 import bot
 import time
 import fnmatch
+import string
 
 
 class Context(bot.Context):
@@ -186,6 +187,9 @@ class M_Dispatcher(bot.Module):
                 ]:
                     if context.text.startswith(prefix):
                         command = context.text[len(prefix):].strip()
+                        if not prefix.strip(string.punctuation):
+                            if command[0] in string.punctuation:
+                                return
                         # Schedule WHOIS if neccessary
                         if context.user[0] not in self.buf:
                             self.buf[context.user[0]] = []
@@ -223,9 +227,6 @@ class M_Dispatcher(bot.Module):
             del self.buf[user]
 
     def doinput(self, context, command):
-        import string
-        if not command.strip(string.punctuation):
-            return
         out, errout = self.server.runcommand(context, command)
         if out or errout:
             context.reply(out if out else errout)

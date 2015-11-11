@@ -33,14 +33,14 @@ class Module(bot.Module):
                 geoips = self.getchannelsetting('geoip', context)
                 if context.channel and geoips:
                     joinregex = (r".* \((\d*\.\d*\.\d*\.\d*)\) has joined the "
-                        "game( \(.*\)|) \[\d*\.\d*\.\d*-.*\] "
-                        "\(\d* player(.|)\)")
+                                 "game( \(.*\)|) \[\d*\.\d*\.\d*-.*\] "
+                                 "\(\d* player(.|)\)")
                     if re.match(joinregex, context.text):
                         ip = re.sub(joinregex, r'\1', context.text)
                         info = self.server.rget('ip.lookup')(
                             self.server.rget("http.url"),
                             ip
-                            )
+                        )
                         out = []
                         for i in geoips:
                             if info and i in info:
@@ -49,7 +49,7 @@ class Module(bot.Module):
                             context.reply('%s' % ', '.join(out))
                         else:
                             if self.getchannelsetting(
-                                'geoipnotfoundmessage', context):
+                                    'geoipnotfoundmessage', context):
                                 context.reply(self.getchannelsetting(
                                     'geoipnotfoundmessage', context))
                 s = context.text
@@ -70,8 +70,9 @@ class Module(bot.Module):
                         "parser.prefixes", context):
                     if text.startswith(prefix):
                         command = text[len(prefix):].strip()
-                        if not command.strip(string.punctuation):
-                            return
+                        if not prefix.strip(string.punctuation):
+                            if command[0] in string.punctuation:
+                                return
                         if not command.startswith('/'):
                             out, errout = self.server.runcommand(
                                 newcontext, command)
