@@ -4,7 +4,7 @@
 Vepybot
 ======
 
-Vepybot is a general purpose command bot independent of protocol, with most functionality added by plugins.
+Vepybot (**Ve**rsatile **Py**thon **Bot**) is a general purpose command bot independent of protocol, with most functionality added by plugins.
 By default it includes an IRC plugin, as well as a minimal `plainsocket` plugin for basing other protocol plugins on.
 
 ### Quick Start
