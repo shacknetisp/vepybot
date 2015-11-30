@@ -82,7 +82,11 @@ class Server(bot.Server):
         channeltree = {}
 
         def getchannel(self, v, context, pop=False):
-            channel = context if isinstance(context, str) else context.channel
+            if context:
+                channel = context if isinstance(
+                    context, str) else context.channel
+            else:
+                channel = ""
             setting = "channels.%s.%s" % (channel, v)
             if channel:
                 try:
