@@ -42,7 +42,10 @@ def runserver(server):
             import traceback
             traceback.print_exc()
             fatal = True
-    server.shutdown()
+    try:
+        server.shutdown()
+    except:
+        pass
 
 if __name__ == "__main__":
     initial = True
@@ -89,6 +92,9 @@ if __name__ == "__main__":
                 db.saveall()
                 time.sleep(0.01)
             for server in bot.runningservers:
-                server.shutdown()
+                try:
+                    server.shutdown()
+                except:
+                    pass
             imp.reload(db)
             imp.reload(bot)
