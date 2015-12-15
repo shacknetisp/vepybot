@@ -56,7 +56,7 @@ class Module(bot.Module):
             return
         if ('%s,v' % context.channel) in context.getrights():
             priv += 1
-        avgcount = (len(context.text) / len(set(context.text)))
+        avgcount = ((len(context.text) / 1.5) / len(set(context.text)))
         d[0] += max((
             1 +
             avgcount) -
