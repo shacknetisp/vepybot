@@ -47,13 +47,13 @@ class Module(bot.Module):
     def actiontotals(self, http, args):
         try:
             jgames = http.request(
-                args.getstr('url') + '/get/games').json()
+                args.getstr('url') + '/api/games').json()
             jservers = http.request(
-                args.getstr('url') + '/get/servers').json()
+                args.getstr('url') + '/api/servers').json()
             jmaps = http.request(
-                args.getstr('url') + '/get/maps').json()
+                args.getstr('url') + '/api/maps').json()
             jplayers = http.request(
-                args.getstr('url') + '/get/players').json()
+                args.getstr('url') + '/api/players').json()
         except http.Error:
             return "Unable to contact API."
         except ValueError:
@@ -78,7 +78,7 @@ class Module(bot.Module):
         else:
             return "Invalid action."
         try:
-            json = http.request(args.getstr('url') + '/get' + actionurl).json()
+            json = http.request(args.getstr('url') + '/api' + actionurl).json()
         except http.Error:
             return "Unable to contact API."
         except ValueError:
