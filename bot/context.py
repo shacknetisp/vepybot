@@ -48,11 +48,12 @@ class Context:
     def _exceptcancommand(self, module, command):
         if not self.checkright("admin"):
             for r in self.server.getrights(self.idstring(), self):
-                if fnmatch.fnmatchcase("-%s.%s.%s" % (
-                                       module.plugin,
-                                       module.index, command['name']), r):
-                        raise NoPerms("You may not use %s" % "%s.%s.%s" % (
-                            module.plugin, module.index, command['name']))
+                if module and command:
+                    if fnmatch.fnmatchcase("-%s.%s.%s" % (
+                                           module.plugin,
+                                           module.index, command['name']), r):
+                            raise NoPerms("You may not use %s" % "%s.%s.%s" % (
+                                module.plugin, module.index, command['name']))
                 if r == "ignore":
                     raise NoPerms("")
 
