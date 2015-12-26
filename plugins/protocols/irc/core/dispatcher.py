@@ -95,20 +95,22 @@ class Context(bot.Context):
     def getrights(self):
         return self.server.getrights(self.idstring(), self)
 
-    def exceptcancommand(self, module, command):
+    def exceptcancommand(self, module=None, command=None):
         if self.channel:
             for r in self.server.getrights(self.channelidstring(), self):
-                if fnmatch.fnmatchcase("-%s.%s.%s" % (
-                                       module.plugin,
-                                       module.index,
-                                       command['name']), r):
-                        if not self.checkright(
-                                "%s,op" % self.channel):
-                            raise bot.NoPerms(
-                                "The channel may not use %s" % "%s.%s.%s" % (
-                                    module.plugin,
-                                    module.index,
-                                    command['name']))
+                if module and command:
+                    if fnmatch.fnmatchcase("-%s.%s.%s" % (
+                                           module.plugin,
+                                           module.index,
+                                           command['name']), r):
+                            if not self.checkright(
+                                    "%s,op" % self.channel):
+                                raise bot.NoPerms(
+                                    "The channel may not use %s" % (
+                                        "%s.%s.%s" % (
+                                        module.plugin,
+                                        module.index,
+                                        command['name'])))
                 if r == "ignore":
                     raise bot.NoPerms("")
 
@@ -117,14 +119,16 @@ class Context(bot.Context):
         if self.channel and not self.checkright(
                 "%s,op" % self.channel):
             for r in self.server.getrights(self.idstring(), self):
-                if fnmatch.fnmatchcase("%s,-%s.%s.%s" % (self.channel,
-                                                         module.plugin,
-                                                         module.index,
-                                                         command['name']), r):
-                        name = "%s.%s.%s" % (
-                            module.plugin, module.index, command['name'])
-                        raise bot.NoPerms(
-                            "You may not use %s on this channel." % name)
+                if module and command:
+                    if fnmatch.fnmatchcase("%s,-%s.%s.%s" % (self.channel,
+                                                             module.plugin,
+                                                             module.index,
+                                                             command['name']),
+                                                                 r):
+                            name = "%s.%s.%s" % (
+                                module.plugin, module.index, command['name'])
+                            raise bot.NoPerms(
+                                "You may not use %s on this channel." % name)
                 if r == "%s,ignore" % self.channel:
                     raise bot.NoPerms("")
 
@@ -227,6 +231,7 @@ class M_Dispatcher(bot.Module):
             del self.buf[user]
 
     def doinput(self, context, command):
+        context.exceptcancommand()
         out, errout = self.server.runcommand(context, command)
         if out or errout:
             context.reply(out if out else errout)
