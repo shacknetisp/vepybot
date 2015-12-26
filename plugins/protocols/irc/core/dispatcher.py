@@ -231,7 +231,10 @@ class M_Dispatcher(bot.Module):
             del self.buf[user]
 
     def doinput(self, context, command):
-        context.exceptcancommand()
+        try:
+            context.exceptcancommand()
+        except bot.NoPerms:
+            return
         out, errout = self.server.runcommand(context, command)
         if out or errout:
             context.reply(out if out else errout)
