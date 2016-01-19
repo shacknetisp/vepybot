@@ -38,6 +38,9 @@ class Module(bot.Module):
             if r['Results']:
                 return "[%s] %s" % (r['Results'][0]['FirstURL'],
                                     html.unescape(r['AbstractText']))
+            if r['AbstractURL']:
+                return "[%s] %s" % (r['AbstractURL'],
+                                    html.unescape(r['AbstractText']))
         elif r['AnswerType'] == 'calc':
             return "%s" % tag_re.sub('', r['Answer'])
         elif r['RelatedTopics']:

@@ -14,4 +14,4 @@ bot.load_server(
         'port': 6667, #IRC Port
         'nick': 'vepybot', #IRC Nick
         'owner': 'irc:*', #This idstring will have all permissions, set to 'irc:mynick!*' for a specific nick.
-    }) 
+    })
