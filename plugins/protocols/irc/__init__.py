@@ -229,7 +229,10 @@ class Server(bot.Server):
                     return
         if time.time() - self.lastpong > 120 and self.socket:
             self.log('CONN', 'TIMEOUT')
-            self.shutdown()
+            try:
+                self.shutdown()
+            except OSError:
+                pass
             self.socket = None
             return
         if not self.socket:
