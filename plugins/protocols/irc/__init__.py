@@ -283,6 +283,7 @@ class Server(bot.Server):
             time.sleep(0.1)
         if self.socket:
             self.socket.close()
+        self.socket = None
 
     # References:
     # http://stackoverflow.com/a/13382032

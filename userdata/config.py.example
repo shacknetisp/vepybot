@@ -3,6 +3,8 @@ import bot
 #The initial config file is written in Python.
 #This will default to True if omitted, it determines if servers should run in their own threads.
 bot.threads = True
+#This will default to True.
+bot.restartfromcrash = True
 #Load a server
 bot.load_server(
     "irc", #Plugin to load.

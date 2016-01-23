@@ -13,6 +13,7 @@ from .hooks import *
 
 threads = True
 run = True
+restartfromcrash = True
 
 from lib import utils, parser
 [reload(x) for x in [utils, parser]]
@@ -134,11 +135,13 @@ class Server(LoaderBase, ParserBase, HookBase):
         self.checkbuild()
         try:
             self.run()
-        except:
+        except Exception as e:
             import traceback
             traceback.print_exc()
             global run
             run = False
+            if restartfromcrash:
+                raise e
 
     def parsecommand(self, context, text, v, argtext):
         parsedargs = self.makeargdict(argtext, context, v)

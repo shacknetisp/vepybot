@@ -192,7 +192,7 @@ class M_Dispatcher(bot.Module):
                     if context.text.startswith(prefix):
                         command = context.text[len(prefix):].strip()
                         if not prefix.strip(string.punctuation):
-                            if command[0] in string.punctuation:
+                            if not command or command[0] in string.punctuation:
                                 return
                         # Schedule WHOIS if neccessary
                         if context.user[0] not in self.buf:
