@@ -71,7 +71,7 @@ class Module(bot.Module):
                     if text.startswith(prefix):
                         command = text[len(prefix):].strip()
                         if not prefix.strip(string.punctuation):
-                            if command[0] in string.punctuation:
+                            if not command or command[0] in string.punctuation:
                                 return
                         if not command.startswith('/'):
                             out, errout = self.server.runcommand(
