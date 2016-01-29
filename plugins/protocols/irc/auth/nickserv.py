@@ -80,7 +80,7 @@ class M_NickServ(bot.Module):
            self.getsetting("password") and self.getsetting("ghost")):
             self.server.setnick(self.server.nick + "_")
             self.server.sendto("PRIVMSG", "nickserv", "GHOST %s %s" % (
-                self.name(),
+                self.server.wantnick,
                 self.getsetting("password"),
             ))
             self.ghosting = True
