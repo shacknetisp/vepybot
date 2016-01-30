@@ -24,7 +24,7 @@ class HTTPURL:
             return self.content
 
         def read(self):
-            return self.raw().decode()
+            return self.raw().decode('utf-8', 'ignore')
 
         def json(self):
             return json.loads(self.read())

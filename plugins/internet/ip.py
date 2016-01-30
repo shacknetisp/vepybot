@@ -26,31 +26,24 @@ def is_valid_ipv6_address(address):
     return True
 
 
-def getiphost(http, inhost, rdns=False):
+def getiphost(http, inhost):
     ip = inhost
-    host = inhost
     try:
         if not is_valid_ipv6_address(ip) and not is_valid_ipv4_address(ip):
             ip = ""
             r = http.request(
-                "http://api.statdns.com/%s/a" % inhost, timeout=2).json()
-            if 'error' not in r and r['answer']:
-                ip = r['answer'][0]['rdata']
-                host = ip
-        if rdns and ip:
-            r = http.request(
-                "http://api.statdns.com/x/%s" % ip, timeout=2).json()
-            if 'error' not in r and r['answer']:
-                host = r['answer'][0]['rdata'].rstrip('.')
+                "https://dns-api.org/A/%s" % inhost, timeout=2).json()[0]
+            if 'error' not in r and r['value']:
+                ip = r['value']
     except ValueError:
         pass
     except http.Error:
         pass
-    return ip, host
+    return ip
 
 
-def hostinfo(http, inhost, l='en', rdns=False):
-    ip, host = getiphost(http, inhost, rdns)
+def hostinfo(http, inhost, l='en'):
+    ip = getiphost(http, inhost)
     if not ip:
         return {}
     try:
@@ -62,7 +55,6 @@ def hostinfo(http, inhost, l='en', rdns=False):
         geoip = {}
     ret = {
         'ip': ip,
-        'host': host,
     }
     if geoip:
         subdivisions = []
@@ -110,7 +102,7 @@ class M_IP(bot.Module):
             self.ip,
             "ip",
             "Get information about an IP or Hostname. Space-delimited values."
-            "Lookup Values: ip, host, city, region[code], "
+            "Lookup Values: ip, city, region[code], "
             "country[code], continent[code]",
             ["ip", "[lookups]..."])
         self.addcommandalias("ip", "geoip")
@@ -118,8 +110,7 @@ class M_IP(bot.Module):
 
     def ip(self, context, args):
         args.default("lookups", "ip city region country")
-        info = hostinfo(self.server.rget("http.url"), args.getstr("ip"),
-                        rdns='host' in args.getstr("lookups").split())
+        info = hostinfo(self.server.rget("http.url"), args.getstr("ip"))
         if info is None:
             return "Unable to resolve that host."
         out = []
