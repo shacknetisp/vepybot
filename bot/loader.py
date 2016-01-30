@@ -59,24 +59,28 @@ def getdirectories():
     for f in paths:
         d.append("plugins/" + f)
         d.append(userdata + "/plugins/" + f)
+        d.append(userdata + "/extra/" + f)
     return d
 
 
-def loadnamedmodule(n, p=""):
+def loadnamedmodule(name, p=""):
     global currentplugin
     global newmodules
     newmodules = []
     d = getdirectories()
     for directory in d:
         sys.path = sys.path + [directory]
-        if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
-                os.path.exists("%s/%s.py" % (directory, n))):
-                currentplugin = p or n
-                if currentplugin not in plugins:
-                    plugins[currentplugin] = {}
-                importmodule("%s/%s" % (directory, n), r=True)
-                currentplugin = ""
-                return True
+        possiblenames = [name, "vepy_" + name]
+        for n in possiblenames:
+            if (os.path.exists("%s/%s/__init__.py" % (directory, n)) or
+                    os.path.exists("%s/%s.py" % (directory, n))):
+                    currentplugin = p or n
+                    if currentplugin not in plugins:
+                        plugins[currentplugin] = {}
+                    importmodule("%s/%s" % (directory, n), r=True)
+                    currentplugin = ""
+                    sys.path.pop(sys.path.index(directory))
+                    return True
         sys.path.pop(sys.path.index(directory))
     return False
 
