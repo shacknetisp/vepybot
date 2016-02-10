@@ -102,6 +102,15 @@ class Server(bot.Server):
                     return ret
             return self.get(v, pop=pop)
 
+        def setchannel(self, k, v, context):
+            if context:
+                channel = context if isinstance(
+                    context, str) else context.channel
+            else:
+                channel = ""
+            setting = "channels.%s.%s" % (channel, k)
+            self.set(setting, v)
+
         def addbranch(self, ss, n):
             if '~' not in n:
                 bot.Server.Settings.addbranch(

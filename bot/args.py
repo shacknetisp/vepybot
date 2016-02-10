@@ -25,9 +25,14 @@ class Args:
     def getstr(self, n):
         """Get the arg <n> as a str."""
         try:
+            ret = None
             if n not in self.d and n in self.defaults:
-                return str(self.defaults[n])
-            return str(self.d[n])
+                ret = self.defaults[n]
+            else:
+                ret = self.d[n]
+            if ret is not None:
+                return str(ret)
+            return ret
         except KeyError:
             raise NoArg("Argument not found: %s" % n)
 

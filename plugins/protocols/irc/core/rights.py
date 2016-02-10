@@ -38,6 +38,7 @@ class M_Rights(lib.rights.Module):
             'idnick': 'echo irc:$*!*',
             'idhost': 'echo irc:*@$*!*',
             'idauth': 'echo irc:*!$*',
+            'idident': 'echo irc:*!$*@*',
         })
 
     def _contextrights(self, idstring, context):
@@ -85,6 +86,7 @@ class M_Rights(lib.rights.Module):
             required = channel + ',' + required
             if context.checkright(required) or context.checkright("owner"):
                 rightlist[ids].append(r)
+                self.server.settings.setchannel("crights", rightlist, channel)
                 self.server.settings.save()
                 return "Set %s on %s" % (r, ids)
         return "You do not have the rights to do that."
@@ -108,6 +110,7 @@ class M_Rights(lib.rights.Module):
                 rightlist[ids] = [x for x in rightlist[ids] if x != r]
                 if not rightlist[ids]:
                     rightlist.pop(ids)
+                self.server.settings.setchannel("crights", rightlist, channel)
                 self.server.settings.save()
                 return "Unset %s from %s" % (r, ids)
         return "You do not have the rights to do that."
