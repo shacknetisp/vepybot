@@ -15,6 +15,9 @@ class Module(bot.Module):
         self.addtimer(self.timer, 'timer', 1 * 1000)
         self.d = {}
         self.b = set()
+        self.server.rget('addchannelrights')({
+            'canspam': ['op'],
+        })
 
     def dr(self, context, responses):
         if context.code('privmsg'):
@@ -53,6 +56,8 @@ class Module(bot.Module):
         d = d[context.user[0]]
         priv = 0
         if ('%s,op' % context.channel) in context.getrights():
+            return
+        if ('%s,canspam' % context.channel) in context.getrights():
             return
         if ('%s,v' % context.channel) in context.getrights():
             priv += 1
