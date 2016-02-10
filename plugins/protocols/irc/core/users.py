@@ -60,6 +60,7 @@ class M_Whois(bot.Module):
             info['name'] = w.name
             info['host'] = w.host
             info['auth'] = w.auth
+            info['idstring'] = "irc:{nick}!{ident}@{host}!{auth}".format(**info)
         else:
             return "Nick not found."
         out = []
