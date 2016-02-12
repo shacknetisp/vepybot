@@ -37,6 +37,9 @@ class Module(bot.Module):
             "ignore": ["owner"],
         })
 
+    def _rights(self, idstring, context):
+        return
+
     def _getrights(self, idstring, context=None):
         rightlist = self.server.settings.get("server.rights")
         rights = (["owner"]
@@ -48,10 +51,9 @@ class Module(bot.Module):
                 if rightlist[r]:
                     matches.append(r)
                 rights += rightlist[r]
-        if context:
-            cr = self._contextrights(idstring, context)
-            rights += cr[0]
-            matches += cr[1]
+        cr = self._rights(idstring, context)
+        rights += cr[0]
+        matches += cr[1]
         return rights, matches
 
     def getrights(self, *args):

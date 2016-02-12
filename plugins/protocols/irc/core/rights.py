@@ -3,6 +3,7 @@ import bot
 import lib.rights
 bot.reload(lib.rights)
 import fnmatch
+import re
 
 
 class M_Rights(lib.rights.Module):
@@ -41,23 +42,28 @@ class M_Rights(lib.rights.Module):
             'idident': 'echo irc:*!$*@*',
         })
 
-    def _contextrights(self, idstring, context):
+    def _rights(self, idstring, context):
         rights = []
         matches = []
-        if context.channel:
-            rightlist = self.server.settings.getchannel("crights", context)
-            for r in rightlist:
-                if fnmatch.fnmatch(idstring, r):
-                    if rightlist[r]:
-                        matches.append(r)
-                    rights += [context.channel + "," + r for r in rightlist[r]]
-        for c in context.whois.channels:
-            modes = context.whois.channels[c]
-            if 'o' in modes:
-                rights += [c + ',' + 'op']
-            elif 'v' in modes:
-                rights += [c + ',' + 'v']
-        return rights, matches
+        match = re.match("^irc:(.*)!.*@.*!.*$", idstring)
+        if match:
+            if match.group(1) in self.server.whois:
+                whois = self.server.whois[match.group(1)]
+                for channel in whois.channels:
+                    rightlist = self.server.settings.getchannel(
+                        "crights", channel)
+                    for r in rightlist:
+                        if fnmatch.fnmatch(idstring, r):
+                            if rightlist[r]:
+                                matches.append(r)
+                            rights += [channel + "," + r for r in rightlist[r]]
+                for c in whois.channels:
+                    modes = whois.channels[c]
+                    if 'o' in modes:
+                        rights += [c + ',' + 'op']
+                    elif 'v' in modes:
+                        rights += [c + ',' + 'v']
+        return list(set(rights)), matches
 
     def channelgetrequired(self, r):
         required = []
