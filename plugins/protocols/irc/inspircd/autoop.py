@@ -102,6 +102,8 @@ class Module(bot.Module):
                 self.tmpw[channel] = []
                 channel = self.server.channels[channel]
                 for nick in channel.names:
+                    if nick not in self.server.whois:
+                        continue
                     whois = self.server.whois[nick]
                     hostmask = "%s!%s@%s" % (nick, whois.ident, whois.host)
                     for o in self.w[channel.name]:
