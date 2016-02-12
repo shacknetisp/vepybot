@@ -207,14 +207,16 @@ class M_Whois(bot.Module):
             w = self.whois[target]
             if channel not in w.channels:
                 w.channels[channel] = []
+            names = self.server.channels[channel].names
             for mode in modes[target]:
-                for modes in 'ov':
-                    if mode == '+%s' % mode:
-                        if mode not in w.channels[channel]:
-                            w.channels[channel].append(mode)
-                    elif mode == '-%s' % mode:
-                        if mode in w.channels[channel]:
-                            i = w.channels[channel].index(mode)
+                for mchar in 'ov':
+                    if mode == '+%s' % mchar:
+                        if mchar not in w.channels[channel]:
+                            w.channels[channel].append(mchar)
+                    elif mode == '-%s' % mchar:
+                        if mchar in w.channels[channel]:
+                            i = w.channels[channel].index(mchar)
                             w.channels[channel].pop(i)
+                    names[target] = w.channels[channel]
 
 bot.register.module(M_Whois)

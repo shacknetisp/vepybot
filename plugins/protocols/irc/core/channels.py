@@ -118,6 +118,7 @@ class M_Channels(bot.Module):
             self.server.channels[c] = self.server.Channel(self.server, c)
             self.server.send("WHO %s" % c)
             self.server.log("JOINED", c)
+            self.server.dohook("self.join", c)
 
     def handlepart(self, context):
         if context.user[0] == self.server.nick:
