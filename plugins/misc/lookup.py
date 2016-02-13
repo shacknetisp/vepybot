@@ -44,9 +44,13 @@ class Module(bot.Module):
         elif r['AnswerType'] == 'calc':
             return "%s" % tag_re.sub('', r['Answer'])
         elif r['RelatedTopics']:
-            result = r['RelatedTopics'][0]['Result']
-            return "[%s] %s" % (r['RelatedTopics'][0]['FirstURL'],
-                                ' '.join(tag_re.sub('', result).split()))
+            t = r['RelatedTopics'][0]
+            if "Topics" in t and t["Topics"]:
+                t = t["Topics"][0]
+            if 'Result' in t:
+                return "[%s] %s" % (t['FirstURL'],
+                                    ' '.join(
+                                        tag_re.sub('', t['Result']).split()))
         elif r['Redirect']:
             return "%s" % r['Redirect']
         return "No results."
