@@ -11,7 +11,7 @@ class Module(bot.Module):
         self.w = {}
         self.tmpw = {}
         self.addsetting('#enabled', True)
-        self.addhook("self.join", "self.join", self.join)
+        self.addhook("join", "join", self.join)
         self.addhook("recv", "recv", self.recv)
         self.addtimer(self.timer, 'timer', 20 * 1000)
         self.addcommand(
@@ -70,7 +70,7 @@ class Module(bot.Module):
 
         return "The operation must be add or remove."
 
-    def join(self, channel):
+    def join(self, channel, user):
         if not self.getchannelsetting('enabled', channel):
             return
         self.server.send("MODE %s +w" % channel)
