@@ -42,6 +42,7 @@ def runserver(server):
             import traceback
             traceback.print_exc()
             fatal = True
+            break
     try:
         server.shutdown()
     except:
