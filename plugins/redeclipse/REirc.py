@@ -32,7 +32,7 @@ class Module(bot.Module):
             if fnmatch.fnmatch(context.idstring(), idstring):
                 geoips = self.getchannelsetting('geoip', context)
                 if context.channel and geoips:
-                    joinregex = (r".* \(.*\) has joined the "
+                    joinregex = (r".* \((.*)\) has joined the "
                                  "game( \(.*\)|) \[\d*\.\d*\.\d*-.*\] "
                                  "\(\d* player(.|)\)")
                     if re.match(joinregex, context.text):
