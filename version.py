@@ -8,4 +8,5 @@ platformtuple = (name, version, "Python %s on %s (%s)" % (
     platform.system(),
     platform.release()
 ))
+url = "https://github.com/shacknetisp/vepybot"
 source = "https://github.com/shacknetisp/vepybot"
