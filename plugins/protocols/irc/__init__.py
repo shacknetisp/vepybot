@@ -389,7 +389,7 @@ class M_Settings(bot.Module):
         for n in ['nick', 'mode']:
             self.server.settings.add("server.user.%s" % n, self.server.opt(n))
         self.server.settings.add("server.user.name",
-                                 "%s: %s" % (bot.version.name, bot.version.url))
+                                 "%s via IRC" % (bot.version.namever))
         if 'ident' not in self.server.options:
             self.server.options['ident'] = self.server.settings.get(
                 'server.user.nick')
