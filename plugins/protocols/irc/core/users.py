@@ -207,6 +207,9 @@ class M_Whois(bot.Module):
             w = self.whois[target]
             if channel not in w.channels:
                 w.channels[channel] = []
+            if channel not in self.server.channels:
+                c = channel.strip(':')
+                self.server.channels[c] = self.server.Channel(self.server, c)
             names = self.server.channels[channel].names
             for mode in modes[target]:
                 for mchar in 'ov':
