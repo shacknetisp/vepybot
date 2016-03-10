@@ -26,7 +26,7 @@ class M_CTCP(bot.Module):
 
     def ctcp_ping(self, context, args):
         if args:
-            context.replyctcp("PING %s" % args[0])
+            context.replyctcp("PING %s" % ' '.join(args))
 
     def ctcp_time(self, context, args):
         context.replyctcp("TIME %s" % time.ctime())
