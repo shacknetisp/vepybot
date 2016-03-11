@@ -24,6 +24,6 @@ class M_Versions(bot.Module):
         return "%s" % (bot.version.namever)
 
     def source(self, context, args):
-        return "%s" % (bot.source)
+        return "%s" % (bot.version.source)
 
 bot.register.module(M_Versions)
