@@ -1,20 +1,30 @@
-#!/usr/bin/env python
 """
-SocksiPy + urllib2 handler
+Copyright 2006 Dan-Haim. All rights reserved.
 
-version: 0.3
-author: e<e@tr0ll.in>
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+3. Neither the name of Dan Haim nor the names of his contributors may be used
+   to endorse or promote products derived from this software without specific
+   prior written permission.
 
-This module provides a Handler which you can use with urllib2 to allow it to tunnel your connection through a socks.sockssocket socket, with out monkey patching the original socket...
+THIS SOFTWARE IS PROVIDED BY DAN HAIM "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL DAN HAIM OR HIS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMANGE.
 """
 import ssl
-
-try:
-    import urllib2
-    import httplib
-except ImportError:  # Python 3
-    import urllib.request as urllib2
-    import http.client as httplib
+import urllib.request
+import http.client
 
 from deps import socks
 
@@ -25,7 +35,7 @@ def merge_dict(a, b):
     return d
 
 
-class SocksiPyConnection(httplib.HTTPConnection):
+class SocksiPyConnection(http.client.HTTPConnection):
 
     def __init__(
         self,
@@ -44,7 +54,7 @@ class SocksiPyConnection(httplib.HTTPConnection):
             rdns,
             username,
             password)
-        httplib.HTTPConnection.__init__(self, *args, **kwargs)
+        http.client.HTTPConnection.__init__(self, *args, **kwargs)
 
     def connect(self):
         self.sock = socks.socksocket()
@@ -54,7 +64,7 @@ class SocksiPyConnection(httplib.HTTPConnection):
         self.sock.connect((self.host, self.port))
 
 
-class SocksiPyConnectionS(httplib.HTTPSConnection):
+class SocksiPyConnectionS(http.client.HTTPSConnection):
 
     def __init__(
         self,
@@ -73,7 +83,7 @@ class SocksiPyConnectionS(httplib.HTTPSConnection):
             rdns,
             username,
             password)
-        httplib.HTTPSConnection.__init__(self, *args, **kwargs)
+        http.client.HTTPSConnection.__init__(self, *args, **kwargs)
 
     def connect(self):
         sock = socks.socksocket()
@@ -84,12 +94,12 @@ class SocksiPyConnectionS(httplib.HTTPSConnection):
         self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file)
 
 
-class SocksiPyHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
+class SocksiPyHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
 
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kw = kwargs
-        urllib2.HTTPHandler.__init__(self)
+        urllib.request.HTTPHandler.__init__(self)
 
     def http_open(self, req):
         def build(host, port=None, timeout=0, **kwargs):
