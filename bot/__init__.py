@@ -144,7 +144,8 @@ class Server(LoaderBase, ParserBase, HookBase):
                 raise e
 
     def parsecommand(self, context, text, v, argtext):
-        parsedargs = self.makeargdict(argtext, context, v)
+        parsedargs = self.makeargdict(argtext, context, v,
+            quote=v[1]['quote'])
         args = Args(parsedargs)
         return v[1]['function'](context, args)
 

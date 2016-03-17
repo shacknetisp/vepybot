@@ -25,7 +25,7 @@ class Module:
         self.serversettings.append((n, v))
 
     def addcommand(self, function, name, helptext, arguments,
-                   recognizers=None):
+                   recognizers=None, quote=True):
         """Add a command to the module."""
         if recognizers is None:
             recognizers = {}
@@ -35,6 +35,7 @@ class Module:
             'args': [],
             'function': function,
             'alias': None,
+            'quote': quote,
         }
         for arg in arguments:
             a = {

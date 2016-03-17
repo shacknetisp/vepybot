@@ -19,7 +19,8 @@ class M_Alias(lib.alias.Module):
             self.add,
             "add",
             "Add an alias.",
-            ["alias", "content..."])
+            ["alias", "content..."],
+            quote=False)
 
         self.addcommand(
             self.remove,

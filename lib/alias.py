@@ -51,7 +51,6 @@ class Module(bot.Module):
         idx = 0
         escaped = False
         avar = None
-        quoted = None
         avari = 0
         try:
             cchar = alias[idx]
@@ -61,8 +60,7 @@ class Module(bot.Module):
             if not escaped and cchar == parser.escape:
                 escaped = True
             elif escaped:
-                if cchar in ["%s%s$" % (parser.escape,
-                             parser.quotes)]:
+                if cchar in ["%s$" % (parser.escape)]:
                         fullalias += cchar
                         escaped = False
                 else:
@@ -101,13 +99,6 @@ class Module(bot.Module):
                             return "$%d doesn't exist." % num
                     adata.append(num)
                     avar = None
-            elif not quoted and cchar in parser.quotes:
-                quoted = cchar
-            elif quoted:
-                if cchar == quoted:
-                    quoted = None
-                else:
-                    fullalias += cchar
             else:
                 fullalias += cchar
             idx += 1

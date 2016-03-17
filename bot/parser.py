@@ -5,7 +5,7 @@ from .exceptions import *
 
 class ParserBase:
 
-    def splitparse(self, text, context=None):
+    def splitparse(self, text, context=None, quote=True):
         sections = []
         sectiond = {}
         sectione = {}
@@ -51,11 +51,12 @@ class ParserBase:
                     running = False
                 else:
                     section += cchar
-            elif not quoted and cchar in parser.quotes and not running:
+            elif (not quoted and cchar in
+                parser.quotes and not running and quote):
                 quoted = cchar
                 if not section:
                     sectiond[len(sections)] = "cooked"
-            elif quoted and not running:
+            elif quoted and not running and quote:
                 if cchar == quoted:
                     quoted = None
                     if not section:
@@ -76,8 +77,8 @@ class ParserBase:
         section = ""
         return sections, sectiond
 
-    def makeargdict(self, argtext, context, v):
-        sections, sectiond = self.splitparse(argtext, context)
+    def makeargdict(self, argtext, context, v, quote=True):
+        sections, sectiond = self.splitparse(argtext, context, quote)
         parsedargs = {}
         args = [a for a in v[1]['args'] if not a['kv']]
         kvargs = [a for a in v[1]['args'] if a['kv']]

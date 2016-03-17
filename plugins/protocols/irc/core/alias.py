@@ -21,7 +21,8 @@ class M_Alias(lib.alias.Module):
             "add",
             "Add an alias.",
             ["[channel]", "alias", "content..."],
-            recognizers={'channel': self.server.ischannel})
+            recognizers={'channel': self.server.ischannel},
+            quote=False)
 
         self.addcommand(
             self.remove,
