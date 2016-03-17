@@ -9,7 +9,7 @@ class M_Rights(lib.rights.Module):
     def register(self):
         lib.rights.Module.register(self)
 
-    def _contextrights(self, idstring, context):
+    def _rights(self, idstring, context):
         """Rights from a context."""
         rights = []
         matches = []

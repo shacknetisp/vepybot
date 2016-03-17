@@ -16,12 +16,10 @@ def reload(m):
 
 
 def importmodule(path, r=False):
-    sys.path = [os.path.dirname(path)] + sys.path
-    module = importlib.import_module(
-        os.path.basename(os.path.splitext(path)[0]))
+    name = '.'.join(os.path.splitext(path)[0].replace('/', '.').split('.'))
+    module = importlib.import_module(name)
     if r:
         reload(module)
-    sys.path.pop(0)
     return module
 
 
@@ -60,6 +58,7 @@ def getdirectories():
         d.append("plugins/" + f)
         d.append(userdata + "/plugins/" + f)
         d.append(userdata + "/extra/" + f)
+        d = [x.rstrip('/') for x in d]
     return d
 
 

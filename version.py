@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import platform
-version = "0.2.23"
+version = "0.2.24"
 name = "Vepybot"
 namever = "%s %s" % (name, version)
 platformtuple = (name, version, "Python %s on %s (%s)" % (
