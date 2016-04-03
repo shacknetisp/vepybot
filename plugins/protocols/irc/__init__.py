@@ -260,7 +260,8 @@ class Server(bot.Server):
                     return
                 self.inbuf += r
                 while b'\n' in self.inbuf:
-                    ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode()
+                    ircmsg = self.inbuf[:self.inbuf.index(b'\n')].decode(
+                        'utf-8', 'ignore')
                     self.inbuf = self.inbuf[self.inbuf.index(b'\n') + 1:]
                     regex = re.compile(
                         "\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
