@@ -71,12 +71,11 @@ class Module(bot.Module):
             serviceurl = "http://" + service + "/create.php"
             http = self.server.rget("http.url")
             try:
-                r = http.request(serviceurl,
+                return http.request(serviceurl,
                                  timeout=4,
-                                 params=params)
+                                 params=params).read()
             except http.HTTPError as error:
-                r = error
-            return r.read().decode("utf-8")
+                return error.read().decode("utf-8")
         else:
             return "Service must be is.gd or v.gd."
 
