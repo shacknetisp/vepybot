@@ -39,6 +39,13 @@ class Module(bot.Module):
             "Get the title of a url.",
             ["url"])
 
+        self.addcommand(
+            self.urlshorten,
+            "urlshorten",
+            "Shorten a url using is.gd",
+            ["-shorturl=custom ending", "-service=is.gd or v.gd", "url"]
+        )
+
     def title(self, context, args):
         try:
             r = self.server.rget("http.url").request(args.getstr("url"),
@@ -49,6 +56,29 @@ class Module(bot.Module):
         p.feed(r.read())
         p.close()
         return p.data[-1] if p.data else "No title found."
+
+    def urlshorten(self, context, args):
+        args.default("service", "is.gd")
+        args.default("shorturl", "")
+        shorturl = args.getstr("shorturl")
+        service = args.getstr("service")
+        if service in ['v.gd', 'is.gd']:
+            params = {
+                "url": args.getstr("url"),
+                "format": "simple",
+                "shorturl": shorturl
+            }
+            serviceurl = "http://" + service + "/create.php"
+            http = self.server.rget("http.url")
+            try:
+                r = http.request(serviceurl,
+                                 timeout=4,
+                                 params=params)
+            except http.HTTPError as error:
+                r = error
+            return r.read().decode("utf-8")
+        else:
+            return "Service must be is.gd or v.gd."
 
 
 bot.register.module(Module)
