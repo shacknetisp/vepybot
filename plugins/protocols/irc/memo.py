@@ -42,7 +42,7 @@ class Module(bot.Module):
         tod = []
         for mid in self.db.d:
             memo = self.db.d[mid]
-            if fnmatch.fnmatch(idstring, memo['target']):
+            if fnmatch.fnmatchcase(idstring, memo['target']):
                 tod.append(mid)
                 command = 'NOTICE' if self.server.settings.getchannel(
                         'irc.notice', memo['channel']) else 'PRIVMSG'
