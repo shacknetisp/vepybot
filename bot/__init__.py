@@ -211,7 +211,14 @@ class Server(LoaderBase, ParserBase, HookBase):
                     traceback.print_exc()
                     return None, "Internal Error: %s" % type(e).__name__
         responses = []
-        self.dohook('command', context, text, responses, False)
+        try:
+            self.dohook('command', context, text, responses, False)
+        except ParserBadCommand as e:
+            return None, e
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return None, "Internal Error: %s" % type(e).__name__
         for r in responses:
             if r[0] is not None:
                 return r[0], None

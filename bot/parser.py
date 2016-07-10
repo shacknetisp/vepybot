@@ -26,12 +26,8 @@ class ParserBase:
                 if not section:
                     sectiond[len(sections)] = "cooked"
             elif escaped:
-                if cchar in ["%s%s" % (parser.escape, parser.quotes)]:
-                    section += cchar
-                    escaped = False
-                else:
-                    section += cchar
-                    escaped = False
+                section += cchar
+                escaped = False
             elif not quoted and cchar == parser.run[0]:
                 if not running:
                     runningsection = section
