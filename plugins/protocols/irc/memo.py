@@ -2,6 +2,7 @@
 import bot
 import uuid
 import fnmatch
+import time
 
 
 class Module(bot.Module):
@@ -32,6 +33,7 @@ class Module(bot.Module):
             'target': target,
             'message': message,
             'channel': context.channel,
+            'time': time.time(),
             }
         self.db.save()
         context.replypriv(
@@ -40,7 +42,7 @@ class Module(bot.Module):
 
     def whoisfound(self, nick, idstring, whois):
         tod = []
-        for mid in self.db.d:
+        for mid in sorted(self.db.d, key=lambda x: self.db.d[x]['time']):
             memo = self.db.d[mid]
             if fnmatch.fnmatch(idstring.lower(), memo['target'].lower()):
                 tod.append(mid)
