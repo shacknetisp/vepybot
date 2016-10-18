@@ -11,6 +11,11 @@ class Module(bot.Module):
 
     def register(self):
         self.db = self.getdb("memo")
+        for mid in self.db.d:
+            m = self.db.d[mid]
+            if 'time' not in m:
+                m['time'] = 0
+            self.db.d[mid] = m
         self.addsetting('#inchannel', True)
         self.addcommand(self.memo, 'send',
             'Send a memo to a user. Target can be an idstring or nick glob.',
