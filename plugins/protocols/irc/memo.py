@@ -24,6 +24,7 @@ class Module(bot.Module):
         self.addcommandalias('send', 'tell')
         self.addcommand(self.delete, 'delete',
             'Delete a memo by ID.', ['id'])
+        self.addhook('whois.lightfound', 'whoislightfound', self.whoisfound)
         self.addhook('whois.found', 'whoisfound', self.whoisfound)
 
     def memo(self, context, args):

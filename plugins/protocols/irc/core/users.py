@@ -172,6 +172,9 @@ class M_Whois(bot.Module):
         self.server.dohook('join', channel, context.user[0])
         self.server.dohook('log', 'join', context.user,
                            channel)
+        self.server.dohook('whois.lightfound', context.user[0],
+                "%s!%s@%s!%s" % (context.user[0], w.ident, w.host, w.auth),
+                w)
 
     def handlepart(self, context):
         self.fromcontext(context)
