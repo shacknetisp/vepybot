@@ -15,7 +15,7 @@ class M_Pinger(bot.Module):
     def recv(self, context):
         if context.sender == "PING":
             self.server.send("PONG :%s" % context.text)
-        elif context.code('PONG'):
+        elif True or context.code('PONG'):  # Any message indicates alive.
             self.server.lastpong = time.time()
 
     def timer(self):
