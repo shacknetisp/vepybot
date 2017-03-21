@@ -78,7 +78,7 @@ class Context(bot.Context):
         self.reply(*args, priv=True)
 
     def replyctcp(self, m):
-        self.reply("\1%s\1" % m, more=False, command='NOTICE')
+        self.reply("\1%s\1" % m, more=False, command='NOTICE', priv=True)
 
     def setting(self, s):
         return "channels.%s.%s" % (self.channel, s)
