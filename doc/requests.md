@@ -1,4 +1,4 @@
-#HTTP
+# HTTP
 
 HTTP or HTTPS requests take place through the core/net module.
 
