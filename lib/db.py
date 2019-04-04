@@ -91,5 +91,6 @@ class DB:
 def saveall():
     for path, d in list(dbs.items()):
         if modified[path]:
-            json.dump(d, open(path, 'w'), indent=4, sort_keys=True)
+            json.dump(d, open(path + ".tmp", 'w'), indent=4, sort_keys=True)
+            os.rename(path + ".tmp", path)
             modified[path] = False
